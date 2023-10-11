@@ -1,3 +1,3 @@
-int read(char* stringFirst) {
+int read(char* string) {
 
 }
