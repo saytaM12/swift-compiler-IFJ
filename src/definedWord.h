@@ -1,1 +1,0 @@
-int read(char* stringFirst);

@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "definedWord.h"
+#include "lexical.h"
 
 int main(void) {
     
