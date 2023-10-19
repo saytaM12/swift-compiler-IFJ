@@ -46,8 +46,8 @@ void handleComments(FILE* file, char ch) {
 
     // multi-line comment
     else if (ch == '*') {
-        while ((ch = fgetc(file)) != '*' &&
-                (ch = fgetc(file)) != '/' ||
+        while (((ch = fgetc(file)) != '*' &&
+                (ch = fgetc(file)) != '/') ||
                 ch != EOF) {
             ungetc(ch, file);
         }
@@ -80,7 +80,7 @@ Token handleOperator(FILE* file, char ch, int* col) {
 
     // just solving these options "==", "!=", "<=", ">=", "??"
     if (((ch == '=' || ch == '!' || ch == '<' || ch == '>') && (ch = fgetc(file)) == '=') ||
-          token.lexeme[0] == '?' && ch == '?') {
+         (token.lexeme[0] == '?' && ch == '?')) {
         token.lexeme = realloc(token.lexeme, sizeof(char) * 3);
         token.lexeme[1] = ch;
         token.lexeme[2] = '\0';
@@ -91,6 +91,13 @@ Token handleOperator(FILE* file, char ch, int* col) {
 }
 
 Token getToken(FILE* file) {
+    if (!file) {
+        Token token = {.lexeme = malloc(sizeof(char) * 2), .type = unknown};
+        token.lexeme[0] = EOF;
+        token.lexeme[1] = '\0';
+        return token;
+    }
+
     char ch;
     static int line = 0;
     static int col = 1;
