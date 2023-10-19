@@ -110,7 +110,6 @@ Token handleString(FILE* file, char ch, int* col) {
 
     (*col)++;
 
-    ungetc(ch, file);
     token.lexeme = realloc(token.lexeme, lexlen + 1);
     token.lexeme[lexlen] = '\0';
     return token;
