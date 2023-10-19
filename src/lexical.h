@@ -17,7 +17,8 @@ typedef enum{
     number = 2,
     operation = 3,
     otherShit = 4,
-    unknown = 5
+    string = 5,
+    unknown = 6
 } Type;
 
 /*
@@ -59,6 +60,7 @@ Token handleIdentifier(FILE* file, char ch, int* col);
  */
 Token handleNumber(FILE* file, char ch, int* col);
 
+Token handleString(FILE* file, char ch, int* col);
 
 /*
  * Ignore comments,

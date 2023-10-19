@@ -5,6 +5,8 @@ Token handleIdentifier(FILE* file, char ch, int* col) {
     int lexlen = 0;
     token.lexeme[lexlen++] = ch;
 
+    (*col)++;
+
     while (isalnum(ch = fgetc(file)) || ch == '_') {
         if (sizeof(token.lexeme) <= lexlen + 1) {
             token.lexeme = realloc(token.lexeme, sizeof(token.lexeme) + DEFAULT_LEXEME_LEN);
@@ -23,6 +25,8 @@ Token handleNumber(FILE* file, char ch, int* col) {
     Token token = {.type = number, .lexeme = malloc(sizeof(char) * DEFAULT_LEXEME_LEN)};
     int lexlen = 0;
     token.lexeme[lexlen++] = ch;
+
+    (*col)++;
 
     while (isdigit(ch = fgetc(file))) {
         if (sizeof(token.lexeme) <= lexlen + 1) {
@@ -90,6 +94,28 @@ Token handleOperator(FILE* file, char ch, int* col) {
     return token;
 }
 
+Token handleString(FILE* file, char ch, int* col) {
+    Token token = {.type = string, .lexeme = malloc(sizeof(char) * DEFAULT_LEXEME_LEN)};
+    int lexlen = 0;
+
+    (*col)++;
+
+    while ((ch = fgetc(file)) != '"' && ch != EOF) {
+        if (sizeof(token.lexeme) <= lexlen + 1) {
+            token.lexeme = realloc(token.lexeme, sizeof(token.lexeme) + DEFAULT_LEXEME_LEN);
+        }
+        token.lexeme[lexlen++] = ch;
+        (*col)++;
+    }
+
+    (*col)++;
+
+    ungetc(ch, file);
+    token.lexeme = realloc(token.lexeme, lexlen + 1);
+    token.lexeme[lexlen] = '\0';
+    return token;
+}
+
 Token getToken(FILE* file) {
     if (!file) {
         Token token = {.lexeme = malloc(sizeof(char) * 2), .type = unknown};
@@ -151,6 +177,10 @@ Token getToken(FILE* file) {
                  ch == '}' ||
                  ch == '!') {
             return handleShit(file, ch, &col);
+        }
+
+        else if (ch == '"') {
+            return handleString(file, ch, &col);
         }
 
         // unknown characters
