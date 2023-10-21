@@ -63,8 +63,8 @@ void handleComments(FILE* file, char ch) {
     }
 }
 
-Token handleShit(FILE* file, char ch, int* col) {
-    Token token = {.type = otherShit, .lexeme = malloc(sizeof(char) * 2)};
+Token handleSingleChars(FILE* file, char ch, int* col) {
+    Token token = {.type = singleChars, .lexeme = malloc(sizeof(char) * 2)};
 
     token.lexeme[0] = ch;
     token.lexeme[1] = '\0';
@@ -165,9 +165,10 @@ Token getToken(FILE* file) {
             return handleOperator(file, ch, &col);
         }
 
-        // other shit
+        // single characters
         else if (ch == ':' ||
                  ch == ',' ||
+                 ch == ';' ||
                  ch == '(' ||
                  ch == ')' ||
                  ch == '[' ||
@@ -175,7 +176,7 @@ Token getToken(FILE* file) {
                  ch == '{' ||
                  ch == '}' ||
                  ch == '!') {
-            return handleShit(file, ch, &col);
+            return handleSingleChars(file, ch, &col);
         }
 
         else if (ch == '"') {

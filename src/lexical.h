@@ -9,14 +9,16 @@
 /*
  * 1 identifier = x, Pos, Bool, ReadWord, ...
  * 2 number = 10, -15, 67.62, ...
- * 3 operation = +, -, *, /, ...
- * 4 otherShit = =, {, }, <, >, (, ), ...
+ * 3 operation = +, -, *, /, <=, ==, ...
+ * 4 singleChars = {, }, [, ], (, ), ',', :, !, ;,
+ * 5 string = "Hello, World", ...
+ * 6 unknown
 */
 typedef enum{
     identifier = 1,
     number = 2,
     operation = 3,
-    otherShit = 4,
+    singleChars = 4,
     string = 5,
     unknown = 6
 } Type;
@@ -52,7 +54,7 @@ Token handleIdentifier(FILE* file, char ch, int* col);
 /*
  * read from file while characters match a number pattern,
  * ('0' - '9'),
- *
+ * ,
  * FILE* file = file from which to read,
  * char ch = first character already read (for simplicity),
  * int* col = column on which the character ch is,
@@ -60,6 +62,14 @@ Token handleIdentifier(FILE* file, char ch, int* col);
  */
 Token handleNumber(FILE* file, char ch, int* col);
 
+/*
+ * read characters between two quatition marks from file,
+ * ("..."), ("Hello, World"),
+ * ,
+ * FILE* file = file from which to read,
+ * int* col = column on which the character first qutation mark is,
+ * returns Token structure of read token
+ */
 Token handleString(FILE* file, char ch, int* col);
 
 /*
@@ -70,6 +80,24 @@ Token handleString(FILE* file, char ch, int* col);
  */
 void handleComments(FILE* file, char ch);
 
-Token handleShit(FILE* file, char ch, int* col);
+/*
+ * return a token containing a single character passed into this function,
+ * (( { } [ ] ( ) , : ! ; )),
+ * ,
+ * FILE* file = file from which to read,
+ * char ch = character which to return
+ * int* col = column on which the character first qutation mark is,
+ * returns Token structure of read token
+ */
+Token handleSingleChars(FILE* file, char ch, int* col);
 
+/*
+ * reads an operator from the file
+ * (( + - * / <= >= == ?? )),
+ * ,
+ * FILE* file = file from which to read,
+ * char ch = first character of the operator already read
+ * int* col = column on which the character first qutation mark is,
+ * returns Token structure of read token
+ */
 Token handleOperator(FILE* file, char ch, int* col);
