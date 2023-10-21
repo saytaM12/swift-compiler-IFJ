@@ -94,9 +94,10 @@ Token handleOperator(FILE* file, char ch, int* col) {
     return token;
 }
 
-Token handleString(FILE* file, char ch, int* col) {
+Token handleString(FILE* file, int* col) {
     Token token = {.type = string, .lexeme = malloc(sizeof(char) * DEFAULT_LEXEME_LEN)};
     int lexlen = 0;
+    int ch;
 
     (*col)++;
 
@@ -161,6 +162,7 @@ Token getToken(FILE* file) {
                  ch == '/' ||
                  ch == '<' ||
                  ch == '>' ||
+                 ch == '!' ||
                  ch == '?' ) {
             return handleOperator(file, ch, &col);
         }
@@ -174,13 +176,12 @@ Token getToken(FILE* file) {
                  ch == '[' ||
                  ch == ']' ||
                  ch == '{' ||
-                 ch == '}' ||
-                 ch == '!') {
+                 ch == '}') {
             return handleSingleChars(file, ch, &col);
         }
 
         else if (ch == '"') {
-            return handleString(file, ch, &col);
+            return handleString(file, &col);
         }
 
         // unknown characters

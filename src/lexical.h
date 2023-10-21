@@ -9,8 +9,8 @@
 /*
  * 1 identifier = x, Pos, Bool, ReadWord, ...
  * 2 number = 10, -15, 67.62, ...
- * 3 operation = +, -, *, /, <=, ==, ...
- * 4 singleChars = {, }, [, ], (, ), ',', :, !, ;,
+ * 3 operation = +, -, *, /, <=, ==, !, ...
+ * 4 singleChars = {, }, [, ], (, ), ',', :, ;,
  * 5 string = "Hello, World", ...
  * 6 unknown
 */
@@ -70,7 +70,7 @@ Token handleNumber(FILE* file, char ch, int* col);
  * int* col = column on which the character first qutation mark is,
  * returns Token structure of read token
  */
-Token handleString(FILE* file, char ch, int* col);
+Token handleString(FILE* file, int* col);
 
 /*
  * Ignore comments,
@@ -82,7 +82,7 @@ void handleComments(FILE* file, char ch);
 
 /*
  * return a token containing a single character passed into this function,
- * (( { } [ ] ( ) , : ! ; )),
+ * (( { } [ ] ( ) , : ; )),
  * ,
  * FILE* file = file from which to read,
  * char ch = character which to return
@@ -93,7 +93,7 @@ Token handleSingleChars(FILE* file, char ch, int* col);
 
 /*
  * reads an operator from the file
- * (( + - * / <= >= == ?? )),
+ * (( + - * / <= >= == ?? ! != )),
  * ,
  * FILE* file = file from which to read,
  * char ch = first character of the operator already read
