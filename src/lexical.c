@@ -1,44 +1,34 @@
 #include "lexical.h"
 
-Token handleIdentifier(FILE* file, char ch, int* col) {
-    Token token = {.type = identifier, .lexeme = malloc(sizeof(char) * DEFAULT_LEXEME_LEN)};
-    int lexlen = 0;
-    token.lexeme[lexlen++] = ch;
+Token* handleIdentifier(FILE* file, char ch, FilePos* pos) {
+    Token* token = initToken();
+    addToLexeme(token, ch);
 
-    (*col)++;
+    pos->col++;
 
     while (isalnum(ch = fgetc(file)) || ch == '_') {
-        if (sizeof(token.lexeme) <= lexlen + 1) {
-            token.lexeme = realloc(token.lexeme, sizeof(token.lexeme) + DEFAULT_LEXEME_LEN);
-        }
-        token.lexeme[lexlen++] = ch;
-        (*col)++;
+        addToLexeme(token, ch);
+        pos->col++;
     }
 
     ungetc(ch, file);
-    token.lexeme = realloc(token.lexeme, lexlen + 1);
-    token.lexeme[lexlen] = '\0';
+    finishToken(token, identifier);
     return token;
 }
 
-Token handleNumber(FILE* file, char ch, int* col) {
-    Token token = {.type = number, .lexeme = malloc(sizeof(char) * DEFAULT_LEXEME_LEN)};
-    int lexlen = 0;
-    token.lexeme[lexlen++] = ch;
+Token* handleNumber(FILE* file, char ch, FilePos* pos) {
+    Token* token = initToken();
+    addToLexeme(token, ch);
 
-    (*col)++;
+    pos->col++;
 
     while (isdigit(ch = fgetc(file))) {
-        if (sizeof(token.lexeme) <= lexlen + 1) {
-            token.lexeme = realloc(token.lexeme, sizeof(token.lexeme) + DEFAULT_LEXEME_LEN);
-        }
-        token.lexeme[lexlen++] = ch;
-        (*col)++;
+        addToLexeme(token, ch);
+        pos->col++;
     }
 
     ungetc(ch, file);
-    token.lexeme = realloc(token.lexeme, lexlen + 1);
-    token.lexeme[lexlen] = '\0';
+    finishToken(token, number);
     return token;
 }
 
@@ -63,80 +53,129 @@ void handleComments(FILE* file, char ch) {
     }
 }
 
-Token handleSingleChars(FILE* file, char ch, int* col) {
-    Token token = {.type = singleChars, .lexeme = malloc(sizeof(char) * 2)};
+Token* handleSingleChars(FILE* file, char ch, FilePos* pos) {
+    Token* token = initToken();
 
-    token.lexeme[0] = ch;
-    token.lexeme[1] = '\0';
+    addToLexeme(token, ch);
+    finishToken(token, singleChars);
 
-    (*col)++;
+    pos->col++;
 
     return token;
 }
 
-Token handleOperator(FILE* file, char ch, int* col) {
-    Token token = {.type = operation, .lexeme = malloc(sizeof(char) * 2)};
+Token* handleOperator(FILE* file, char ch, FilePos* pos) {
+    Token* token = initToken();
 
-    token.lexeme[0] = ch;
-    token.lexeme[1] = '\0';
+    addToLexeme(token, ch);
 
-    (*col)++;
+    pos->col++;
 
     // just solving these options "==", "!=", "<=", ">=", "??"
     if (((ch == '=' || ch == '!' || ch == '<' || ch == '>') && (ch = fgetc(file)) == '=') ||
-         (token.lexeme[0] == '?' && ch == '?')) {
-        token.lexeme = realloc(token.lexeme, sizeof(char) * 3);
-        token.lexeme[1] = ch;
-        token.lexeme[2] = '\0';
-        (*col)++;
+         (token->lexeme[0] == '?' && ch == '?')) {
+        addToLexeme(token, ch);
+        pos->col++;
     }
 
+    finishToken(token, singleChars);
     return token;
 }
 
-Token handleString(FILE* file, int* col) {
-    Token token = {.type = string, .lexeme = malloc(sizeof(char) * DEFAULT_LEXEME_LEN)};
-    int lexlen = 0;
+Token* multilineString(FILE* file, FilePos* pos) {
+    Token* token = initToken();
+    int ch;
+    int quoteCheck[3];
+
+    while ((ch = fgetc(file)) != EOF) {
+        if (ch != '\\') {
+            if ((quoteCheck[0] = fgetc(file)) == '"') {
+                if ((quoteCheck[1] = fgetc(file)) == '"')  {
+                    if ((quoteCheck[2] = fgetc(file)) == '"')  {
+                        pos->col += 4;
+
+                        addToLexeme(token, ch);
+                        finishToken(token, string);
+                        return token;
+
+                    } else { ungetc(quoteCheck[2], file); }
+                } else { ungetc(quoteCheck[1], file); }
+            } else { ungetc(quoteCheck[0], file); }
+        }
+
+        addToLexeme(token, ch);
+        pos->col++;
+    }
+
+    // string ended with EOF insted of """
+    finishToken(token, unknown);
+    return token;
+}
+
+Token* singlelineString(FILE* file, FilePos* pos) {
+    Token* token = initToken();
+    int quoteCheck;
     int ch;
 
-    (*col)++;
+    while ((ch = fgetc(file)) != '\n' && ch != EOF) {
+        if (ch != '\\') {
+            if ((quoteCheck = fgetc(file)) == '"') {
+                pos->col++;
 
-    while ((ch = fgetc(file)) != '"' && ch != EOF) {
-        if (sizeof(token.lexeme) <= lexlen + 1) {
-            token.lexeme = realloc(token.lexeme, sizeof(token.lexeme) + DEFAULT_LEXEME_LEN);
+                addToLexeme(token, ch);
+                finishToken(token, string);
+                return token;
+            } else { ungetc(quoteCheck, file); }
         }
-        token.lexeme[lexlen++] = ch;
-        (*col)++;
+        addToLexeme(token, ch);
+        pos->col++;
     }
 
-    (*col)++;
-
-    token.lexeme = realloc(token.lexeme, lexlen + 1);
-    token.lexeme[lexlen] = '\0';
+    finishToken(token, unknown);
     return token;
 }
 
-Token getToken(FILE* file) {
+Token* handleString(FILE* file, FilePos* pos) {
+    bool multiline = false;
+    int ch;
+
+    pos->col++;
+
+    // check for multiline strings
+    if ((ch = fgetc(file)) == '"') {
+         if ((ch = fgetc(file)) == '"')  {
+             multiline = true;
+
+         } else { ungetc(ch, file); }
+    } else { ungetc(ch, file); }
+
+    if ( multiline ) {
+        return multilineString(file, pos);
+    } else {
+        return singlelineString(file, pos);
+    }
+}
+
+Token* getToken(FILE* file) {
     if (!file) {
-        Token token = {.lexeme = malloc(sizeof(char) * 2), .type = unknown};
-        token.lexeme[0] = EOF;
-        token.lexeme[1] = '\0';
+        Token* token = initToken();
+        addToLexeme(token, EOF);
+        finishToken(token, unknown);
         return token;
     }
 
     char ch;
-    static int line = 0;
-    static int col = 1;
+    FilePos pos = {.col = 1, .line = 0};
 
     while ((ch = fgetc(file)) != EOF) {
 
         // whitespaces
         if (isspace(ch)) {
             if (ch == '\n') {
-                col = 0;
-                line++;
+                pos.col = 0;
+                pos.line++;
             }
-            col++;
+            pos.col++;
         }
 
         // comments
@@ -146,12 +185,12 @@ Token getToken(FILE* file) {
 
         // keywords and identifiers
         else if (isalpha(ch) || ch == '_') {
-            return handleIdentifier(file, ch, &col);
+            return handleIdentifier(file, ch, &pos);
         }
         
         // numbers
         else if (isdigit(ch)) {
-            return handleNumber(file, ch, &col);
+            return handleNumber(file, ch, &pos);
         }
         
         // operators
@@ -164,7 +203,7 @@ Token getToken(FILE* file) {
                  ch == '>' ||
                  ch == '!' ||
                  ch == '?' ) {
-            return handleOperator(file, ch, &col);
+            return handleOperator(file, ch, &pos);
         }
 
         // single characters
@@ -177,24 +216,24 @@ Token getToken(FILE* file) {
                  ch == ']' ||
                  ch == '{' ||
                  ch == '}') {
-            return handleSingleChars(file, ch, &col);
+            return handleSingleChars(file, ch, &pos);
         }
 
         else if (ch == '"') {
-            return handleString(file, &col);
+            return handleString(file, &pos);
         }
 
         // unknown characters
         else {
-            Token token = {.lexeme = malloc(sizeof(char) * 2), .type = unknown};
-            token.lexeme[0] = ch;
-            token.lexeme[1] = '\0';
+            Token* token = initToken();
+            addToLexeme(token, ch);
+            finishToken(token, unknown);
             return token;
         }
     }
 
-    Token token = {.lexeme = malloc(sizeof(char) * 2), .type = unknown};
-    token.lexeme[0] = EOF;
-    token.lexeme[1] = '\0';
+    Token* token = initToken();
+    addToLexeme(token, EOF);
+    finishToken(token, unknown);
     return token;
 }

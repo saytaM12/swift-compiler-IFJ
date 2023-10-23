@@ -1,36 +1,19 @@
 #include <stdio.h>
+#include <string.h>
 #include <ctype.h>
 #include <stdbool.h>
-#include <stdlib.h>
-#include <string.h>
-
-#define DEFAULT_LEXEME_LEN 20
+#include "tokenizer.h"
 
 /*
- * 1 identifier = x, Pos, Bool, ReadWord, ...
- * 2 number = 10, -15, 67.62, ...
- * 3 operation = +, -, *, /, <=, ==, !, ...
- * 4 singleChars = {, }, [, ], (, ), ',', :, ;,
- * 5 string = "Hello, World", ...
- * 6 unknown
-*/
-typedef enum{
-    identifier = 1,
-    number = 2,
-    operation = 3,
-    singleChars = 4,
-    string = 5,
-    unknown = 6
-} Type;
-
-/*
- * Type type = enumeration describing type of token,
- * char* lexeme = the token as string
+ * indicates at which position file is being read,
+ * ,
+ * int col = column,
+ * int line = line
  */
 typedef struct {
-    Type type;
-    char* lexeme;
-} Token;
+    int col;
+    int line;
+} FilePos;
 
 /*
  * Get next token from file,
@@ -38,7 +21,7 @@ typedef struct {
  * FILE* file = file to read from,
  * returns Token structure of read token
  */
-Token getToken(FILE* file);
+Token* getToken(FILE* file);
 
 /*
  * read from file while characters match an identifier pattern,
@@ -46,10 +29,10 @@ Token getToken(FILE* file);
  * ,
  * FILE* file = file from which to read,
  * char ch = first character already read (for simplicity),
- * int* col = column on which the character ch is,
+ * FilePos* pos = position on which the character ch is,
  * returns Token structure of read token
  */
-Token handleIdentifier(FILE* file, char ch, int* col);
+Token* handleIdentifier(FILE* file, char ch, FilePos* pos);
 
 /*
  * read from file while characters match a number pattern,
@@ -57,20 +40,20 @@ Token handleIdentifier(FILE* file, char ch, int* col);
  * ,
  * FILE* file = file from which to read,
  * char ch = first character already read (for simplicity),
- * int* col = column on which the character ch is,
+ * FilePos* pos = position on which the character ch is,
  * returns Token structure of read token
  */
-Token handleNumber(FILE* file, char ch, int* col);
+Token* handleNumber(FILE* file, char ch, FilePos* pos);
 
 /*
  * read characters between two quatition marks from file,
  * ("..."), ("Hello, World"),
  * ,
  * FILE* file = file from which to read,
- * int* col = column on which the character first qutation mark is,
+ * FilePos* pos = position on which the character first qutation mark is,
  * returns Token structure of read token
  */
-Token handleString(FILE* file, int* col);
+Token* handleString(FILE* file, FilePos* pos);
 
 /*
  * Ignore comments,
@@ -86,10 +69,10 @@ void handleComments(FILE* file, char ch);
  * ,
  * FILE* file = file from which to read,
  * char ch = character which to return
- * int* col = column on which the character first qutation mark is,
+ * FilePos* pos = position on which the character first qutation mark is,
  * returns Token structure of read token
  */
-Token handleSingleChars(FILE* file, char ch, int* col);
+Token* handleSingleChars(FILE* file, char ch, FilePos* pos);
 
 /*
  * reads an operator from the file
@@ -97,7 +80,7 @@ Token handleSingleChars(FILE* file, char ch, int* col);
  * ,
  * FILE* file = file from which to read,
  * char ch = first character of the operator already read
- * int* col = column on which the character first qutation mark is,
+ * FilePos* pos = position on which the character first qutation mark is,
  * returns Token structure of read token
  */
-Token handleOperator(FILE* file, char ch, int* col);
+Token* handleOperator(FILE* file, char ch, FilePos* pos);
