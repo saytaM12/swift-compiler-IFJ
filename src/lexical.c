@@ -40,10 +40,13 @@ void handleComments(FILE* file, char ch) {
 
     // multi-line comment
     else if (ch == '*') {
-        while (((ch = fgetc(file)) != '*' &&
-                (ch = fgetc(file)) != '/') ||
-                ch != EOF) {
-            ungetc(ch, file);
+        int check[2];
+        while ((ch = fgetc(file)) != EOF) {
+            if ((check[0] = fgetc(file)) == '*') {
+                if ((check[1] = fgetc(file)) == '/') {
+                    return;
+                } else { ungetc(check[1], file); }
+            } else { ungetc(check[0], file); }
         }
     }
 
