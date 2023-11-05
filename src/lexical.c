@@ -1,5 +1,7 @@
 #include "lexical.h"
 
+const char keywords[NUMOFKEYWORDS][20] = {"Double", "else", "func", "if", "Int", "let", "nil", "return", "String", "var", "while"};
+
 Token* handleIdentifier(FILE* file, char ch, FilePos* pos) {
     Token* token = initToken();
     addToLexeme(token, ch);
@@ -13,6 +15,15 @@ Token* handleIdentifier(FILE* file, char ch, FilePos* pos) {
 
     ungetc(ch, file);
     finishToken(token, identifier);
+
+    // check for keywords
+    for (int i = 0; i < NUMOFKEYWORDS; i++) {
+        if (strcmp(token->lexeme, keywords[i]) == 0) {
+            changeTokenType(token, keyword);
+            break;
+        }
+    }
+
     return token;
 }
 

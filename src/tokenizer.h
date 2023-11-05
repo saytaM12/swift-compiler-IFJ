@@ -4,19 +4,21 @@
 
 /*
  * 1 identifier = x, Pos, Bool, ReadWord, ...
- * 2 number = 10, -15, 67.62, ...
- * 3 operation = +, -, *, /, <=, ==, !, ...
- * 4 singleChars = {, }, [, ], (, ), ',', :, ;,
- * 5 string = "Hello, World", ...
- * 6 unknown
+ * 2 keyword = Double, else, func, if, Int, let, nil, return, String, var, while
+ * 3 number = 10, -15, 67.62, ...
+ * 4 operation = +, -, *, /, <=, ==, !, ...
+ * 5 singleChars = {, }, [, ], (, ), ',', :, ;,
+ * 6 string = "Hello, World", ...
+ * 7 unknown
 */
 typedef enum{
     identifier = 1,
-    number = 2,
-    operation = 3,
-    singleChars = 4,
-    string = 5,
-    unknown = 6
+    keyword = 2,
+    number = 3,
+    operation = 4,
+    singleChars = 5,
+    string = 6,
+    unknown = 7
 } Type;
 
 /*
@@ -57,3 +59,11 @@ void finishToken(Token* token, Type type);
  * Token* token = token which to free
  */
 void destroyToken(Token* token);
+
+/*
+ * changes type of token passed,
+ * ,
+ * Token* token = token that's type should change,
+ * Type type = type to change token's type to,
+ */
+void changeTokenType(Token* token, Type type);

@@ -4,6 +4,8 @@
 #include <stdbool.h>
 #include "tokenizer.h"
 
+#define NUMOFKEYWORDS 11
+
 /*
  * indicates at which position file is being read,
  * ,

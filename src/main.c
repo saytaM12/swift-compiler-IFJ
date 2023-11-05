@@ -11,6 +11,9 @@ void lexCheck() {
             case identifier:
                 printf("(identifier)  ");
                 break;
+            case keyword:
+                printf("(keyword)     ");
+                break;
             case number:
                 printf("(number)      ");
                 break;
