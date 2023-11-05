@@ -1,3 +1,5 @@
+#ifndef TOKENIZERDEFINED
+#define TOKENIZERDEFINED
 #include <stdlib.h>
 
 #define DEFAULT_LEXEME_LEN 20
@@ -67,3 +69,4 @@ void destroyToken(Token* token);
  * Type type = type to change token's type to,
  */
 void changeTokenType(Token* token, Type type);
+#endif //TOKENIZERDEFINED

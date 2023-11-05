@@ -31,7 +31,7 @@ void lexCheck() {
                 break;
         }
         printf("%d,\t", token->type);
-        printf("%s\n", token->lexeme);
+        printf("%s\n\n", token->lexeme);
         destroyToken(token);
         token = getToken(file);
     }
@@ -42,6 +42,7 @@ void lexCheck() {
 }
 
 int main(void) {
+    putchar('\n');
     printf("===Printing Lexical analyzer output===");
     printf("\n\n");
     lexCheck();

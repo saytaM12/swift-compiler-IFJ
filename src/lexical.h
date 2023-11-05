@@ -1,3 +1,5 @@
+#ifndef LEXICALDEFINED
+#define LEXICALDEFINED
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
@@ -86,3 +88,4 @@ Token* handleSingleChars(FILE* file, char ch, FilePos* pos);
  * returns Token structure of read token
  */
 Token* handleOperator(FILE* file, char ch, FilePos* pos);
+#endif //LEXICALDEFINED
