@@ -29,3 +29,7 @@ void destroyToken(Token* token) {
     free(token);
     token = NULL;
 }
+
+void changeTokenType(Token* token, Type type) {
+    token->type = type;
+}

@@ -1,8 +1,12 @@
+#ifndef LEXICALDEFINED
+#define LEXICALDEFINED
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
 #include <stdbool.h>
 #include "tokenizer.h"
+
+#define NUMOFKEYWORDS 11
 
 /*
  * indicates at which position file is being read,
@@ -84,3 +88,4 @@ Token* handleSingleChars(FILE* file, char ch, FilePos* pos);
  * returns Token structure of read token
  */
 Token* handleOperator(FILE* file, char ch, FilePos* pos);
+#endif //LEXICALDEFINED
