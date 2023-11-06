@@ -6,21 +6,23 @@
 
 /*
  * 1 identifier = x, Pos, Bool, ReadWord, ...
- * 2 keyword = Double, else, func, if, Int, let, nil, return, String, var, while
- * 3 number = 10, -15, 67.62, ...
- * 4 operation = +, -, *, /, <=, ==, !, ...
- * 5 singleChars = {, }, [, ], (, ), ',', :, ;,
- * 6 string = "Hello, World", ...
- * 7 unknown
+ * 2 keyword = else, func, if, let, nil, return, var, while,
+ * 3 variableType = Double, Int, String,
+ * 4 number = 10, -15, 67.62, ...
+ * 5 operation = +, -, *, /, <=, ==, !, ...
+ * 6 singleChars = {, }, [, ], (, ), ',', :, ;,
+ * 7 string = "Hello, World", ...
+ * 8 unknown
 */
 typedef enum{
     identifier = 1,
     keyword = 2,
-    number = 3,
-    operation = 4,
-    singleChars = 5,
-    string = 6,
-    unknown = 7
+    variableType = 3,
+    number = 4,
+    operation = 5,
+    singleChars = 6,
+    string = 7,
+    unknown = 8
 } Type;
 
 /*

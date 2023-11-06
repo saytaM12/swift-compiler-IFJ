@@ -9,25 +9,28 @@ void lexCheck() {
     while (token->lexeme[0] != EOF) {
         switch (token->type) {
             case identifier:
-                printf("(identifier)  ");
+                printf("(identifier)   ");
                 break;
             case keyword:
-                printf("(keyword)     ");
+                printf("(keyword)      ");
+                break;
+            case variableType:
+                printf("(variableType) ");
                 break;
             case number:
-                printf("(number)      ");
+                printf("(number)       ");
                 break;
             case operation:
-                printf("(operation)   ");
+                printf("(operation)    ");
                 break;
             case singleChars:
-                printf("(singleChars) ");
+                printf("(singleChars)  ");
                 break;
             case string:
-                printf("(string)      ");
+                printf("(string)       ");
                 break;
             case unknown:
-                printf("(unknown)     ");
+                printf("(unknown)      ");
                 break;
         }
         printf("%d,\t", token->type);

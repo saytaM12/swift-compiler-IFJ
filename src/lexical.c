@@ -1,6 +1,7 @@
 #include "lexical.h"
 
-const char keywords[NUMOFKEYWORDS][20] = {"Double", "else", "func", "if", "Int", "let", "nil", "return", "String", "var", "while"};
+const char keywords[NUMOFKEYWORDS][20] = {"else", "func", "if", "let", "nil", "return", "var", "while"};
+const char variableTypes[NUMOFVARIABLETYPES][20] = {"Double", "Int", "String"};
 
 Token* handleIdentifier(FILE* file, char ch, FilePos* pos) {
     Token* token = initToken();
@@ -20,6 +21,14 @@ Token* handleIdentifier(FILE* file, char ch, FilePos* pos) {
     for (int i = 0; i < NUMOFKEYWORDS; i++) {
         if (strcmp(token->lexeme, keywords[i]) == 0) {
             changeTokenType(token, keyword);
+            break;
+        }
+    }
+
+    // check for variable types
+    for (int i = 0; i < NUMOFVARIABLETYPES; i++) {
+        if (strcmp(token->lexeme, variableTypes[i]) == 0) {
+            changeTokenType(token, variableType);
             break;
         }
     }
@@ -92,7 +101,7 @@ Token* handleOperator(FILE* file, char ch, FilePos* pos) {
         pos->col++;
     }
 
-    finishToken(token, singleChars);
+    finishToken(token, operation);
     return token;
 }
 
