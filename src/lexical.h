@@ -6,7 +6,8 @@
 #include <stdbool.h>
 #include "tokenizer.h"
 
-#define NUMOFKEYWORDS 11
+#define NUMOFKEYWORDS 8
+#define NUMOFVARIABLETYPES 3
 
 /*
  * indicates at which position file is being read,
