@@ -1,0 +1,86 @@
+# Zacatek programu
+<PROG>	      -> <MAIN_BODY>
+
+# Hlavni telo programu 
+<MAIN_BODY>   -> func <FUNC_DECLARE> <MAIN_BODY>
+<MAIN_BODY>   -> <BODY> <MAIN_BODY>
+<MAIN_BODY>   -> while [expression] <IF_WHILE_MAIN_BODY> <MAIN_BODY>
+<MAIN_BODY>   -> if <IF_EXPRESSION> <IF_WHILE_MAIN_BODY> <ELSE_MAIN_BODY> <MAIN_BODY>
+<MAIN_BODY>   -> eps
+
+# Deklarace funkce
+<FUNC_DECLARE> -> [id]<PARAM> <FUNCTION_TYPE> <FUNC_BODY> <MAIN_BODY>
+
+# Prvni parametr funkce
+<PARAM>      -> eps
+<PARAM>      -> (<PARAM_TYPES>) <NEXT_PARAM>
+
+# Typy parametru funkce ktera se definuje
+<PARAM_TYPES> -> [name] [id] : [type]
+
+# Dalsi parametry funkce
+<NEXT_PARAM> -> eps
+<NEXT_PARAM> -> , <PARAM_TYPES> <NEXT_PARAM>
+
+# Definice typu funkce
+<FUNCTION_TYPE> -> eps
+<FUNCTION_TYPE> -> -> [type]
+
+# Telo funkce
+<FUNC_BODY>  -> <BODY> <FUNCTION_BODY>
+<FUNC_BODY>  -> if <IF_EXPRESSION> <FUNC_BODY> <ELSE_FUNC_BODY> <FUNC_BODY>
+<FUNC_BODY>  -> while [expression] <FUNC_BODY> <FUNC_BODY>
+<FUNC_BODY>  -> return [expression]
+<FUNC_BODY>  -> eps
+
+# Spolecne telo
+<BODY>  -> [id](<CALL_PARAM>)
+<BODY>  -> <DEF_VARIABLE> <ASSIGN>
+<BODY>  -> [id] = <EXPRESSION>
+
+# Deinice promenne
+<DEF_VARIABLE> -> let [id]
+<DEF_VARIABLE> -> var [id]
+
+# Prirazeni hodnoty/typu promenne
+<ASSiGN>     -> = [expression]
+<ASSIGN>     -> = [id](<CALL_PARAM>)
+<ASSIGN>     -> : [type] <VALUE>
+
+# Prirazeni hodnoty promenne (muze byt zadana jenom hodnota nebo jenom typ)
+<VALUE>      -> eps
+<VALUE>      -> = [expression]
+<VALUE>      -> = [id](<CALL_PARAM>)
+
+# Kontrola zda vyraz neni volani funkce
+<EXPRESSION> -> [id](<CALL_PARAM>)
+<EXPRESSION> -> [expression]
+
+# Parametry volajici funkce
+<CALL_PARAM> -> <CALL_PARAM_TYPES>
+<CALL_PARAM> -> eps
+
+# Typy parametru volajici funkce
+<CALL_PARAM_TYPES> -> [expression] <NEXT_CALL_PARAM>
+<CALL_PARAM_TYPES> -> [name]: [expression] <NEXT_CALL_PARAM>
+<CALL_PARAM_TYPES> -> _: [expression] <NEXT_CALL_PARAM>
+
+# Dalsi parametry volajici funkce
+<NEXT_CALL_PARAM> -> , <CALL_PARAM_TYPES>
+<NEXT_CALL_PARAM> -> eps
+
+# Vyraz podminky IF
+<IF_EXPRESSION> -> let [id] {
+<IF_EXPRESSION> -> [expression]
+
+# Vetev else v tele funkce
+<ELSE_FUNCTION_BODY> -> else { <FUNC_BODY>
+
+# Telo pro IF/WHILE v MAIN
+<IF_WHILE_MAIN_BODY>   -> <BODY> <IF__MAIN_BODY>
+<IF_WHILE_MAIN_BODY>   -> if <IF_EXPRESSION> <IF_WHILE_MAIN_BODY> <ELSE_MAIN_BODY> <IF_WHILE_MAIN_BODY>             
+<IF_WHILE_MAIN_BODY>   -> while [expression] <IF_WHILE_MAIN_BODY>         
+<IF_WHILE_MAIN_BODY>   -> eps
+
+# Vetev else v MAIN
+<ELSE_MAIN_BODY> -> else { <IF_WHILE_MAIN_BODY>

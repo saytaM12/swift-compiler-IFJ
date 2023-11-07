@@ -1,4 +1,5 @@
 #include "lexical.h"
+#include "parser.h"
 
 void lexCheck() {
     Token* token;
@@ -9,26 +10,32 @@ void lexCheck() {
     while (token->lexeme[0] != EOF) {
         switch (token->type) {
             case identifier:
-                printf("(identifier)  ");
+                printf("(identifier)   ");
+                break;
+            case keyword:
+                printf("(keyword)      ");
+                break;
+            case variableType:
+                printf("(variableType) ");
                 break;
             case number:
-                printf("(number)      ");
+                printf("(number)       ");
                 break;
             case operation:
-                printf("(operation)   ");
+                printf("(operation)    ");
                 break;
             case singleChars:
-                printf("(singleChars) ");
+                printf("(singleChars)  ");
                 break;
             case string:
-                printf("(string)      ");
+                printf("(string)       ");
                 break;
             case unknown:
-                printf("(unknown)     ");
+                printf("(unknown)      ");
                 break;
         }
         printf("%d,\t", token->type);
-        printf("%s\n", token->lexeme);
+        printf("%s\n\n", token->lexeme);
         destroyToken(token);
         token = getToken(file);
     }
@@ -38,9 +45,17 @@ void lexCheck() {
     fclose(file);
 }
 
+void synCheck(){
+    if(!parse_prog())
+        printf("gud");
+    else
+        printf("BAAAD");
+}
 int main(void) {
     printf("===Printing Lexical analyzer output===");
     printf("\n\n");
     lexCheck();
+    printf("=====SYNCHECK====\n");
+    synCheck();
     printf("\n\n");
 }
