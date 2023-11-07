@@ -71,4 +71,8 @@ void destroyToken(Token* token);
  * Type type = type to change token's type to,
  */
 void changeTokenType(Token* token, Type type);
+<<<<<<< HEAD
 #endif //TOKENIZERDEFINED
+=======
+#endif //TOKENIZERDEFINED
+>>>>>>> 82234ed5ea03b87f549b1ca39b7835a40daa0788

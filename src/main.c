@@ -52,6 +52,7 @@ void synCheck(){
         printf("BAAAD");
 }
 int main(void) {
+    putchar('\n');
     printf("===Printing Lexical analyzer output===");
     printf("\n\n");
     lexCheck();

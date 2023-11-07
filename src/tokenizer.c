@@ -32,4 +32,8 @@ void destroyToken(Token* token) {
 
 void changeTokenType(Token* token, Type type) {
     token->type = type;
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 82234ed5ea03b87f549b1ca39b7835a40daa0788

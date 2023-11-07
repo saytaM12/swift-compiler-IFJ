@@ -89,4 +89,8 @@ Token* handleSingleChars(FILE* file, char ch, FilePos* pos);
  * returns Token structure of read token
  */
 Token* handleOperator(FILE* file, char ch, FilePos* pos);
+<<<<<<< HEAD
 #endif //LEXICALDEFINED
+=======
+#endif //LEXICALDEFINED
+>>>>>>> 82234ed5ea03b87f549b1ca39b7835a40daa0788
