@@ -1,5 +1,6 @@
 #include "lexical.h"
 
+FilePos pos = {.col = 0, .line = 1};
 const char keywords[NUMOFKEYWORDS][20] = {"else", "func", "if", "let", "nil", "return", "var", "while"};
 const char variableTypes[NUMOFVARIABLETYPES][20] = {"Double", "Int", "String"};
 
@@ -56,12 +57,24 @@ void handleComments(FILE* file, char ch) {
     // line comment
     if ((ch = getc(file)) == '/') {
         while ((ch = fgetc(file)) != '\n' && ch != EOF) {}
+
+        // so file position works
+        if (ch == '\n') {
+            ungetc(ch, file);
+        }
     }
 
     // multi-line comment
     else if (ch == '*') {
         int check[2];
         while ((ch = fgetc(file)) != EOF) {
+
+            // so file position works
+            if (ch == '\n') {
+                pos.col = 0;
+                pos.line++;
+            }
+
             if ((check[0] = fgetc(file)) == '*') {
                 if ((check[1] = fgetc(file)) == '/') {
                     return;
@@ -127,7 +140,14 @@ Token* multilineString(FILE* file, FilePos* pos) {
         }
 
         addToLexeme(token, ch);
-        pos->col++;
+
+        // file position
+        if (ch == '\n') {
+            pos->col = 0;
+            pos->line++;
+        } else {
+            pos->col++;
+        }
     }
 
     // string ended with EOF insted of """
@@ -140,10 +160,12 @@ Token* singlelineString(FILE* file, FilePos* pos) {
     int quoteCheck;
     int ch;
 
+    pos->col++;
+
     while ((ch = fgetc(file)) != '\n' && ch != EOF) {
         if (ch != '\\') {
             if ((quoteCheck = fgetc(file)) == '"') {
-                pos->col++;
+                pos->col += 2;
 
                 addToLexeme(token, ch);
                 finishToken(token, string);
@@ -188,7 +210,6 @@ Token* getToken(FILE* file) {
     }
 
     char ch;
-    FilePos pos = {.col = 1, .line = 0};
 
     while ((ch = fgetc(file)) != EOF) {
 
@@ -197,8 +218,9 @@ Token* getToken(FILE* file) {
             if (ch == '\n') {
                 pos.col = 0;
                 pos.line++;
-            }
+            } else {
             pos.col++;
+            }
         }
 
         // comments

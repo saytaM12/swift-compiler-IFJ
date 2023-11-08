@@ -34,8 +34,8 @@ void lexCheck() {
                 printf("(unknown)      ");
                 break;
         }
-        printf("%d,\t", token->type);
-        printf("%s\n\n", token->lexeme);
+        printf("%d:%d\t", pos.line, pos.col);
+        printf("%s\n", token->lexeme);
         destroyToken(token);
         token = getToken(file);
     }
@@ -46,17 +46,18 @@ void lexCheck() {
 }
 
 void synCheck(){
-    if(!parse_prog())
+    if(!parse_prog()) {
         printf("gud");
-    else
+    } else {
         printf("BAAAD");
+    }
 }
 int main(void) {
     putchar('\n');
     printf("===Printing Lexical analyzer output===");
     printf("\n\n");
     lexCheck();
-    printf("=====SYNCHECK====\n");
+    printf("\n\n====Printing top-down parser output===\n\n");
     synCheck();
     printf("\n\n");
 }

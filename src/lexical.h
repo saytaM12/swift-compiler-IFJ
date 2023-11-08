@@ -20,6 +20,8 @@ typedef struct {
     int line;
 } FilePos;
 
+extern FilePos pos;
+
 /*
  * Get next token from file,
  * ,
