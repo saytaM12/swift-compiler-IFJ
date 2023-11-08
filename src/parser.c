@@ -9,7 +9,7 @@ Token* new_token(FILE* file, Token* token){
 // Start of the program
 int parse_prog(){
     FILE* file = fopen("input.swift", "r");
-    Token* token =NULL;
+    Token* token = NULL;
     return parse_main_body(file,token);
 }
 
@@ -23,7 +23,7 @@ int parse_main_body(FILE *file, Token* token){
         return 0;
     }
     // -> func <FUNCTION_DECLARE>
-    if(!strcmp(token->lexeme,"func")){
+    if(!strcmp(token->lexeme, "func")){
         printf("\nfunc\n");
         return parse_func_declare(file,token) || parse_main_body(file,token);
     }
