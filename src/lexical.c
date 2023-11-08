@@ -104,14 +104,18 @@ Token* handleOperator(FILE* file, char ch, FilePos* pos) {
     Token* token = initToken();
 
     addToLexeme(token, ch);
+    char next = fgetc(file);
 
     pos->col++;
 
     // just solving these options "==", "!=", "<=", ">=", "??"
-    if (((ch == '=' || ch == '!' || ch == '<' || ch == '>') && (ch = fgetc(file)) == '=') ||
-         (token->lexeme[0] == '?' && ch == '?')) {
-        addToLexeme(token, ch);
+    if (((ch == '=' || ch == '!' || ch == '<' || ch == '>') && next == '=') ||
+         (ch == '?' && next == '?') ||
+         (ch == '-' && next == '>')) {
+        addToLexeme(token, next);
         pos->col++;
+    } else {
+        ungetc(next, file);
     }
 
     finishToken(token, operation);
@@ -165,7 +169,7 @@ Token* singlelineString(FILE* file, FilePos* pos) {
     while ((ch = fgetc(file)) != '\n' && ch != EOF) {
         if (ch != '\\') {
             if ((quoteCheck = fgetc(file)) == '"') {
-                pos->col += 2;
+                pos->col++;
 
                 addToLexeme(token, ch);
                 finishToken(token, string);
