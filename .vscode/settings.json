@@ -2,6 +2,7 @@
     "files.associations": {
         "ctype.h": "c",
         "lexical.h": "c",
-        "symtable.h": "c"
+        "symtable.h": "c",
+        "symstack.h": "c"
     }
 }
