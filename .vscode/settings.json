@@ -1,5 +1,7 @@
 {
     "files.associations": {
-        "ctype.h": "c"
+        "ctype.h": "c",
+        "lexical.h": "c",
+        "symtable.h": "c"
     }
 }
