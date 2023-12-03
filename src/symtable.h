@@ -31,13 +31,12 @@ typedef struct
 {
     char *name;
     Type type;
-    void *value;      // also possibly function address
     bool is_variable; // false means it's a function
     Type return_type;
     Type *param_types;
 } symbol_t;
 
-symbol_t *symbol_ctor(char *name, Type type, void *value, bool is_variable, Type return_type, Type *param_types);
+symbol_t *symbol_ctor(char *name, Type type, bool is_variable, Type return_type, Type *param_types);
 
 /**
  * A symbol constructor for functions.
@@ -47,7 +46,7 @@ symbol_t *symbol_function_ctor(char *name, Type return_type, Type *param_types);
 /**
  * A symbol constructor for variables.
  */
-symbol_t *symbol_variable_ctor(char *name, Type type, void *value);
+symbol_t *symbol_variable_ctor(char *name, Type type);
 
 void symbol_dtor(symbol_t *symbol);
 

@@ -12,18 +12,24 @@
 
 int main()
 {
+
+    printf("-> starting example...\n");
     // Creates a stack of scopes. NOTE: One stack per program!
     stack_t *stack = stack_ctor();
 
     // Create variable symbols
-    int x = 6;
-    symbol_t *symbol = symbol_variable_ctor("x", int_t, &x);
-    symbol_t *symbol2 = symbol_variable_ctor("y", int_t, NULL);
+    printf("-> symbol ctor...\n");
 
+    int x = 6;
+    symbol_t *symbol = symbol_variable_ctor("x", int_t);
+    symbol_t *symbol2 = symbol_variable_ctor("y", int_t);
+
+    printf("-> function ctor...\n");
     // Create function symbols
     Type param_types[2] = {int_t, int_t};
     symbol_t *symbol3 = symbol_function_ctor("add", int_t, param_types); // an example function can be seen below
 
+    printf("-> pushing new scope...\n");
     // Create a scope
     push_new_scope(stack);
 
@@ -41,10 +47,10 @@ int main()
     //       scope 1 has 3 symbols: x, y, add
 
     // Get a symbol from the scope
+    printf("-> getting symbol...\n");
     symbol_t *found = get_symbol(stack, "x");
 
     printf("Found variable with the name: %s\n", found->name);
-    printf("Its value is: %d\n", *(int *)found->value);
 
     // Get a function symbol from the scope
     symbol_t *found2 = get_symbol(stack, "add");
@@ -57,7 +63,7 @@ int main()
 
     int z = 10;
     // try to add a symbol with the same name as the one in the previous scope
-    symbol_t *symbol4 = symbol_variable_ctor("x", int_t, &z);
+    symbol_t *symbol4 = symbol_variable_ctor("x", int_t);
 
     add_symbol(stack, symbol4);
 
@@ -71,14 +77,13 @@ int main()
     //
     //       scope 1 has 3 symbols: x, y, add
     //       scope 2 has 1 symbol: x
-    //       Since scope 2 is the topmost scope, x is 10.
+    //       Since scope 2 is the topmost scope.
 
     // try to get x
     symbol_t *found3 = get_symbol(stack, "x");
 
     printf("Found variable with the name: %s\n", found3->name);
-    // Here, the value of x is 10, because in the topmost scope, x is 10.
-    printf("Its value is: %d\n", *(int *)found3->value);
+    // Here, we get the topmost x.
     printf("---------\n");
 
     pop_scope(stack);
@@ -88,7 +93,6 @@ int main()
 
     printf("Found variable with the name: %s\n", found4->name);
     // Here, the value of x is 6, because in the topmost scope, x is 6 again.
-    printf("Its value is: %d\n", *(int *)found4->value);
 
     stack_dtor(stack);
     return 0;

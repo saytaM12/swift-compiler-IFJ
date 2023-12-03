@@ -2,13 +2,12 @@
 
 #include "symtable.h"
 
-symbol_t *symbol_ctor(char *name, Type type, void *value, bool is_variable, Type return_type, Type *param_types)
+symbol_t *symbol_ctor(char *name, Type type, bool is_variable, Type return_type, Type *param_types)
 {
     symbol_t *symbol = (symbol_t *)malloc(sizeof(symbol_t));
 
     symbol->name = name;
     symbol->type = type;
-    symbol->value = value;
     symbol->is_variable = is_variable;
     symbol->return_type = return_type;
     symbol->param_types = param_types;
@@ -18,12 +17,12 @@ symbol_t *symbol_ctor(char *name, Type type, void *value, bool is_variable, Type
 
 symbol_t *symbol_function_ctor(char *name, Type return_type, Type *param_types)
 {
-    return symbol_ctor(name, function_t, NULL, false, return_type, param_types);
+    return symbol_ctor(name, function_t, false, return_type, param_types);
 }
 
-symbol_t *symbol_variable_ctor(char *name, Type type, void *value)
+symbol_t *symbol_variable_ctor(char *name, Type type)
 {
-    return symbol_ctor(name, type, value, true, undefined_t, NULL);
+    return symbol_ctor(name, type, true, undefined_t, NULL);
 }
 
 symtable_t *symtable_ctor()
@@ -32,6 +31,11 @@ symtable_t *symtable_ctor()
 
     symtable->capacity = DEFAULT_SYMTABLE_SIZE;
     symtable->array = (symbol_t *)malloc(symtable->capacity * sizeof(symbol_t));
+
+    for (int i = 0; i < symtable->capacity; i++)
+    {
+        symtable->array[i].name = NULL;
+    }
 
     return symtable;
 }
@@ -42,15 +46,14 @@ void symtable_dtor(symtable_t *symtable)
     free(symtable);
 }
 
-// TODO: Come up with a better hash function
 int hash_function(symtable_t *symtable, char *name)
 {
-    int hash = 0;
-    for (int i = 0; name[i] != '\0'; i++)
-    {
-        hash += name[i];
-    }
-    return hash % symtable->capacity;
+    unsigned h = 0; // musí mít 32 bitů
+    const unsigned char *p;
+    for (p = (const unsigned char *)name; *p != '\0'; p++)
+        h = 65599 * h + *p;
+
+    return h % symtable->capacity;
 }
 
 void symtable_insert(symtable_t *symtable, symbol_t *symbol)
@@ -100,11 +103,6 @@ void print_symtable(symtable_t *symtable)
 void symbol_dtor(symbol_t *symbol)
 {
     free(symbol);
-}
-
-void testing_function()
-{
-    printf("testing\n");
 }
 
 /*int main()
