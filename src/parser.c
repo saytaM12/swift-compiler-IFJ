@@ -1,6 +1,8 @@
 #include "parser.h"
 #include "lexical.h"
 
+code_t code = {.last = NULL, .first = NULL};
+
 // Get new and delete old token
 Token* new_token(FILE* file, Token* token){
     destroyToken(token);

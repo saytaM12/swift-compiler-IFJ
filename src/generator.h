@@ -111,11 +111,13 @@ typedef struct {
     };
 } instruction_t;
 
+extern instruction_t ins;
+
 /*
  * Inicializes empty code_t structure
  * this will later be used to store final code
  */
-void generator_init(code_t *code);
+code_t *generator_init();
 
 /*
  * Frees every elemet and bring the structure to state after init
@@ -136,5 +138,10 @@ int generator_addLineFromEnd(code_t *code, char *line, int offset);
  * Write all of the lines in `code` to the file
  */
 void generator_write(FILE *file, code_t code);
+
+/*
+ * Translates a line of IFJ23 into IFJcode23
+ */
+void generator_translate(code_t code);
 
 #endif // GENERATOR_H
