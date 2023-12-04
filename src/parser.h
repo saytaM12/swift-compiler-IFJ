@@ -3,6 +3,12 @@
 
 #include "lexical.h"
 #include "symstack.h"
+
+#define ERROR() do{\
+    destroyToken(token);\
+    fprintf(stderr, "%d:%d\n", pos.line, pos.col + 1);\
+    }while(0)
+
 /*
 *Get new and delete old token
 *FILE* file = file to read from,
