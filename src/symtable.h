@@ -58,6 +58,8 @@ void symbol_dtor(symbol_t *symbol);
 typedef struct
 {
     unsigned capacity;
+    unsigned size;
+
     symbol_t *array;
 } symtable_t;
 

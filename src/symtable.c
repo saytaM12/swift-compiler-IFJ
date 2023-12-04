@@ -30,6 +30,7 @@ symtable_t *symtable_ctor()
     symtable_t *symtable = (symtable_t *)malloc(sizeof(symtable_t));
 
     symtable->capacity = DEFAULT_SYMTABLE_SIZE;
+    symtable->size = 0;
     symtable->array = (symbol_t *)malloc(symtable->capacity * sizeof(symbol_t));
 
     for (int i = 0; i < symtable->capacity; i++)
@@ -60,12 +61,38 @@ void symtable_insert(symtable_t *symtable, symbol_t *symbol)
 {
     int index = hash_function(symtable, symbol->name);
 
+    if (symtable->size > symtable->capacity)
+    {
+        // resize the symtable
+        symtable->capacity *= 2;
+
+        // for each symbol in the symtable, rehash it
+        // create temp array
+        symbol_t *temp_array = (symbol_t *)malloc(symtable->capacity * sizeof(symbol_t));
+
+        for (int i = 0; i < symtable->size; i++)
+        {
+            int new_index = hash_function(symtable, symtable->array[i].name);
+            symtable->array[new_index] = symtable->array[i];
+        }
+
+        free(symtable->array);
+        symtable->array = temp_array;
+
+        if (symtable->array == NULL)
+        {
+            printf("ERROR: Symtable overflow. You tried to insert to a full symtable and realloc has failed.\n");
+            exit(1);
+        }
+    }
+
     while (symtable->array[index].name != NULL)
     {
         index++;
         index %= symtable->capacity;
     }
 
+    symtable->size++;
     symtable->array[index] = *symbol;
 
     // Does this create any problems?
@@ -91,7 +118,7 @@ symbol_t *symtable_lookup(symtable_t *symtable, char *name)
 
 void print_symtable(symtable_t *symtable)
 {
-    for (int i = 0; i < symtable->capacity; i++)
+    for (int i = 0; i < symtable->size; i++)
     {
         if (symtable->array[i].name != NULL)
         {
