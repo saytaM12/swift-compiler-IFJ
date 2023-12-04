@@ -3,11 +3,14 @@
 
 #include "lexical.h"
 #include "symstack.h"
+#include "generator.h"
 
 #define ERROR() do{\
     destroyToken(token);\
     fprintf(stderr, "%d:%d\n", pos.line, pos.col + 1);\
     }while(0)
+
+extern code_t code;
 
 /*
 *Get new and delete old token

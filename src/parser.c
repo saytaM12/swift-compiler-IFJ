@@ -13,6 +13,8 @@ struct CALLFUNCTION{
 };
 
 struct CALLFUNCTION *call_function;
+code_t code = {.last = NULL, .first = NULL};
+
 // Get new and delete old token
 Token* new_token(FILE* file, Token* token){
     destroyToken(token);

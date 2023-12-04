@@ -64,10 +64,6 @@ void synCheck(){
 void genCheck() {
     FILE *file = fopen("code.txt", "w");
 
-    code_t code;
-
-    generator_init(&code);
-
     generator_addLineEnd(&code, "line1");
     generator_addLineEnd(&code, "line2");
     generator_addLineEnd(&code, "line3");

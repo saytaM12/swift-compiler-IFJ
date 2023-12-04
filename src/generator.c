@@ -1,8 +1,12 @@
 #include "generator.h"
 
-void generator_init(code_t *code) {
+instruction_t ins;
+
+code_t *generator_init() {
+    code_t *code;
     code->last = NULL;
     code->first = NULL;
+    return code;
 }
 
 void generator_destroy(code_t *code) {
@@ -72,5 +76,24 @@ void generator_write(FILE *file, code_t code) {
     while (line) {
         fprintf(file, "%s\n", line->line);
         line = line->next;
+    }
+}
+
+void generator_translate(code_t code) {
+    switch (ins.instructionType) {
+        case funDef:
+            break;
+        case funCal:
+            break;
+        case varDef:
+            break;
+        case assign:
+            break;
+        case whileLoop:
+            break;
+        case ifExpr:
+            break;
+        default:
+            break;
     }
 }
