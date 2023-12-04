@@ -1,4 +1,9 @@
 #include "parser.h"
+#include "symstack.h"
+#include "symtable.h"
+
+
+Typee param_types[2];
 
 // Get new and delete old token
 Token* new_token(FILE* file, Token* token){
@@ -6,31 +11,70 @@ Token* new_token(FILE* file, Token* token){
     return getToken(file);
 }
 
+void addSymbol(Token* token, char* name, stack_t *stack){
+    symbol_t *symbol;
+    switch (token->type) {
+            case identifier:
+                printf("(identifier)   ");
+                break;
+            case keyword:
+                printf("chyba");
+                break;
+            case variableType:
+                printf("chyba");
+                break;
+            case number:
+                symbol = symbol_variable_ctor(name, int_t);
+                add_symbol(stack, symbol);
+                break;
+            case operation:
+                printf("(operation)    ");
+                break;
+            case singleChars:
+                printf("(singleChars)  ");
+                break;
+            case string:
+                symbol = symbol_variable_ctor(name, string_t);
+                add_symbol(stack, symbol);
+                break;
+            case unknown:
+                printf("(unknown)      ");
+                break;
+        }
+}
+
 // Start of the program
 int parse_prog(){
     FILE* file = fopen("input.swift", "r");
     Token* token = NULL;
-    return parse_main_body(file,token);
+    stack_t *stack = stack_ctor();
+    push_new_scope(stack);
+    return parse_main_body(file,token, stack);
 }
 
 // Main body
 // <MAIN_BODY> 
-int parse_main_body(FILE *file, Token* token){
+int parse_main_body(FILE *file, Token* token, stack_t *stack){
     token = getToken(file);
     // -> eps
     if(token->lexeme[0] == EOF){
+        symbol_t *found = get_symbol(stack, "z");
+        if(found!=NULL)
+            printf("Found variable with the name: %s\n", found->name);
+        pop_scope(stack);
+        stack_dtor(stack);
         destroyToken(token);
         return 0;
     }
     // -> func <FUNCTION_DECLARE>
     if(!strcmp(token->lexeme, "func")){
         printf("\nfunc\n");
-        return parse_func_declare(file,token) || parse_main_body(file,token);
+        return parse_func_declare(file,token,stack) || parse_main_body(file,token,stack);
     }
     // -> if <IF_WHILE_EXPRESSION> <IF_WHILE_MAIN_BODY> <ELSE_MAIN_BODY> <MAIN_BODY>
     if(!strcmp(token->lexeme,"if")){
         printf("if\n");
-        return parse_if_expression(file,token) || parse_if_while_main_body(file,token) || parse_else_main_body(file,token) || parse_main_body(file,token);
+        return parse_if_expression(file,token) || parse_if_while_main_body(file,token,stack) || parse_else_main_body(file,token,stack) || parse_main_body(file,token, stack);
     }
     // -> while [expression] <IF_WHILE_MAIN_BODY> <MAIN_BODY>
     // TODO
@@ -40,12 +84,12 @@ int parse_main_body(FILE *file, Token* token){
         destroyToken(token);
         return 0;
     }
-    return parse_body(file,token) || parse_main_body(file,token);
+    return parse_body(file,token, stack) || parse_main_body(file,token,stack);
 }
 
 // Function declartion
 // <FUNC_DECLARE> -> [id]<PARAM> <FUNCTION_TYPE> <FUNC_BODY>
-int parse_func_declare(FILE* file,Token* token){
+int parse_func_declare(FILE* file,Token* token, stack_t *stack){
     token = new_token(file,token);
     // [id] 
     if(token->type != identifier){
@@ -66,7 +110,7 @@ int parse_func_declare(FILE* file,Token* token){
         return 2;
     }
     // <FUNC_BODY>
-    if(parse_function_body(file,token)){
+    if(parse_function_body(file,token, stack)){
         destroyToken(token);
         return 2;
     }
@@ -183,7 +227,7 @@ int parse_function_type(FILE *file, Token* token){
 
 // Body of the declared function
 // <FUNCTION_BODY>
-int parse_function_body(FILE * file, Token * token){
+int parse_function_body(FILE * file, Token * token, stack_t *stack){
     // -> eps
     token = getToken(file);
     if(!strcmp(token->lexeme,"}")){
@@ -194,12 +238,12 @@ int parse_function_body(FILE * file, Token * token){
     // -> return
     if(!strcmp(token->lexeme,"return")){
         token = new_token(file,token);
-        return parse_expression(file,token) || parse_function_body(file,token);
+        return parse_expression(file,token, "TODO",stack) || parse_function_body(file,token,stack);
     }
     // if <IF_WHILE_EXPRESSION> <FUNC_BODY> <ELSE_FUNCTION_BODY> <FUNC_BODY>
     if(!strcmp(token->lexeme,"if")){
         printf("if\n");
-        return parse_if_expression(file,token) || parse_function_body(file,token) || parse_else_function_body(file,token) || parse_function_body(file,token);
+        return parse_if_expression(file,token) || parse_function_body(file,token, stack) || parse_else_function_body(file,token,stack) || parse_function_body(file,token,stack);
     }
     // while <IF_WHILE_EXPRESSION> <IF_WHILE_MAIN_BODY>
     // TODO
@@ -210,16 +254,16 @@ int parse_function_body(FILE * file, Token * token){
         return 0;
     }
     // <BODY>
-    if(parse_body(file,token)){
+    if(parse_body(file,token,stack)){
         destroyToken(token);
         return 2;
     }
-    return parse_function_body(file,token);
+    return parse_function_body(file,token, stack);
 }
 
 // Body for function/main
 // <BODY>
-int parse_body(FILE* file, Token* token){
+int parse_body(FILE* file, Token* token, stack_t *stack){
     // -> <DEF_VARIABLE> <ASSIGN>
     // <DEF_VARIABLE> -> let [id]
     // <DEF_VARIABLE> -> var [id]
@@ -230,8 +274,8 @@ int parse_body(FILE* file, Token* token){
             destroyToken(token);
             return 2;
         }
-        printf("ID\n");
-        return parse_assign(file,token);
+        printf("%s\n",token->lexeme);
+        return parse_assign(file,token,stack);
     }
     if(token->type == identifier){
         // -> [id](<CALL_PARAM>);
@@ -246,7 +290,7 @@ int parse_body(FILE* file, Token* token){
         if(!strcmp(token->lexeme,"=")){
             printf("=\n");
             token = new_token(file,token);
-            return parse_expression(file,token);
+            return parse_expression(file,token, "TODO", stack);
         }
     }
     destroyToken(token);
@@ -255,13 +299,15 @@ int parse_body(FILE* file, Token* token){
 
 // Asign value
 // <ASIGN>
-int parse_assign(FILE* file, Token* token){
+int parse_assign(FILE* file, Token* token, stack_t *stack){
+    char name[100];
+    strcpy(name,token->lexeme);
     token = new_token(file,token);
     if(!strcmp(token->lexeme,"=")){
         // -> = [id](<CALL_PARAM>)
         printf("=\n");
         token = new_token(file,token);
-        return parse_expression(file,token);
+        return parse_expression(file,token,name, stack);
     }
     // -> : [type] <VALUE>
     if(!strcmp(token->lexeme,":")){
@@ -272,6 +318,7 @@ int parse_assign(FILE* file, Token* token){
             return 2;
         }
         printf("TYPE\n");
+        return 0;
         // TODO - ASSIGN VALUE
         /*
         token = new_token(file,token);
@@ -289,7 +336,7 @@ int parse_assign(FILE* file, Token* token){
 
 // Expression
 // <EXPRESSION>
-int parse_expression(FILE* file, Token* token){
+int parse_expression(FILE* file, Token* token, char* name, stack_t *stack){
     if(token->type == identifier){
         // -> [id](<CALL_PARAM>);
         printf("ID\n");
@@ -300,11 +347,16 @@ int parse_expression(FILE* file, Token* token){
             return parse_call_param(file,token);
     }
     // -> [expression]
+    printf("\n%s\n",name);
     printf("\nEXPRESSSIOOON\n");
     destroyToken(token);
     return 0;
 }
+addSymbol(token,name, stack);
 // -> [expression]
+printf("-> getting symbol...\n");
+symbol_t *found = get_symbol(stack, name);
+printf("Found variable with the name: %s\n", found->name);
 printf("\nEXPRESSSIOOON\n");
 destroyToken(token);
 return 0;
@@ -399,12 +451,12 @@ int parse_if_expression(FILE* file, Token* token){
 
 // Body in IF in MAIN
 // <IF_WHILE_MAIN_BODY>
-int parse_if_while_main_body(FILE* file,Token *token){
+int parse_if_while_main_body(FILE* file,Token *token, stack_t *stack){
     token = getToken(file);
     // -> if <IF_EXPRESSION> <IF_WHILE_MAIN_BODY> <ELSE_MAIN_BODY> <IF_WHILE_MAIN_BODY>
     if(!strcmp(token->lexeme,"if")){
         printf("if\n");
-        return parse_if_expression(file,token) || parse_if_while_main_body(file,token) || parse_else_main_body(file,token) || parse_if_while_main_body(file,token);
+        return parse_if_expression(file,token) || parse_if_while_main_body(file,token,stack) || parse_else_main_body(file,token,stack) || parse_if_while_main_body(file,token,stack);
     }
     // -> while [expression] <IF_WHILE_MAIN_BODY>
     if(!strcmp(token->lexeme,"while")){
@@ -419,12 +471,12 @@ int parse_if_while_main_body(FILE* file,Token *token){
         destroyToken(token);
         return 0;
     }
-    return parse_body(file,token) || parse_if_while_main_body(file,token);
+    return parse_body(file,token, stack) || parse_if_while_main_body(file,token,stack);
 }
 
 // ELSE in MAIN
 // <ELSE_MAIN_BODY>
-int parse_else_main_body(FILE* file, Token* token){
+int parse_else_main_body(FILE* file, Token* token, stack_t *stack){
     //-> else { <IF_WHILE_MAIN_BODY>
     token = getToken(file);
     // else
@@ -436,7 +488,7 @@ int parse_else_main_body(FILE* file, Token* token){
             printf("{\n");
             destroyToken(token);
             // <IF_WHILE_MAIN_BODY>
-            return parse_if_while_main_body(file,token);
+            return parse_if_while_main_body(file,token,stack);
         }
         destroyToken(token);
         return 2;
@@ -447,7 +499,7 @@ int parse_else_main_body(FILE* file, Token* token){
 
 // ELSE in the body of function
 // <ELSE_FUNCTION_BODY> -> else { <FUNC_BODY>
-int parse_else_function_body(FILE* file, Token* token){
+int parse_else_function_body(FILE* file, Token* token, stack_t *stack){
     token = getToken(file);
     // else
     if(!strcmp(token->lexeme,"else")){
@@ -458,7 +510,7 @@ int parse_else_function_body(FILE* file, Token* token){
             printf("{\n");
             destroyToken(token);
             //<FUNC_BODY>
-            return parse_function_body(file,token);
+            return parse_function_body(file,token,stack);
         }
         destroyToken(token);
         return 2;

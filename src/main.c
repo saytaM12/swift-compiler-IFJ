@@ -1,6 +1,6 @@
 #include "lexical.h"
 #include "parser.h"
-
+#include "symstack.h"
 void lexCheck() {
     Token* token;
 
