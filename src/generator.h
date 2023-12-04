@@ -111,13 +111,19 @@ typedef struct {
     };
 } instruction_t;
 
-extern instruction_t ins;
+extern instruction_t *ins;
 
 /*
  * Inicializes empty code_t structure
  * this will later be used to store final code
  */
-code_t *generator_init();
+code_t generator_code_init();
+
+/*
+ * Inicializes empty instruction_t structure
+ * this will later be used to store a line of IFJ23 text
+ */
+instruction_t *generator_ins_init();
 
 /*
  * Frees every elemet and bring the structure to state after init

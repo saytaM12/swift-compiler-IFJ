@@ -3,6 +3,7 @@
 #include "symtable.h"
 #include "expression.h"
 #include "lexical.h"
+#include "generator.h"
 
 Typee *param_types = NULL;
 int size = 0;
@@ -13,7 +14,9 @@ struct CALLFUNCTION{
 };
 
 struct CALLFUNCTION *call_function;
-code_t code = {.last = NULL, .first = NULL};
+
+code_t code;
+instruction_t *ins;
 
 // Get new and delete old token
 Token* new_token(FILE* file, Token* token){
@@ -64,6 +67,8 @@ int addSymbol(Token* token, char* name, stack_t *stack){
 
 // Start of the program
 int parse_prog(){
+    code = generator_code_init();
+    ins = generator_ins_init();
     FILE* file = fopen("input.swift", "r");
     Token* token = NULL;
     stack_t *stack = stack_ctor();
@@ -90,6 +95,7 @@ int parse_main_body(FILE *file, Token* token, stack_t *stack){
     // -> func <FUNCTION_DECLARE>
     if(!strcmp(token->lexeme, "func")){
         printf("\nfunc\n");
+        ins->instructionType = funDef;
         return parse_func_declare(file,token,stack) || parse_main_body(file,token,stack);
     }
     // -> if <IF_WHILE_EXPRESSION> <IF_WHILE_MAIN_BODY> <ELSE_MAIN_BODY> <MAIN_BODY>
@@ -120,6 +126,7 @@ int parse_func_declare(FILE* file,Token* token, stack_t *stack){
     printf("%s\n",token->lexeme);
     char name[100];
     strcpy(name,token->lexeme);
+    strcpy(ins->funDef.name, token->lexeme);
     token = new_token(file,token);
     // <PARAM>
     if(parse_param(file,token)){
