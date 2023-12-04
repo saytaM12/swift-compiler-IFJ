@@ -1,12 +1,14 @@
 #include "generator.h"
 
-instruction_t ins;
-
-code_t *generator_init() {
-    code_t *code;
-    code->last = NULL;
-    code->first = NULL;
+code_t generator_code_init() {
+    code_t code;
+    code.last = NULL;
+    code.first = NULL;
     return code;
+}
+
+instruction_t *generator_ins_init() {
+    return malloc(sizeof(instruction_t));
 }
 
 void generator_destroy(code_t *code) {

@@ -1,7 +1,9 @@
 #include "parser.h"
+#include "generator.h"
 #include "lexical.h"
 
-code_t code = {.last = NULL, .first = NULL};
+code_t code;
+instruction_t *ins;
 
 // Get new and delete old token
 Token* new_token(FILE* file, Token* token){
@@ -11,6 +13,8 @@ Token* new_token(FILE* file, Token* token){
 
 // Start of the program
 int parse_prog(){
+    code = generator_code_init();
+    ins = generator_ins_init();
     FILE* file = fopen("input.swift", "r");
     Token* token = NULL;
     return parse_main_body(file,token);
@@ -28,6 +32,7 @@ int parse_main_body(FILE *file, Token* token){
     // -> func <FUNCTION_DECLARE>
     if(!strcmp(token->lexeme, "func")){
         printf("\nfunc\n");
+        ins->instructionType = funDef;
         return parse_func_declare(file,token) || parse_main_body(file,token);
     }
     // -> if <IF_WHILE_EXPRESSION> <IF_WHILE_MAIN_BODY> <ELSE_MAIN_BODY> <MAIN_BODY>
@@ -56,6 +61,7 @@ int parse_func_declare(FILE* file,Token* token){
         return 2;
     }
     printf("ID\n");
+    strcpy(ins->funDef.name, token->lexeme);
     token = new_token(file,token);
     // <PARAM>
     if(parse_param(file,token)){
