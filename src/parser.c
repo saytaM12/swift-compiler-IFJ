@@ -1,4 +1,5 @@
 #include "parser.h"
+#include "lexical.h"
 
 // Get new and delete old token
 Token* new_token(FILE* file, Token* token){
@@ -49,25 +50,25 @@ int parse_func_declare(FILE* file,Token* token){
     token = new_token(file,token);
     // [id] 
     if(token->type != identifier){
-        destroyToken(token);
+        ERROR();
         return 2;
     }
     printf("ID\n");
     token = new_token(file,token);
     // <PARAM>
     if(parse_param(file,token)){
-        destroyToken(token);
+        ERROR();
         return 2;
     }
     // <FUNCTION_TYPE>
     token = new_token(file,token);
     if(parse_function_type(file,token)){
-        destroyToken(token);
+        ERROR();
         return 2;
     }
     // <FUNC_BODY>
     if(parse_function_body(file,token)){
-        destroyToken(token);
+        ERROR();
         return 2;
     }
     return 0;
@@ -78,7 +79,7 @@ int parse_func_declare(FILE* file,Token* token){
 int parse_param(FILE*file, Token* token){
     // (
     if(strcmp(token->lexeme,"(")){
-        destroyToken(token);
+        ERROR();
         printf("NOT \"(\" in func [id](<PARAM>) <FUNCTION_TYPE> {<FUNC_BODY>} <MAIN_BODY>");
         return 2;
     }
@@ -99,7 +100,7 @@ int parse_param_types(FILE* file, Token* token){
     // [name]
     if(token->type != identifier){
         printf("NOT \"ID\" in <PARAM_TYPES> -> [name] [id] : [type]");  
-        destroyToken(token);
+        ERROR();
         return 2;
     }
     printf("NAME\n");
@@ -107,7 +108,7 @@ int parse_param_types(FILE* file, Token* token){
     // [id]
     if(token->type != identifier){
         printf("NOT \"ID\" in <PARAM_TYPES> -> [name] [id] : [type]");  
-        destroyToken(token);
+        ERROR();
         return 2;
     }
     printf("ID\n");
@@ -115,14 +116,14 @@ int parse_param_types(FILE* file, Token* token){
     // :
     if(strcmp(token->lexeme,":")){
         printf("NOT \":\" in <PARAM_TYPES> -> [name] [id] : [type]");  
-        destroyToken(token);
+        ERROR();
         return 2;
     }
     printf(":\n");
     token = new_token(file,token);
     // [type]
     if(token->type != variableType){
-        destroyToken(token);
+        ERROR();
         return 2;
     }
     printf("TYPE\n");
@@ -136,16 +137,16 @@ int parse_next_param(FILE* file, Token* token){
     token = getToken(file);
     // -> eps
     if(!strcmp(token->lexeme,")")){
-            printf(")\n");
-            destroyToken(token);
-            return 0;
+        printf(")\n");
+        destroyToken(token);
+        return 0;
     }
     // -> , <PARAM_TYPES> <NEXT_PARAM>
     if(!strcmp(token->lexeme,",")){
-            token = new_token(file,token);
-            return parse_param_types(file,token) || parse_next_param(file,token);
+        token = new_token(file,token);
+        return parse_param_types(file,token) || parse_next_param(file,token);
     }
-    destroyToken(token);
+    ERROR();
     return 2;
 }
 
@@ -157,7 +158,7 @@ int parse_function_type(FILE *file, Token* token){
         printf("{\n");
         destroyToken(token);
         return 0;
-    // ->
+        // ->
     }else if(!strcmp(token->lexeme,"-")){
         token = new_token(file,token);
         if(!strcmp(token->lexeme,">")){
@@ -177,7 +178,7 @@ int parse_function_type(FILE *file, Token* token){
             }
         }
     }
-    destroyToken(token);
+    ERROR();
     return 2;
 }
 
@@ -187,9 +188,9 @@ int parse_function_body(FILE * file, Token * token){
     // -> eps
     token = getToken(file);
     if(!strcmp(token->lexeme,"}")){
-            destroyToken(token);
-            printf("}\n");
-            return 0;
+        destroyToken(token);
+        printf("}\n");
+        return 0;
     }
     // -> return
     if(!strcmp(token->lexeme,"return")){
@@ -211,7 +212,7 @@ int parse_function_body(FILE * file, Token * token){
     }
     // <BODY>
     if(parse_body(file,token)){
-        destroyToken(token);
+        ERROR();
         return 2;
     }
     return parse_function_body(file,token);
@@ -227,7 +228,7 @@ int parse_body(FILE* file, Token* token){
         printf("%s\n",token->lexeme);
         token = new_token(file,token);
         if(token->type != identifier){
-            destroyToken(token);
+            ERROR();
             return 2;
         }
         printf("ID\n");
@@ -249,7 +250,7 @@ int parse_body(FILE* file, Token* token){
             return parse_expression(file,token);
         }
     }
-    destroyToken(token);
+    ERROR();
     return 2;
 }
 
@@ -268,22 +269,26 @@ int parse_assign(FILE* file, Token* token){
         printf(":\n");
         token = new_token(file,token);
         if(token->type != variableType){
-            destroyToken(token);
+            ERROR();
             return 2;
         }
         printf("TYPE\n");
         // TODO - ASSIGN VALUE
-        /*
+        //*
         token = new_token(file,token);
+        if(!strcmp(token->lexeme,"?")){
+            printf("?\n");
+            token = new_token(file,token);
+        }
+        // = [id](<CALL_PARAM>)
         if(!strcmp(token->lexeme,"=")){
-            // = [id](<CALL_PARAM>)
             printf("=\n");
             token = new_token(file,token);
             return parse_expression(file,token);
         }
-        */
+        //*/
     }
-    destroyToken(token);
+    ERROR();
     return 2;
 }
 
@@ -298,16 +303,16 @@ int parse_expression(FILE* file, Token* token){
             destroyToken(token);
             printf("(\n");
             return parse_call_param(file,token);
+        }
+        // -> [expression]
+        printf("\nEXPRESSSIOOON\n");
+        destroyToken(token);
+        return 0;
     }
     // -> [expression]
     printf("\nEXPRESSSIOOON\n");
     destroyToken(token);
     return 0;
-}
-// -> [expression]
-printf("\nEXPRESSSIOOON\n");
-destroyToken(token);
-return 0;
 }
 
 // Parameters of the calling function
@@ -316,9 +321,9 @@ int parse_call_param(FILE * file, Token * token){
     //<CALL_PARAM> -> eps
     token = getToken(file);
     if(!strcmp(token->lexeme,")")){
-            destroyToken(token);
-            printf(")\n");
-            return 0;
+        destroyToken(token);
+        printf(")\n");
+        return 0;
     }
     // -> <CALL_PARAM_TYPES>
     return parse_call_param_types(file,token);
@@ -341,13 +346,13 @@ int parse_call_param_types(FILE* file, Token* token){
                 // <NEXT_CALL_PARAM>
                 return parse_next_call_param(file,token);
             }
-            destroyToken(token);
+            ERROR();
             return 2;
         }
         // <NEXT_CALL_PARAM>
         return parse_next_call_param(file,token);
     }
-    destroyToken(token);
+    ERROR();
     return 2;
 }
 
@@ -356,16 +361,16 @@ int parse_call_param_types(FILE* file, Token* token){
 int parse_next_call_param(FILE* file, Token* token){
     //-> eps
     if(!strcmp(token->lexeme,")")){
-            printf(")\n");
-            destroyToken(token);
-            return 0;
+        printf(")\n");
+        destroyToken(token);
+        return 0;
     }
     // -> , <CALL_PARAM_TYPES>
     if(!strcmp(token->lexeme,",")){
-            token = new_token(file,token);
-            return parse_call_param_types(file,token);
+        token = new_token(file,token);
+        return parse_call_param_types(file,token);
     }
-    destroyToken(token);
+    ERROR();
     return 2;
 }
 
@@ -388,7 +393,7 @@ int parse_if_expression(FILE* file, Token* token){
                 return 0;
             }
         }
-        destroyToken(token);
+        ERROR();
         return 2;
     }
     // -> [expression]
@@ -438,10 +443,10 @@ int parse_else_main_body(FILE* file, Token* token){
             // <IF_WHILE_MAIN_BODY>
             return parse_if_while_main_body(file,token);
         }
-        destroyToken(token);
+        ERROR();
         return 2;
     }
-    destroyToken(token);
+    ERROR();
     return 2;
 }
 
@@ -460,9 +465,9 @@ int parse_else_function_body(FILE* file, Token* token){
             //<FUNC_BODY>
             return parse_function_body(file,token);
         }
-        destroyToken(token);
+        ERROR();
         return 2;
     }
-    destroyToken(token);
+    ERROR();
     return 2;
-}
+    }

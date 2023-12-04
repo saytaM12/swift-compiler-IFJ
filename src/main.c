@@ -1,5 +1,6 @@
 #include "lexical.h"
 #include "parser.h"
+#include "generator.h"
 
 void lexCheck() {
     Token* token;
@@ -52,12 +53,34 @@ void synCheck(){
         printf("BAAAD");
     }
 }
+
+void genCheck() {
+    FILE *file = fopen("code.txt", "w");
+
+    code_t code;
+
+    generator_init(&code);
+
+    generator_addLineEnd(&code, "line1");
+    generator_addLineEnd(&code, "line2");
+    generator_addLineEnd(&code, "line3");
+    generator_addLineEnd(&code, "line4");
+    generator_addLineFromEnd(&code, "line3.5", 1);
+
+    generator_write(file, code);
+    generator_destroy(&code);
+}
+
 int main(void) {
-    putchar('\n');
-    printf("===Printing Lexical analyzer output===");
-    printf("\n\n");
+    /*
+    printf("\n===Printing Lexical analyzer output===\n\n");
     lexCheck();
+    pos.line = 1;
+    pos.col = 0;
+    */
     printf("\n\n====Printing top-down parser output===\n\n");
     synCheck();
+    printf("\n\n====Printing generator output to a file===");
+    genCheck();
     printf("\n\n");
 }

@@ -7,10 +7,10 @@
 #include <string.h>
 #include <stdbool.h>
 
-#include "symtable.c"
-#include "symstack.c"
+#include "symtable.h"
+#include "symstack.h"
 
-int main()
+int main2()
 {
 
     printf("-> starting example...\n");
