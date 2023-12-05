@@ -67,10 +67,4 @@ int main(void) {
     printf("\n\n====Printing top-down parser output===\n\n");
     synCheck();
     printf("\n\n");
-    FILE * file = fopen("input.swift", "r");
-    Token *token = getToken(file);
-    // expression_value *value = bottomUp(token);
-    // printValue(value,0);
-    // disposeValue(value);
-    fclose(file);
 }

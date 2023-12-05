@@ -366,7 +366,7 @@ expression_value *bottomUp(Token *token,FILE *fp)
             retVal = expression_list_pop(stack);
     expression_list_dispose(stack);
     // destroyToken(token);
-    fclose(fp);
+    // fclose(fp);
     return retVal;
 }
 

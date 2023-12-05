@@ -427,6 +427,11 @@ printf("\nEXPRESSSIOOON\n");
     }
     printValue(value,0);
     disposeValue(value);
+    // for (int i = 0; i < token->lexlen-1; i++)
+    // {
+    //     printf("%c\n",token->lexeme[i]);
+    // }
+    // printf("%s\n",token->lexeme);
 // destroyToken(token);
 return 0;
 }
