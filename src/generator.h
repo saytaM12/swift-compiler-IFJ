@@ -2,25 +2,29 @@
 #define GENERATOR_H
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 /*
  * Single node of double linked list of lines of code IFJcode23
  */
-typedef struct Line{
-     struct Line *prev;
-     struct Line *next;
-     char *line;
+typedef struct Line
+{
+    struct Line *prev;
+    struct Line *next;
+    char *line;
 } line_t;
 
 /*
  * Double linked list structure with lines of code IFJcode23
  */
-typedef struct {
+typedef struct
+{
     line_t *first;
     line_t *last;
 } code_t;
 
-typedef enum {
+typedef enum
+{
     funDef = 1,
     funCal = 2,
     varDef = 3,
@@ -29,12 +33,14 @@ typedef enum {
     ifExpr = 6,
 } instructionType_e;
 
-typedef enum {
+typedef enum
+{
     Int = 1,
     Float = 2,
     String = 3,
 } varialbeType_e;
 
+<<<<<<< HEAD
 typedef struct Scope{
     struct Scope *next;
     char *name;
@@ -71,52 +77,81 @@ struct funCal_t {                       //
 };                                      //
                                         //
 //////////////////////////////////////////
+=======
+char *varTypeToString(varialbeType_e type);
+
+// function definition ///////////////////
+struct funcDefParam
+{
+    char *name;
+    char *id;
+    varialbeType_e type;
+};
+
+struct funDef_t
+{
+    varialbeType_e type;
+    char *name;
+    struct funcDefParam *parameters;
+};
+
+// function Call /////////////////////////
+struct funcCallParam
+{
+    varialbeType_e type;
+    char *value;
+};
+struct funCal_t
+{
+    char *name;
+    struct funcCallParam *parameters;
+};
+>>>>>>> 6f8ef42 (varDef and assign finished)
 
 // variable definition ///////////////////
-                                        //
-struct varDef_t {                       //
-    char *name;                         //
-    varialbeType_e type;                //
-    char *value;                        //
-};                                      //
-                                        //
-//////////////////////////////////////////
+struct varDef_t
+{
+    char *name;
+    varialbeType_e type;
+    char *value;
+    bool local;
+};
 
 // assignment ////////////////////////////
-                                        //
-struct assign_t {                       //
-    char *from;                         //
-    char *to;                           //
-};                                      //
-                                        //
-//////////////////////////////////////////
+struct assign_t
+{
+    char *from;
+    char *to;
+};
 
 // while loop ////////////////////////////
-                                        //
-struct whileLoop_t {                    //
-};                                      //
-                                        //
-//////////////////////////////////////////
+struct whileLoop_t
+{
+};
 
 // if expression /////////////////////////
-                                        //
-struct ifExpr_t {                       //
-};                                      //
-                                        //
-//////////////////////////////////////////
+struct ifExpr_t
+{
+};
 
+<<<<<<< HEAD
 
 typedef struct {
     scope_t *currScope;
     int totalOffset;
+=======
+typedef struct
+{
+>>>>>>> 6f8ef42 (varDef and assign finished)
     instructionType_e instructionType;
-    union {
+    union
+    {
         struct funDef_t funDef;
         struct funCal_t funCal;
         struct varDef_t varDef;
         struct assign_t assign;
-        //struct whileLoop_t whileLoop;
-        //struct ifExpr_t ifExpr;
+        // struct whileLoop_t whileLoop;
+        // struct ifExpr_t ifExpr;
     };
 } instruction_t;
 

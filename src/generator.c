@@ -4,11 +4,16 @@
 #include <math.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 code_t generator_code_init() {
     code_t code;
     code.last = NULL;
     code.first = NULL;
+
+    generator_addLineEnd(&code, ".IFJcode23");
+    generator_addLineEnd(&code, "JUMP $$main");
+
     return code;
 }
 
@@ -118,13 +123,11 @@ int generator_addLineFromEnd(code_t *code, char *line, int offset) {
         }
     }
 
-
     line_t *new = calloc(sizeof(line_t), 1);
     if (!new) {
         fputs("malloc fail", stderr);
         return -2;
     }
-    
     new->line = malloc(strlen(line) + 1);
     strcpy(new->line, line);
 
@@ -136,14 +139,12 @@ int generator_addLineFromEnd(code_t *code, char *line, int offset) {
         if (previous == code->last) {
             code->last = new;
         }
-
     } else { // list was empty ('previous' was NULL pointer)
         new->next = new->prev = NULL;
         code->first = code->last = new;
     }
 
     return 0;
-
 }
 
 void generator_write(FILE *file, code_t code) {
