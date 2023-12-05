@@ -1,5 +1,6 @@
 #include "lexical.h"
 #include "parser.h"
+#include "expression.h"
 
 void lexCheck() {
     Token* token;
@@ -64,6 +65,12 @@ int main(void) {
     printf("\n\n");
     lexCheck();
     printf("\n\n====Printing top-down parser output===\n\n");
-    synCheck();
+    //synCheck();
     printf("\n\n");
+    FILE * file = fopen("input.swift", "r");
+    Token *token = getToken(file);
+    expression_list *list = bottomUp(token);
+    printExprList(list);
+    expression_list_dispose(list);
+    fclose(file);
 }
