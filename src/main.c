@@ -1,7 +1,5 @@
 #include "lexical.h"
 #include "parser.h"
-#include "LList.h"
-#include "ASTree.h"
 #include "expression.h"
 
 void lexCheck() {
