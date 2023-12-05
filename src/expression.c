@@ -264,7 +264,7 @@ void reduce(expression_list *stack){
         printf("E -> i\n");
         return;
     }
-    else if (node->value->index==PlusMinus||node->value->index==MultiplyDivide)
+    else if (node->value->index==PlusMinus||node->value->index==MultiplyDivide||node->value->index==Rel||node->value->index==QuestionMark)
     {
         node->value->index = Dollar;
         node->value->action = R;
