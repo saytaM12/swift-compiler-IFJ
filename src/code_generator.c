@@ -104,7 +104,7 @@
     "\n LABEL readInt"       \
     "\n PUSHFRAME"           \
     "\n DEFVAR LF@%retval"   \
-    "\n READ TF@%retval int" \
+    "\n READ LF@%retval int" \
     "\n POPFRAME"            \
     "\n RETURN"
 
@@ -113,8 +113,8 @@
 #define FUN_READ_DOUBLE        \
     "\n LABEL readInt"         \
     "\n PUSHFRAME"             \
-    "\n DEFVAR TF@%retval"     \
-    "\n READ TF@%retval float" \
+    "\n DEFVAR LF@%retval"     \
+    "\n READ LF@%retval float" \
     "\n POPFRAME"              \
     "\n RETURN"
 
