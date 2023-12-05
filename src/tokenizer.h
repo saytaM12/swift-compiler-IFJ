@@ -19,10 +19,11 @@ typedef enum{
     keyword = 2,
     variableType = 3,
     number = 4,
-    operation = 5,
-    singleChars = 6,
-    string = 7,
-    unknown = 8
+    numberFloat = 5,
+    operation = 6,
+    singleChars = 7,
+    string = 8,
+    unknown = 9
 } Type;
 
 /*
