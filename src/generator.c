@@ -81,8 +81,8 @@ void generator_write(FILE *file, code_t code) {
     }
 }
 
-void generator_translate(code_t code) {
-    switch (ins.instructionType) {
+void generator_translate() {
+    switch (ins->instructionType) {
         case funDef:
             break;
         case funCal:

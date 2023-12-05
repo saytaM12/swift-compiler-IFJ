@@ -46,7 +46,8 @@ struct funcDefParam {                   //
 struct funDef_t {                       //
     varialbeType_e type;                //
     char *name;                         //
-    struct funcDefParam *parameters;    //
+    int paramNum;                       //
+    struct funcDefParam **parameters;   //
 };                                      //
                                         //
 //////////////////////////////////////////
@@ -148,6 +149,6 @@ void generator_write(FILE *file, code_t code);
 /*
  * Translates a line of IFJ23 into IFJcode23
  */
-void generator_translate(code_t code);
+void generator_translate();
 
 #endif // GENERATOR_H

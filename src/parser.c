@@ -3,6 +3,7 @@
 #include "symtable.h"
 #include "expression.h"
 #include "lexical.h"
+#include <string.h>
 #include "generator.h"
 
 Typee *param_types = NULL;
@@ -95,8 +96,11 @@ int parse_main_body(FILE *file, Token* token, stack_t *stack){
     // -> func <FUNCTION_DECLARE>
     if(!strcmp(token->lexeme, "func")){
         printf("\nfunc\n");
+
         ins->instructionType = funDef;
         return parse_func_declare(file,token,stack) || parse_main_body(file,token,stack);
+        ins->funDef.paramNum = 0;
+        ins->funDef.parameters = calloc(sizeof(struct funcDefParam *), 1);
     }
     // -> if <IF_WHILE_EXPRESSION> <IF_WHILE_MAIN_BODY> <ELSE_MAIN_BODY> <MAIN_BODY>
     if(!strcmp(token->lexeme,"if")){
@@ -126,6 +130,7 @@ int parse_func_declare(FILE* file,Token* token, stack_t *stack){
     printf("%s\n",token->lexeme);
     char name[100];
     strcpy(name,token->lexeme);
+    ins->funDef.name = calloc(sizeof(token->lexeme), 1);
     strcpy(ins->funDef.name, token->lexeme);
     token = new_token(file,token);
     // <PARAM>
@@ -178,18 +183,25 @@ int parse_param_types(FILE* file, Token* token){
         return 2;
     }
     printf("NAME\n");
+    struct funcDefParam *newParam = calloc(sizeof(struct funcDefParam), 1);
+    newParam->name = calloc(sizeof(token->lexeme), 1);
+    strcpy(newParam->name, token->lexeme);
     token = new_token(file,token);
     // [id]
     if(token->type != identifier){
         printf("NOT \"ID\" in <PARAM_TYPES> -> [name] [id] : [type]");  
+        free(newParam);
         ERROR();
         return 2;
     }
     printf("ID\n");
+    newParam->id = calloc(sizeof(token->lexeme), 1);
+    strcpy(newParam->id, token->lexeme);
     token = new_token(file,token);
     // :
     if(strcmp(token->lexeme,":")){
         printf("NOT \":\" in <PARAM_TYPES> -> [name] [id] : [type]");  
+        free(newParam);
         ERROR();
         return 2;
     }
@@ -201,6 +213,8 @@ int parse_param_types(FILE* file, Token* token){
         return 2;
     }
     printf("TYPE\n");
+    newParam->type = ENUMTYPE(token);
+    ins->funDef.parameters[ins->funDef.paramNum++] = newParam;
     size++;
     param_types = realloc(param_types, size * sizeof(Typee));
     if (!strcmp(token->lexeme,"Int")){
@@ -248,6 +262,7 @@ int parse_function_type(FILE *file, Token* token, char* name, stack_t* stack){
             // [type]
             if(token->type == variableType){
                 printf("TYPE\n");
+                ins->funDef.type = ENUMTYPE(token);
                 int typ;
                 if (!strcmp(token->lexeme,"Int")){
                     typ = int_t;
@@ -267,6 +282,7 @@ int parse_function_type(FILE *file, Token* token, char* name, stack_t* stack){
                 if(!strcmp(token->lexeme,"{")){
                     printf("{\n");
                     destroyToken(token);
+                    generator_translate();
                     return 0;
                 }
             }
