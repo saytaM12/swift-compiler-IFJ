@@ -1,6 +1,5 @@
 #ifndef EXPRESSIN_H
 #define EXPRESSIN_H
-#include "LList.h"
 #include "lexical.h"
 typedef enum {R, S, Eq, Err, Fin}prec_action; // R = reduce, S = shift, Eq = equal, Err = error, Fin = final
 typedef enum {PlusMinus, MultiplyDivide, Rel, ExMark, QuestionMark, OpenBracket, CloseBracket, Identifier, Dollar, Expression}prec_index;

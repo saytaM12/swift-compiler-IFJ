@@ -1,8 +1,6 @@
 #include "expression.h"
-#include "LList.h"
 #include "tokenizer.h"
 #include "parser.h"
-#include "ASTree.h"
 
 // +-   */   !=<>   !   ??   (   )   i   $
 int precTable[9][9] = {
