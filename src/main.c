@@ -5,6 +5,9 @@ void lexCheck() {
     Token* token;
 
     FILE* file = fopen("input.swift", "r");
+    if (!file) {
+        return;
+    }
     token = getToken(file);
 
     while (token->lexeme[0] != EOF) {
@@ -20,6 +23,9 @@ void lexCheck() {
                 break;
             case number:
                 printf("(number)       ");
+                break;
+            case numberFloat:
+                printf("(numberFloat)  ");
                 break;
             case operation:
                 printf("(operation)    ");
