@@ -1,6 +1,7 @@
 #include "parser.h"
 #include "generator.h"
 #include "lexical.h"
+#include <string.h>
 
 code_t code;
 instruction_t *ins;
@@ -32,7 +33,11 @@ int parse_main_body(FILE *file, Token* token){
     // -> func <FUNCTION_DECLARE>
     if(!strcmp(token->lexeme, "func")){
         printf("\nfunc\n");
+
         ins->instructionType = funDef;
+        ins->funDef.paramNum = 0;
+        ins->funDef.parameters = calloc(sizeof(struct funcDefParam *), 1);
+
         return parse_func_declare(file,token) || parse_main_body(file,token);
     }
     // -> if <IF_WHILE_EXPRESSION> <IF_WHILE_MAIN_BODY> <ELSE_MAIN_BODY> <MAIN_BODY>
@@ -61,6 +66,7 @@ int parse_func_declare(FILE* file,Token* token){
         return 2;
     }
     printf("ID\n");
+    ins->funDef.name = calloc(sizeof(token->lexeme), 1);
     strcpy(ins->funDef.name, token->lexeme);
     token = new_token(file,token);
     // <PARAM>
@@ -112,18 +118,25 @@ int parse_param_types(FILE* file, Token* token){
         return 2;
     }
     printf("NAME\n");
+    struct funcDefParam *newParam = calloc(sizeof(struct funcDefParam), 1);
+    newParam->name = calloc(sizeof(token->lexeme), 1);
+    strcpy(newParam->name, token->lexeme);
     token = new_token(file,token);
     // [id]
     if(token->type != identifier){
         printf("NOT \"ID\" in <PARAM_TYPES> -> [name] [id] : [type]");  
+        free(newParam);
         ERROR();
         return 2;
     }
     printf("ID\n");
+    newParam->id = calloc(sizeof(token->lexeme), 1);
+    strcpy(newParam->id, token->lexeme);
     token = new_token(file,token);
     // :
     if(strcmp(token->lexeme,":")){
         printf("NOT \":\" in <PARAM_TYPES> -> [name] [id] : [type]");  
+        free(newParam);
         ERROR();
         return 2;
     }
@@ -135,6 +148,8 @@ int parse_param_types(FILE* file, Token* token){
         return 2;
     }
     printf("TYPE\n");
+    newParam->type = ENUMTYPE(token);
+    ins->funDef.parameters[ins->funDef.paramNum++] = newParam;
     destroyToken(token);
     return 0;
 }
@@ -176,11 +191,13 @@ int parse_function_type(FILE *file, Token* token){
             // [type]
             if(token->type == variableType){
                 printf("TYPE\n");
+                ins->funDef.type = ENUMTYPE(token);
                 token = new_token(file,token);
                 // {
                 if(!strcmp(token->lexeme,"{")){
                     printf("{\n");
                     destroyToken(token);
+                    generator_translate();
                     return 0;
                 }
             }

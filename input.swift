@@ -1,6 +1,8 @@
 // Program 1: Vypocet faktorialu (iterativne)
 /* Hlavni telo programu */
-write("Zadejte cislo pro vypocet faktorialu\n")
+func hello(from x: Int, to y: Int) {
+    write("Zadejte cislo pro vypocet faktorialu\n")
+}
 let b : Int = 6
 let a : Int? = readInt()
 if let a {
