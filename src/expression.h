@@ -40,5 +40,5 @@ void printExprList(expression_list* stack);
 void printValue(expression_value* value, int level);
 expression_value *expression_last(expression_list *list);
 expression_value* expression_value_create(Token* token);
-expression_list *bottomUp(Token *token);
+expression_value *bottomUp(Token *token,FILE *fp);
 #endif

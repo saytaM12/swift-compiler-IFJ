@@ -274,7 +274,6 @@ void reduce(expression_list *stack){
         expression_list_insert(stack, node->value);
         printf("E -> E + E\n");
     }
-    
     else
     {
         printf("Nejaky dalsi index: %d\n",node->value->index);
@@ -282,9 +281,10 @@ void reduce(expression_list *stack){
     return;
 }
 
-expression_list *bottomUp(Token *token)
+expression_value *bottomUp(Token *token,FILE *fp)
 {
-    FILE *fp = fopen("input.swift", "r");
+    expression_value *retVal=NULL;
+    // FILE *fp = fopen("input.swift", "r");
     expression_list *stack = expression_list_create();
     char *dollar = malloc(sizeof(char) * 2);
     strcpy(dollar, "$");
@@ -296,8 +296,13 @@ expression_list *bottomUp(Token *token)
     dollarVal->right = NULL;
     dollarVal->index = Dollar;
     expression_list_insert(stack, dollarVal);
-    token = new_token(fp, token);
-    while (token->type==identifier||token->type == number||token->type==string||token->type==operation||token->type==singleChars)
+    // token = new_token(fp, token);
+    if (!(token->type!=identifier||token->type != number||token->type!=string||token->type!=numberFloat||token->type!=singleChars))
+    {
+        return NULL;
+    }
+    
+    while (token->type==identifier||token->type == number||token->type==string||token->type==operation||token->type==singleChars||token->type==numberFloat)
     {
         if (token->type==unknown)
         {
@@ -348,19 +353,20 @@ expression_list *bottomUp(Token *token)
             break;
         }
         
-        if (token->lexeme[0] == EOF)
-        {
-            int i = 0;
-            while (stack->head->next->next != NULL&& i<10)
+        if (token->lexeme[0] == EOF){break;}
+
+    }
+                if (stack->head->next!=NULL)
+            {
+                while (stack->head->next->next != NULL)
             {
                 reduce(stack);
-                i++;
             }
-            break;
-        }
-    }
-    destroyToken(token);
+            }
+            retVal = expression_list_pop(stack);
+    expression_list_dispose(stack);
+    // destroyToken(token);
     fclose(fp);
-    return stack;
+    return retVal;
 }
 
