@@ -21,6 +21,8 @@ typedef struct expression_element
 {
     expression_value *value;
     struct expression_element *next;
+    struct expression_element *prev;
+    
 }expression_element;
 
 typedef struct expression_list

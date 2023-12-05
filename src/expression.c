@@ -64,6 +64,7 @@ void expression_list_insert(expression_list *list, expression_value *value)
         {
             printf("Error: malloc failed\n");
         }
+        tmp->prev = NULL;
         tmp->value = value;
         tmp->next = NULL;
         list->head = tmp;
@@ -81,6 +82,7 @@ void expression_list_insert(expression_list *list, expression_value *value)
         {
             list->active = list->active->next;
         }
+        tmp->prev = list->active;
         tmp->value = value;
         tmp->next = NULL;
         list->active->next = tmp;
@@ -154,11 +156,11 @@ expression_value *expression_last(expression_list *list)
     expression_value *value = node->value;
     while (node->next != NULL)
     {
-        // if (node->next->value->index != Dollar)
-        // {
-        //     value = node->next->value;        
-        // }
-        value = node->next->value;
+        if (node->next->value->index != Dollar)
+        {
+            value = node->next->value;        
+        }
+        // value = node->next->value;
         node=node->next;
 
     }
@@ -247,7 +249,16 @@ void reduce(expression_list *stack){
         printf("Error: syntax error\n");
         return;
     }
-    node = lastShift->next;
+    if (lastShift->next->value->index == Dollar)
+    {
+        node=lastShift;
+    }
+    else
+    {
+        node = lastShift->next;
+    }
+    // node = lastShift->next;
+    
     if (node->value->index==Identifier)
     {
         node->value->index = Dollar;
@@ -255,6 +266,17 @@ void reduce(expression_list *stack){
         printf("E -> i\n");
         return;
     }
+    else if (node->value->index==PlusMinus||node->value->index==MultiplyDivide)
+    {
+        node->value->index = Dollar;
+        node->value->action = R;
+        node->value->right = expression_list_pop(stack);
+        node->value = expression_list_pop(stack);
+        node->value->left = expression_list_pop(stack);
+        expression_list_insert(stack, node->value);
+        printf("E -> E + E\n");
+    }
+    
     else
     {
         printf("Nejaky dalsi index: %d\n",node->value->index);
@@ -303,10 +325,35 @@ expression_list *bottomUp(Token *token)
             free(value);
             break;
         }
+        else if (action == Eq)
+        {
+            expression_element *tmp = stack->head;
+            while (tmp->next!=NULL)
+            {
+                tmp=tmp->next;
+            }
+            tmp->value = expression_list_pop(stack);
+            disposeValue(expression_list_pop(stack));
+            expression_list_insert(stack, tmp->value);
+            free(value);
+            token = new_token(fp, token);
+        }
+        else if (action == Fin)
+        {
+            printf("Konec\n");
+            break;
+        }
+        else
+        {
+            printf("Error: syntax error\n");
+            free(value);
+            break;
+        }
+        
         if (token->lexeme[0] == EOF)
         {
             int i = 0;
-            while (stack->head->next != NULL&& i<10)
+            while (stack->head->next->next != NULL&& i<10)
             {
                 reduce(stack);
                 i++;
