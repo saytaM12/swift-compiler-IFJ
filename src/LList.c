@@ -13,7 +13,7 @@ void LListDispose(LList* list) {
     while (node != NULL) {
         if (node->tree!=NULL)
         {
-            printf("Disposing %d\n",node->tree->type);
+            // printf("Disposing %s\n",node->tree->type);
             ASTreeDispose(node->tree);
 
         }
@@ -45,9 +45,14 @@ void LListInsert(LList* list, AST* tree) {
             {
                 printf("Error: malloc failed\n");
             }
+            while (list->active->next != NULL)
+            {
+                list->active = list->active->next;
+            }
+            
             tmp->tree = tree;
-            tmp->next = list->head;
-            list->head = tmp;
+            tmp->next = NULL;
+            list->active->next = tmp;
             return;
         }
 }

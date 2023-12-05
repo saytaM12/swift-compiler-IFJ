@@ -1,6 +1,6 @@
 #include "LList.h"
 
-AST *ASTreeCreate(int type)
+AST *ASTreeCreate(char *type)
 {
     AST *tree = (AST *)malloc(sizeof(AST));
     tree->type = type;
@@ -26,15 +26,15 @@ void ASTreeInsert(AST *tree, AST *child)
 
 void ASTreeDispose(AST *tree)
 {
-    // while (tree->children->head->next != NULL)
-    // {
-    //     LListDispose(tree->children->head->tree->children);
-    // }
     if (tree->children != NULL)
     {
-        printf("Disposing %d\n",tree->type);
+        // printf("Disposing %s\n",tree->type);
         LListDispose(tree->children);
     }
-    printf("%d\n",tree->type);
+    // printf("%s\n",tree->type);
+    if (tree->type != NULL)
+    {
+        free(tree->type);
+    }
     free(tree);
 }
