@@ -58,7 +58,7 @@ int parse_next_param(FILE *file, Token* token);
 *FILE* file = file to read from,
 *Token* token = structure of read token
 */
-int parse_function_type(FILE* file, Token* token);
+int parse_function_type(FILE* file, Token* token, char* name, stack_t *stack);
 
 /*
 *Body of the declared function
@@ -79,7 +79,7 @@ int parse_body(FILE* file, Token* token, stack_t *stack);
 *FILE* file = file to read from,
 *Token* token = structure of read token
 */
-int parse_assign(FILE* file, Token* token,stack_t *stack);
+int parse_assign(FILE* file, Token* token,char* name,stack_t *stack);
 
 
 /*
@@ -95,28 +95,28 @@ int parse_expression(FILE* file, Token* token, char* name, stack_t *stack);
 *FILE* file = file to read from,
 *Token* token = structure of read token
 */
-int parse_call_param(FILE * file, Token * token);
+int parse_call_param(FILE * file, Token * token, char *name);
 
 /*
 *Types of parameters of the calling function
 *FILE* file = file to read from,
 *Token* token = structure of read token
 */
-int parse_call_param_types(FILE* file, Token* token);
+int parse_call_param_types(FILE* file, Token* token, char *name);
 
 /*
 *Next parameter of the calling function
 *FILE* file = file to read from,
 *Token* token = structure of read token
 */
-int parse_next_call_param(FILE* file, Token* token);
+int parse_next_call_param(FILE* file, Token* token, char *name);
 
 /*
 *Condition in IF
 *FILE* file = file to read from,
 *Token* token = structure of read token
 */
-int parse_if_expression(FILE* file, Token* token);
+int parse_if_expression(FILE* file, Token* token, stack_t* stack);
 
 /*
 *Body in IF in MAIN
