@@ -196,6 +196,7 @@ void translateFunDef() {
     sprintf(line, "POPFRAME");
     generator_addLineEnd(&code, line);
     generator_ins_push_scope(ins, 2, ins->funDef.name);
+    free(line);
     free(var);
 }
 

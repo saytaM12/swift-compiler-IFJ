@@ -6,8 +6,10 @@ func hello(from x: Int, to y: Int) {
 }
 let b : Int = 6
 let a : Int = b
+/*
 if let a {
     hello(from: a, to: b)
 } else {
     write("Chyba pri nacitani celeho cisla!\n")
 }
+*/
