@@ -153,6 +153,12 @@ char *generator_ins_get_current_scope_name(instruction_t ins);
 void generator_ins_pop_scope(instruction_t *ins);
 
 
+void postOrderTraversal(expression_value *curr, int type, int fromEnd);
+
+int isNumber(const char *str);
+
+void codeTypeCheck(int fromEnd);
+
 
 /*
  * Frees every element and brings the structure to state after init
