@@ -521,15 +521,15 @@ int parse_expression(FILE* file, Token* token, char* name, stack_t *stack){
     }
     // -> [expression]
     printf("\nEXPRESSSIOOON\n");
-    expression_value *value=bottomUp(token,file);
+    expression_value *value=NULL;
+    bottomUp(token,file,&value);
     if (value==NULL)
     {
         return 2;
     }
-
     printValue(value,0);
     disposeValue(value);
-    destroyToken(token);
+    // destroyToken(token);
     return 0;
 }
 if(name != NULL){
@@ -541,7 +541,8 @@ if(name != NULL){
     printf("Found variable with the name: %s typ: %d\n", found->name,found->type);
 }
 printf("\nEXPRESSSIOOON\n");
-    expression_value *value=bottomUp(token,file);
+    expression_value *value=NULL;
+    bottomUp(token,file,&value);
     if (value==NULL)
     {
         return 2;
