@@ -1,9 +1,12 @@
 #include "parser.h"
+#include "generator.h"
+#include "lexical.h"
 #include "symstack.h"
 #include "symtable.h"
 #include "expression.h"
-#include "lexical.h"
-#include "generator.h"
+
+code_t code;
+instruction_t *ins;
 
 Typee *param_types = NULL;
 int size = 0;
@@ -49,6 +52,8 @@ int addSymbol(Token* token, char* name, stack_t *stack){
             case number:
                 symbol = symbol_variable_ctor(name, int_t);
                 add_symbol(stack, symbol);
+                break;
+            case numberFloat:
                 break;
             case operation:
                 return 9;
@@ -292,8 +297,9 @@ int parse_function_type(FILE *file, Token* token, char* name, stack_t* stack){
                     return 0;
                 }
             }
+        }
     }
-    ERROR();
+    destroyToken(token);
     return 2;
 }
 
@@ -665,4 +671,4 @@ int parse_else_function_body(FILE* file, Token* token, stack_t *stack){
     }
     ERROR();
     return 2;
-    }
+}

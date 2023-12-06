@@ -228,6 +228,12 @@ void translateFunCal() {
 }
 
 void translateVarDEF() {
+    const char *typeLookup[] = {
+        "int",
+        "float",
+        "string",
+    };
+
     int max_len;
     char *line;
 
@@ -265,6 +271,7 @@ void translateAssign() {
     generator_addLineFromEnd(&code, line, ins->totalOffset);
 }
 
+
 void generator_translate() {
     switch (ins->instructionType) {
         case funDef:
@@ -286,4 +293,119 @@ void generator_translate() {
         default:
             break;
     }
+}
+
+void translateExpression(expression_value *expr_val, int lineFromEnd) {
+    if (expr_val->type == num || expr_val->type == doub) {
+        postOrderTraversal(expr_val, expr_val->type, lineFromEnd);
+    }
+    else if (expr_val->type == str)
+    {
+
+    }
+}
+
+void postOrderTraversal(expression_value *curr, int type, int fromEnd) {
+    if (curr->left) {
+        postOrderTraversal(curr->left, type, fromEnd);
+    }
+    if (curr->right) {
+        postOrderTraversal(curr->right, type, fromEnd);
+    }
+    
+    if (isNumber(curr->value)) {
+        char *line = malloc(1 + strlen("PUSHS int@") + strlen(curr->value));
+        sprintf(line, "PUSHS int@%s", curr->value);
+        generator_addLineFromEnd(&code, line, fromEnd);
+
+        return;
+    } 
+    // checks that both types are the same, otherwise converts int to float
+    codeTypeCheck(fromEnd);
+
+    if (strcmp(curr->value, "+") == 0) {
+        generator_addLineFromEnd(&code, "ADDS", fromEnd);
+    } else if (strcmp(curr->value, "-") == 0) {
+        generator_addLineFromEnd(&code, "SUBS", fromEnd);
+    } else if (strcmp(curr->value, "*") == 0) {
+        generator_addLineFromEnd(&code, "MULS", fromEnd);
+    } else if (strcmp(curr->value, "/") == 0) {
+        if (type == doub) {
+            generator_addLineFromEnd(&code, "DIVS", fromEnd);
+        }
+        else if (type == num) {
+            generator_addLineFromEnd(&code, "IDIVS", fromEnd);
+        }
+    } else if (strcmp(curr->value, ">") == 0) {
+        generator_addLineFromEnd(&code, "GTS", fromEnd);
+    } else if (strcmp(curr->value, "<") == 0) {
+        generator_addLineFromEnd(&code, "LTS", fromEnd);
+    } else if (strcmp(curr->value, ">=") == 0) {
+        generator_addLineFromEnd(&code, "PUSHFRAME", fromEnd);
+        generator_addLineFromEnd(&code, "CREATEFRAME", fromEnd);
+        generator_addLineFromEnd(&code, "DEFVAR TF@%tmp1", fromEnd);
+        generator_addLineFromEnd(&code, "DEFVAR TF@%tmp2", fromEnd);
+        generator_addLineFromEnd(&code, "POPS TF@%tmp2", fromEnd);
+        generator_addLineFromEnd(&code, "POPS TF@%tmp1", fromEnd);
+        generator_addLineFromEnd(&code, "DEFVAR TF@%res_gt", fromEnd);
+        generator_addLineFromEnd(&code, "DEFVAR TF@%res_eq", fromEnd);
+        generator_addLineFromEnd(&code, "DEFVAR TF@%res", fromEnd);
+        generator_addLineFromEnd(&code, "GT TF@%res_gt LF@%tmp1 LF@%tmp2", fromEnd);
+        generator_addLineFromEnd(&code, "EQ TF@%res_eq LF@%tmp1 LF@%tmp2", fromEnd);
+        generator_addLineFromEnd(&code, "OR TF@%res TF@%res_gt TF@%res_eq", fromEnd);
+        generator_addLineFromEnd(&code, "PUSHS TF@%res", fromEnd);
+        generator_addLineFromEnd(&code, "POPFRAME", fromEnd);
+    } else if (strcmp(curr->value, "<=") == 0) {
+        generator_addLineFromEnd(&code, "PUSHFRAME", fromEnd);
+        generator_addLineFromEnd(&code, "CREATEFRAME", fromEnd);
+        generator_addLineFromEnd(&code, "DEFVAR TF@%tmp1", fromEnd);
+        generator_addLineFromEnd(&code, "DEFVAR TF@%tmp2", fromEnd);
+        generator_addLineFromEnd(&code, "POPS TF@%tmp2", fromEnd);
+        generator_addLineFromEnd(&code, "POPS TF@%tmp1", fromEnd);
+        generator_addLineFromEnd(&code, "DEFVAR TF@%res_lt", fromEnd);
+        generator_addLineFromEnd(&code, "DEFVAR TF@%res_eq", fromEnd);
+        generator_addLineFromEnd(&code, "DEFVAR TF@%res", fromEnd);
+        generator_addLineFromEnd(&code, "LT TF@%res_lt LF@%tmp1 LF@%tmp2", fromEnd);
+        generator_addLineFromEnd(&code, "EQ TF@%res_eq LF@%tmp1 LF@%tmp2", fromEnd);
+        generator_addLineFromEnd(&code, "OR TF@%res TF@%res_lt TF@%res_eq", fromEnd);
+        generator_addLineFromEnd(&code, "PUSHS TF@%res", fromEnd);
+        generator_addLineFromEnd(&code, "POPFRAME", fromEnd);
+    } else if (strcmp(curr->value, "!=") == 0) {
+        generator_addLineFromEnd(&code, "EQS", fromEnd);
+        generator_addLineFromEnd(&code, "NOTS", fromEnd);
+    } else if (strcmp(curr->value, "==") == 0) {
+        generator_addLineFromEnd(&code, "EQS", fromEnd);
+    } else if (strcmp(curr->value, "!") == 0) {
+        generator_addLineFromEnd(&code, "NOTS", fromEnd);
+    }
+}
+
+int isNumber(const char *str) {
+    char *endptr;
+    strtol(str, &endptr, 10);
+
+    return (*str != '\0' && *endptr == '\0');
+}
+
+void codeTypeCheck(int fromEnd) {
+    generator_addLineFromEnd(&code, "PUSHFRAME", fromEnd);
+    generator_addLineFromEnd(&code, "CREATEFRAME", fromEnd);
+    generator_addLineFromEnd(&code, "DEFVAR TF@val1", fromEnd);
+    generator_addLineFromEnd(&code, "DEFVAR TF@val2", fromEnd);
+    generator_addLineFromEnd(&code, "POPS TF@val1", fromEnd);
+    generator_addLineFromEnd(&code, "POPS TF@val2", fromEnd);
+    generator_addLineFromEnd(&code, "DEFVAR TF@type1", fromEnd);
+    generator_addLineFromEnd(&code, "DEFVAR TF@type2", fromEnd);
+    generator_addLineFromEnd(&code, "TYPE TF@type1 TF@val1", fromEnd);
+    generator_addLineFromEnd(&code, "TYPE TF@type2 TF@val2", fromEnd);
+    generator_addLineFromEnd(&code, "JUMPIFEQ $types_eq TF@type1 TF@type2", fromEnd);
+    generator_addLineFromEnd(&code, "JUMPIFNEQ $val1_is_int TF@type1 string@int", fromEnd);
+    generator_addLineFromEnd(&code, "INT2FLOAT TF@val1 TF@val1", fromEnd);
+    generator_addLineFromEnd(&code, "JUMP $types_eq", fromEnd);
+    generator_addLineFromEnd(&code, "LABEL $val1_is_int", fromEnd);
+    generator_addLineFromEnd(&code, "INT2FLOAT TF@val2 TF@val2", fromEnd);
+    generator_addLineFromEnd(&code, "LABEL $types_eq", fromEnd);
+    generator_addLineFromEnd(&code, "PUSHS TF@val2", fromEnd);
+    generator_addLineFromEnd(&code, "PUSHS TF@val1", fromEnd);
+    generator_addLineFromEnd(&code, "POPFRAME", fromEnd);
 }

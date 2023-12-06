@@ -1,7 +1,7 @@
 #include "lexical.h"
 #include "parser.h"
-#include "expression.h"
 #include "generator.h"
+#include "expression.h"
 
 void lexCheck() {
     Token* token;

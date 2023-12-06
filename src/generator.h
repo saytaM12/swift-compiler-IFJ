@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include <math.h>
 #include <string.h>
+#include "expression.h"
 
 /*
  * Single node of double linked list of lines of code IFJcode23
@@ -98,6 +99,7 @@ struct whileLoop_t
 struct ifExpr_t
 {
 };
+
 
 typedef struct {
     scope_t *currScope;
