@@ -898,6 +898,7 @@ int parse_if_while_main_body(FILE *file, Token *token, stack_t *stack)
     {
         printf("while\n");
         printf("expression\n");
+        token = new_token(file,token);
         expression_value *value = NULL;
         int error = bottomUp(token,file,&value,stack);
         if(error){
@@ -909,6 +910,7 @@ int parse_if_while_main_body(FILE *file, Token *token, stack_t *stack)
         }
         printValue(value, 0);
         disposeValue(value);
+        token = getToken(file);
         return 0;
     }
     // eps
