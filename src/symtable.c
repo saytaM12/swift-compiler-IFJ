@@ -1,4 +1,5 @@
 #include "symtable.h"
+#include "generator.h"
 
 symbol_t *symbol_ctor(char *name, Typee type, bool is_variable, Typee return_type, Typee *param_types, int size)
 {
@@ -105,6 +106,7 @@ void print_symtable(symtable_t *symtable)
 void symbol_dtor(symbol_t *symbol)
 {
     free(symbol);
+    free(symbol->name);
 }
 
 /*int main()
