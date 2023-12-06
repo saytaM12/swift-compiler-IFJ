@@ -120,6 +120,7 @@ int parse_call_param(FILE * file, Token * token, char *name,stack_t* stack);
 */
 int parse_call_param_types(FILE* file, Token* token, char *name,stack_t* stack);
 
+void addFunctions(stack_t *stack);
 /*
 *Next parameter of the calling function
 *FILE* file = file to read from,
