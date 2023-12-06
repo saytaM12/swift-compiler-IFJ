@@ -95,21 +95,21 @@ int parse_expression(FILE* file, Token* token, char* name, stack_t *stack);
 *FILE* file = file to read from,
 *Token* token = structure of read token
 */
-int parse_call_param(FILE * file, Token * token, char *name);
+int parse_call_param(FILE * file, Token * token, char *name,stack_t* stack);
 
 /*
 *Types of parameters of the calling function
 *FILE* file = file to read from,
 *Token* token = structure of read token
 */
-int parse_call_param_types(FILE* file, Token* token, char *name);
+int parse_call_param_types(FILE* file, Token* token, char *name,stack_t* stack);
 
 /*
 *Next parameter of the calling function
 *FILE* file = file to read from,
 *Token* token = structure of read token
 */
-int parse_next_call_param(FILE* file, Token* token, char *name);
+int parse_next_call_param(FILE* file, Token* token, char *name,stack_t* stack);
 
 /*
 *Condition in IF

@@ -40,16 +40,20 @@ Token* handleIdentifier(FILE* file, char ch, FilePos* pos) {
 Token* handleNumber(FILE* file, char ch, FilePos* pos) {
     Token* token = initToken();
     addToLexeme(token, ch);
+    Type type = number;
 
     pos->col++;
 
-    while (isdigit(ch = fgetc(file))) {
+    while (isdigit(ch = fgetc(file)) || ch == '.') {
+        if (ch == '.') {
+            type = numberFloat;
+        }
         addToLexeme(token, ch);
         pos->col++;
     }
 
     ungetc(ch, file);
-    finishToken(token, number);
+    finishToken(token, type);
     return token;
 }
 
