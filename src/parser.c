@@ -36,52 +36,59 @@ int addSymbol(Token *token, char *name, stack_t *stack)
     symbol_t *symbol;
     symbol_t *found = get_symbol_top(stack, name);
     // Redefinice promenne
-    if (found != NULL)
-    {
-        return 3;
-    }
-    switch (token->type)
-    {
-    case identifier:
-        printf("(identifier)   ");
-    case keyword:
-        return 9;
-    case variableType:
-        if (!strcmp(token->lexeme, "Int"))
-        {
-            symbol = symbol_variable_ctor(name, int_t);
-            add_symbol(stack, symbol);
+        if(found!=NULL){
+            return 3;
         }
-        if (!strcmp(token->lexeme, "String"))
-        {
-            symbol = symbol_variable_ctor(name, string_t);
-            add_symbol(stack, symbol);
+    switch (token->type) {
+            case identifier:
+                 symbol_t *found = get_symbol(stack, token->lexeme);
+                if(found == NULL){
+                    return 3;
+                }
+                if(found->is_variable){
+                    symbol = symbol_variable_ctor(name, found->type);
+                    add_symbol(stack, symbol);
+                }else{  
+                    symbol = symbol_variable_ctor(name, found->return_type);
+                    add_symbol(stack, symbol);
+                }
+                printf("(identifier)   ");
+                break;
+            case keyword:
+                return 9;
+            case variableType:
+                if (!strcmp(token->lexeme,"Int"))
+                {
+                    symbol = symbol_variable_ctor(name, int_t);
+                    add_symbol(stack, symbol);
+                }if(!strcmp(token->lexeme,"String")){
+                    symbol = symbol_variable_ctor(name, string_t);
+                    add_symbol(stack, symbol);
+                }
+                if(!strcmp(token->lexeme,"Double")){
+                    symbol = symbol_variable_ctor(name, double_tt);
+                    add_symbol(stack, symbol);
+                }
+                break;
+            case number:
+                symbol = symbol_variable_ctor(name, int_t);
+                add_symbol(stack, symbol);
+                break;
+            case numberFloat:
+                symbol = symbol_variable_ctor(name, double_tt);
+                add_symbol(stack, symbol);
+            case operation:
+                return 9;
+            case singleChars:
+                return 9;
+                break;
+            case string:
+                symbol = symbol_variable_ctor(name, string_t);
+                add_symbol(stack, symbol);
+                break;
+            case unknown:
+                return 9;
         }
-        if (!strcmp(token->lexeme, "Double"))
-        {
-            symbol = symbol_variable_ctor(name, double_tt);
-            add_symbol(stack, symbol);
-        }
-        break;
-    case number:
-        symbol = symbol_variable_ctor(name, int_t);
-        add_symbol(stack, symbol);
-        break;
-    case numberFloat:
-        symbol = symbol_variable_ctor(name, double_tt);
-        add_symbol(stack, symbol);
-    case operation:
-        return 9;
-    case singleChars:
-        return 9;
-        break;
-    case string:
-        symbol = symbol_variable_ctor(name, string_t);
-        add_symbol(stack, symbol);
-        break;
-    case unknown:
-        return 9;
-    }
     return 0;
 }
 // Vestavene funkce
@@ -144,19 +151,14 @@ int parse_main_body(FILE *file, Token *token, stack_t *stack)
             symbol_t *found = get_symbol(stack, call_function[i].name);
             if (found == NULL)
             {
-                printf("Nedefinovana funkce %s\n", call_function[i].name);
                 ERROR();
                 return 3;
             }
 
             // Parametry
-            // FIX THIS --- spatna velikost pole ,sizeof(call_function[i].param_types)/sizeof(Typee)
-            printf("pole %d hash %d\n",call_function[i].size,found->size);
-            printf("jmeno funkce: %s\n",found->name);
             // Kvuli funkci write, ktera muze mit parametru kolik chce
             if(found->size != -1){
                 if(call_function[i].size != found->size){
-                    printf("spatny pocet argumentu");
                     ERROR();
                     return 4;
                 }
@@ -165,8 +167,6 @@ int parse_main_body(FILE *file, Token *token, stack_t *stack)
                 // Kvuli funkci write, ktera muze mit parametru kolik chce
                 if(found->size != -1){
                     if(found->param_types[j] != call_function[i].param_types[j]){
-                        printf("spatny typ\n");
-                        printf("typ %d typ %d",found->param_types[j], call_function[i].param_types[j]);
                         ERROR();
                         return 4;
                     }
@@ -179,8 +179,6 @@ int parse_main_body(FILE *file, Token *token, stack_t *stack)
                 {
                     if (found->param_types[j] != call_function[i].param_types[j])
                     {
-                        printf("spatny typ");
-                        printf("typ %d typ %d", found->param_types[j], call_function[i].param_types[j]);
                         ERROR();
                         return 4;
                     }
@@ -195,7 +193,6 @@ int parse_main_body(FILE *file, Token *token, stack_t *stack)
     // -> func <FUNCTION_DECLARE>
     if (!strcmp(token->lexeme, "func"))
     {
-        printf("\nfunc\n");
 
         ins->instructionType = funDef;
         ins->cleared = false;
@@ -207,15 +204,12 @@ int parse_main_body(FILE *file, Token *token, stack_t *stack)
     // -> if <IF_WHILE_EXPRESSION> <IF_WHILE_MAIN_BODY> <ELSE_MAIN_BODY> <MAIN_BODY>
     if (!strcmp(token->lexeme, "if"))
     {
-        printf("if\n");
         return parse_if_expression(file, token, stack) || parse_if_while_main_body(file, token, stack) || parse_else_main_body(file, token, stack) || parse_main_body(file, token, stack);
     }
     // -> while [expression] <IF_WHILE_MAIN_BODY> <MAIN_BODY>
     // TODO
     if (!strcmp(token->lexeme, "while"))
     {
-        printf("while\n");
-        printf("expression\n");
         expression_value *value = NULL;
         int error = bottomUp(token,file,&value,stack);
         if(error){
@@ -245,7 +239,6 @@ int parse_func_declare(FILE *file, Token *token, stack_t *stack)
         ERROR();
         return 2;
     }
-    printf("%s\n", token->lexeme);
     char name[100];
     strcpy(name, token->lexeme);
     ins->funDef.name = calloc(sizeof(token->lexeme), 1);
@@ -282,7 +275,6 @@ int parse_param(FILE *file, Token *token, stack_t *stack)
     if (strcmp(token->lexeme, "("))
     {
         ERROR();
-        printf("NOT \"(\" in func [id](<PARAM>) <FUNCTION_TYPE> {<FUNC_BODY>} <MAIN_BODY>");
         return 2;
     }
     printf("(\n");
@@ -291,7 +283,6 @@ int parse_param(FILE *file, Token *token, stack_t *stack)
     if (!strcmp(token->lexeme, ")"))
     {
         destroyToken(token);
-        printf(")\n");
         return 0;
     }
     return parse_param_types(file, token, stack) || parse_next_param(file, token, stack);
@@ -304,11 +295,9 @@ int parse_param_types(FILE *file, Token *token, stack_t *stack)
     // [name]
     if (token->type != identifier)
     {
-        printf("NOT \"ID\" in <PARAM_TYPES> -> [name] [id] : [type]");
         ERROR();
         return 2;
     }
-    printf("NAME\n");
 
     struct funDefParam *newParam = calloc(sizeof(struct funDefParam), 1);
     newParam->name = calloc(sizeof(token->lexeme), 1);
@@ -318,14 +307,12 @@ int parse_param_types(FILE *file, Token *token, stack_t *stack)
     // [id]
     if (token->type != identifier)
     {
-        printf("NOT \"ID\" in <PARAM_TYPES> -> [name] [id] : [type]");
         free(newParam);
         ERROR();
         return 2;
     }
     char name[100];
     strcpy(name, token->lexeme);
-    printf("ID\n");
 
     newParam->id = calloc(sizeof(token->lexeme), 1);
     strcpy(newParam->id, token->lexeme);
@@ -334,12 +321,10 @@ int parse_param_types(FILE *file, Token *token, stack_t *stack)
     // :
     if (strcmp(token->lexeme, ":"))
     {
-        printf("NOT \":\" in <PARAM_TYPES> -> [name] [id] : [type]");
         free(newParam);
         ERROR();
         return 2;
     }
-    printf(":\n");
     token = new_token(file, token);
     // [type]
     if (token->type != variableType)
@@ -347,7 +332,6 @@ int parse_param_types(FILE *file, Token *token, stack_t *stack)
         ERROR();
         return 2;
     }
-    printf("TYPE\n");
     newParam->type = ENUMTYPE(token);
     ins->funDef.parameters = realloc(ins->funDef.parameters, sizeof(struct funDefParam *) * (ins->funDef.paramNum + 1));
     ins->funDef.parameters[ins->funDef.paramNum++] = newParam;
@@ -377,7 +361,6 @@ int parse_next_param(FILE *file, Token *token, stack_t *stack)
     // -> eps
     if (!strcmp(token->lexeme, ")"))
     {
-        printf(")\n");
         destroyToken(token);
         return 0;
     }
@@ -406,7 +389,6 @@ int parse_function_type(FILE *file, Token *token, char *name, stack_t *stack)
                     symbol_t *symbol = symbol_function_ctor(name, void_t, param_types,size);
                     add_symbol(stack, symbol);
                     size=0;
-        printf("{\n");
         destroyToken(token);
         generator_translate();
         return 0;
@@ -414,13 +396,10 @@ int parse_function_type(FILE *file, Token *token, char *name, stack_t *stack)
     }
     else if (!strcmp(token->lexeme, "->"))
     {
-        printf("->\n");
         token = new_token(file, token);
-        printf("%s\n", token->lexeme);
         // [type]
         if (token->type == variableType)
         {
-            printf("TYPE\n");
             ins->funDef.type = ENUMTYPE(token);
             int typ;
             if (!strcmp(token->lexeme, "Int"))
@@ -447,7 +426,6 @@ int parse_function_type(FILE *file, Token *token, char *name, stack_t *stack)
             // {
             if (!strcmp(token->lexeme, "{"))
             {
-                printf("{\n");
                 destroyToken(token);
                 generator_translate();
                 return 0;
@@ -468,13 +446,11 @@ int parse_function_body(FILE *file, Token *token, stack_t *stack)
     {
         pop_scope(stack);
         destroyToken(token);
-        printf("}\n");
         return 0;
     }
     // -> return
     if (!strcmp(token->lexeme, "return"))
     {
-        printf("return\n");
         token = new_token(file,token);
 
         generator_translate();
@@ -486,15 +462,12 @@ int parse_function_body(FILE *file, Token *token, stack_t *stack)
     // if <IF_WHILE_EXPRESSION> <FUNC_BODY> <ELSE_FUNCTION_BODY> <FUNC_BODY>
     if (!strcmp(token->lexeme, "if"))
     {
-        printf("if\n");
         return parse_if_expression(file, token, stack) || parse_function_body(file, token, stack) || parse_else_function_body(file, token, stack) || parse_function_body(file, token, stack);
     }
     // while <IF_WHILE_EXPRESSION> <IF_WHILE_MAIN_BODY>
     // TODO
     if (!strcmp(token->lexeme, "while"))
     {
-        printf("while\n");
-        printf("expression\n");
         expression_value *value = NULL;
         int error = bottomUp(token,file,&value,stack);
         if(error){
@@ -527,14 +500,12 @@ int parse_body(FILE *file, Token *token, stack_t *stack)
     // <DEF_VARIABLE> -> var [id]
     if (!strcmp(token->lexeme, "let") || !strcmp(token->lexeme, "var"))
     {
-        printf("%s\n", token->lexeme);
         token = new_token(file, token);
         if (token->type != identifier)
         {
             ERROR();
             return 2;
         }
-        printf("%s\n", token->lexeme);
         char name[100];
         strcpy(name, token->lexeme);
         return parse_assign(file, token, name, stack);
@@ -542,7 +513,6 @@ int parse_body(FILE *file, Token *token, stack_t *stack)
     if (token->type == identifier)
     {
         // -> [id](<CALL_PARAM>);
-        printf("ID\n");
         char name[100];
         strcpy(name, token->lexeme);
 
@@ -560,7 +530,6 @@ int parse_body(FILE *file, Token *token, stack_t *stack)
             ins->funCal.parameters = calloc(sizeof(char*), ins->funCal.paramNum + 1);
 
             destroyToken(token);
-            printf("(\n");
             return parse_call_param(file, token, name, stack);
         }
 
@@ -572,13 +541,11 @@ int parse_body(FILE *file, Token *token, stack_t *stack)
             {
                 printf("not defined");
                 ERROR();
-                return 3;
+                return 5;
             }
-            printf("=\n");
             free(potentialFun);
-            token = new_token(file, token);
-            char name[100];
-            return parse_expression(file, token, name, stack);
+            token = new_token(file,token);
+            return parse_expression(file,token, NULL, stack);
         }
     }
     ERROR();
@@ -595,18 +562,12 @@ int parse_assign(FILE* file, Token* token, char*name,stack_t *stack){
 
     token = getToken(file);
     if(!strcmp(token->lexeme,"=")){
-        // -> = [id](<CALL_PARAM>)
-        printf("= \n");
-        //printf("%s\n",test->lexeme);
-        //addSymbol(test,name)
         token = new_token(file,token);
-        addSymbol(token,namee,stack);
         return parse_expression(file,token,name, stack);
     }
     // -> : [type] <VALUE>
     if (!strcmp(token->lexeme, ":"))
     {
-        printf(":\n");
         token = new_token(file, token);
         if (token->type != variableType)
         {
@@ -615,7 +576,6 @@ int parse_assign(FILE* file, Token* token, char*name,stack_t *stack){
         }
         if (addSymbol(token, name, stack))
             return addSymbol(token, name, stack);
-        printf("TYPE\n");
         token = new_token(file, token);
         if (!strcmp(token->lexeme, "?"))
         {
@@ -623,7 +583,6 @@ int parse_assign(FILE* file, Token* token, char*name,stack_t *stack){
         }
         if (!strcmp(token->lexeme, "="))
         {
-            printf("=\n");
             token = new_token(file, token);
             return parse_expression(file, token, "", stack);
         }
@@ -642,17 +601,20 @@ int parse_expression(FILE *file, Token *token, char *name, stack_t *stack)
     {
         // symbol_t *found = get_symbol(stack, name);
         //  -> [id](<CALL_PARAM>);
-        printf("IDee\n");
         char namee[100];
+        Token*test = initToken();
+        test = token;
         strcpy(namee,token->lexeme);
-        token = new_token(file,token);
+        token = getToken(file);
         if(!strcmp(token->lexeme,"(")){
-            printf("(\n");
-            printf("%s",namee);
+            symbol_t *found = get_symbol(stack, namee);
+            if(found != NULL){
+                symbol_t * symbol = symbol_variable_ctor(name, found->return_type);
+                add_symbol(stack, symbol);
+            }
             return parse_call_param(file,token,namee, stack);
             returnToken(token, file);
             // -> [expression]
-            printf("\nEXPRESSSIOOON\n");
             expression_value *value = NULL;
             int error = bottomUp(token,file,&value,stack);
             if(error){
@@ -711,12 +673,6 @@ printf("\nEXPRESSSIOOON\n");
         generator_translate();
         printValue(value, 0);
         disposeValue(value);
-    // for (int i = 0; i < token->lexlen-1; i++)
-    // {
-    //     printf("%c\n",token->lexeme[i]);
-    // }
-    // printf("%s\n",token->lexeme);
-    // destroyToken(token);
     return 0;
 }
 
@@ -736,7 +692,6 @@ int parse_call_param(FILE *file, Token *token, char *name, stack_t *stack)
         call_function[size_call_function - 1].size = 0;
         size = 0;
         destroyToken(token);
-        printf(")\n");
         return 0;
     }
     // -> <CALL_PARAM_TYPES>
@@ -758,7 +713,6 @@ int parse_call_param_types(FILE *file, Token *token, char *name, stack_t *stack)
         // -> name: expression <NEXT_CALL_PARAM>
         char namee[100];
         strcpy(namee,token->lexeme);
-        printf("%s\n", token->lexeme);
 
         if (!ins->cleared) {
         ins->funCal.parameters = realloc(ins->funCal.parameters, sizeof(char*) * (ins->funCal.paramNum + 1));
@@ -770,7 +724,6 @@ int parse_call_param_types(FILE *file, Token *token, char *name, stack_t *stack)
         token = new_token(file, token);
         if (!strcmp(token->lexeme, ":"))
         {
-            printf(":\n");
             token = new_token(file, token);
             if (token->type == number || token->type == string || token->type == identifier || token->type == numberFloat)
             {
@@ -792,12 +745,10 @@ int parse_call_param_types(FILE *file, Token *token, char *name, stack_t *stack)
                     if (found == NULL)
                     {
                         ERROR();
-                        return 3;
+                        return 5;
                     }
-                    printf("TYYYYYYYYP %d \n \n",found->type);
                     call_function[size_call_function-1].param_types[size-1] = found->type;
                 }
-                printf("%s\n", token->lexeme);
 
                 ins->funCal.parameters[ins->funCal.paramNum - 1] =
                     realloc(ins->funCal.parameters[ins->funCal.paramNum - 1], strlen(token->lexeme) + 1);
@@ -810,7 +761,6 @@ int parse_call_param_types(FILE *file, Token *token, char *name, stack_t *stack)
             ERROR();
             return 2;
         }
-        printf("size_fnc:%d size:%d\n", size_call_function, size);
         if (typ == number)
             call_function[size_call_function - 1].param_types[size - 1] = int_t;
         if (typ == string)
@@ -823,7 +773,7 @@ int parse_call_param_types(FILE *file, Token *token, char *name, stack_t *stack)
             if (found == NULL)
             {
                 ERROR();
-                return 3;
+                return 5;
             }
             call_function[size_call_function - 1].param_types[size - 1] = found->type;
         }
@@ -841,7 +791,6 @@ int parse_next_call_param(FILE *file, Token *token, char *name, stack_t *stack)
     //-> eps
     if (!strcmp(token->lexeme, ")"))
     {
-        printf(")\n");
         call_function[size_call_function - 1].size = size;
         size = 0;
         destroyToken(token);
@@ -866,16 +815,13 @@ int parse_if_expression(FILE *file, Token *token, stack_t *stack)
     // -> let [id] {
     if (!strcmp(token->lexeme, "let"))
     {
-        printf("let\n");
         token = new_token(file, token);
         if (token->type == identifier)
         {
-            printf("ID\n");
             token = new_token(file, token);
             //{
             if (!strcmp(token->lexeme, "{"))
             {
-                printf("{\n");
                 destroyToken(token);
                 //<FUNC_BODY>
                 push_new_scope(stack);
@@ -886,7 +832,6 @@ int parse_if_expression(FILE *file, Token *token, stack_t *stack)
         return 2;
     }
     // -> [expression]
-    printf("EXPRESIOOON\n");
         expression_value *value = NULL;
         int error = bottomUp(token,file,&value,stack);
         if(error){
@@ -910,14 +855,11 @@ int parse_if_while_main_body(FILE *file, Token *token, stack_t *stack)
     // -> if <IF_EXPRESSION> <IF_WHILE_MAIN_BODY> <ELSE_MAIN_BODY> <IF_WHILE_MAIN_BODY>
     if (!strcmp(token->lexeme, "if"))
     {
-        printf("if\n");
         return parse_if_expression(file, token, stack) || parse_if_while_main_body(file, token, stack) || parse_else_main_body(file, token, stack) || parse_if_while_main_body(file, token, stack);
     }
     // -> while [expression] <IF_WHILE_MAIN_BODY>
     if (!strcmp(token->lexeme, "while"))
     {
-        printf("while\n");
-        printf("expression\n");
         token = new_token(file,token);
         expression_value *value = NULL;
         int error = bottomUp(token,file,&value,stack);
@@ -938,7 +880,6 @@ int parse_if_while_main_body(FILE *file, Token *token, stack_t *stack)
     if (!strcmp(token->lexeme, "}"))
     {
         pop_scope(stack);
-        printf("}\n");
         destroyToken(token);
         return 0;
     }
@@ -954,13 +895,11 @@ int parse_else_main_body(FILE *file, Token *token, stack_t *stack)
     // else
     if (!strcmp(token->lexeme, "else"))
     {
-        printf("else\n");
         token = new_token(file, token);
         // {
         if (!strcmp(token->lexeme, "{"))
         {
             push_new_scope(stack);
-            printf("{\n");
             destroyToken(token);
             // <IF_WHILE_MAIN_BODY>
             return parse_if_while_main_body(file, token, stack);
@@ -980,13 +919,11 @@ int parse_else_function_body(FILE *file, Token *token, stack_t *stack)
     // else
     if (!strcmp(token->lexeme, "else"))
     {
-        printf("else\n");
         token = new_token(file, token);
         //{
         if (!strcmp(token->lexeme, "{"))
         {
             push_new_scope(stack);
-            printf("{\n");
             destroyToken(token);
             //<FUNC_BODY>
             return parse_function_body(file, token, stack);
