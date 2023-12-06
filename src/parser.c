@@ -462,8 +462,14 @@ int parse_function_body(FILE *file, Token *token, stack_t *stack)
     if (!strcmp(token->lexeme, "return"))
     {
         printf("return\n");
-        token = new_token(file, token);
-        return parse_expression(file, token, NULL, stack) || parse_function_body(file, token, stack);
+        token = new_token(file,token);
+
+        generator_translate();
+        generator_ins_destroy(ins);
+        ins = generator_ins_init();
+        ins->instructionType = ret;
+
+        return parse_expression(file,token, NULL,stack) || parse_function_body(file,token,stack);
     }
     // if <IF_WHILE_EXPRESSION> <FUNC_BODY> <ELSE_FUNCTION_BODY> <FUNC_BODY>
     if (!strcmp(token->lexeme, "if"))
