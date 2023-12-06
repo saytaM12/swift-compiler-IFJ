@@ -150,13 +150,21 @@ int parse_main_body(FILE *file, Token *token, stack_t *stack)
 
             // Parametry
             // FIX THIS --- spatna velikost pole ,sizeof(call_function[i].param_types)/sizeof(Typee)
-            printf("pole %d hash %d\n", call_function[i].size, found->size);
+            printf("pole %d hash %d\n",call_function[i].size,found->size);
+            printf("jmeno funkce: %s\n",found->name);
             // Kvuli funkci write, ktera muze mit parametru kolik chce
-            if (found->size != -1)
-            {
-                if (call_function[i].size != found->size)
-                {
-                    printf("spatny pocet argumentu");
+            if(found->size != -1){
+            if(call_function[i].size != found->size){
+                printf("spatny pocet argumentu");
+                return 4;
+            }
+            }
+            for(int j = 0;j < call_function[i].size;j++){
+                // Kvuli funkci write, ktera muze mit parametru kolik chce
+                if(found->size != -1){
+                if(found->param_types[j] != call_function[i].param_types[j]){
+                    printf("spatny typ\n");
+                    printf("typ %d typ %d",found->param_types[j], call_function[i].param_types[j]);
                     return 4;
                 }
             }
