@@ -26,6 +26,7 @@ void finishToken(Token* token, Type type) {
 
 void destroyToken(Token* token) {
     free(token->lexeme);
+    token->lexeme = NULL;
     free(token);
     token = NULL;
 }

@@ -40,45 +40,13 @@ typedef enum
     String = 3,
 } varialbeType_e;
 
-<<<<<<< HEAD
+extern const char *typeLookup[];
+
 typedef struct Scope{
     struct Scope *next;
     char *name;
     int offset;
 } scope_t;
-
-// function definition ///////////////////
-                                        //
-struct funDefParam {                    //
-    char *name;                         //
-    char *id;                           //
-    varialbeType_e type;                //
-};                                      //
-                                        //
-struct funDef_t {                       //
-    varialbeType_e type;                //
-    char *name;                         //
-    int paramNum;                       //
-    struct funDefParam **parameters;    //
-};                                      //
-                                        //
-//////////////////////////////////////////
-
-// function Call /////////////////////////
-                                        //
-struct funCallParam {                   //
-    varialbeType_e type;                //
-    char *value;                        //
-};                                      //
-                                        //
-struct funCal_t {                       //
-    char *name;                         //
-    struct funCallParam **parameters;   //
-};                                      //
-                                        //
-//////////////////////////////////////////
-=======
-char *varTypeToString(varialbeType_e type);
 
 // function definition ///////////////////
 struct funcDefParam
@@ -106,7 +74,6 @@ struct funCal_t
     char *name;
     struct funcCallParam *parameters;
 };
->>>>>>> 6f8ef42 (varDef and assign finished)
 
 // variable definition ///////////////////
 struct varDef_t
@@ -134,15 +101,9 @@ struct ifExpr_t
 {
 };
 
-<<<<<<< HEAD
-
 typedef struct {
     scope_t *currScope;
     int totalOffset;
-=======
-typedef struct
-{
->>>>>>> 6f8ef42 (varDef and assign finished)
     instructionType_e instructionType;
     union
     {

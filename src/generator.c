@@ -6,6 +6,12 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
+const char *typeLookup[] = {
+    "int",
+    "float",
+    "string",
+};
+
 code_t generator_code_init() {
     code_t code;
     code.last = NULL;
