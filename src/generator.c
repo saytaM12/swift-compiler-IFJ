@@ -426,8 +426,6 @@ void postOrderTraversal(expression_value *curr, int type, int fromEnd) {
         generator_addLineFromEnd(&code, "EQS", fromEnd);
     } else if (strcmp(curr->value, "!") == 0) {
         generator_addLineFromEnd(&code, "NOTS", fromEnd);
-    } else {
-        
     }
 }
 
@@ -440,10 +438,15 @@ void postOrderString(expression_value *curr, int fromEnd) {
     }
     
     if (strcmp(curr->value, "+") == 0) {
+        generator_addLineFromEnd(&code, "PUSHFRAME", fromEnd);
+        generator_addLineFromEnd(&code, "CREATEFRAME", fromEnd);
+        generator_addLineFromEnd(&code, "DEFVAR TF@%tmp1", fromEnd);
+        generator_addLineFromEnd(&code, "DEFVAR TF@%tmp2", fromEnd);
         generator_addLineFromEnd(&code, "POPS TF@%tmp2", fromEnd);
         generator_addLineFromEnd(&code, "POPS TF@%tmp1", fromEnd);
         generator_addLineFromEnd(&code, "CONCAT TF@%tmp1 TF@%tmp1 TF@%tmp2", fromEnd);
         generator_addLineFromEnd(&code, "PUSHS TF@%tmp1", fromEnd);
+        generator_addLineFromEnd(&code, "POPFRAME", fromEnd);
     } else if (strcmp(curr->value, "==") == 0) {
         generator_addLineFromEnd(&code, "EQS", fromEnd);
     } else if (strcmp(curr->value, "!=") == 0) {
@@ -459,6 +462,13 @@ void postOrderString(expression_value *curr, int fromEnd) {
     } else if (strcmp(curr->value, ">=") == 0) {
         generator_addLineFromEnd(&code, "GTS", fromEnd);
         generator_addLineFromEnd(&code, "NOTS", fromEnd);
+    } else {
+        generator_addLineFromEnd(&code, "PUSHFRAME", fromEnd);
+        generator_addLineFromEnd(&code, "CREATEFRAME", fromEnd);
+        char *line = malloc(1 + strlen("PUSHS string@") + strlen(curr->value));
+        sprintf(line, "PUSHS string@%s", curr->value);
+        generator_addLineFromEnd(&code, line, fromEnd);
+        generator_addLineFromEnd(&code, "POPFRAME", fromEnd);
     }
 }
 
