@@ -66,16 +66,20 @@ void synCheck(){
 }
 
 int main(void) {
+    /*
     printf("\n===Printing Lexical analyzer output===\n\n");
     //lexCheck();
     pos.line = 1;
     pos.col = 0;
     printf("\n\n====Printing top-down parser output===\n\n");
+    */
     synCheck();
+    /*
     printf("\n\n====Printing generator output to a file===");
-    FILE *file = fopen("code.txt", "w");
+    */
+    FILE *file = stdout;
     generator_write(file, code);
     fclose(file);
     generator_code_destroy(&code);
-    printf("\n\n");
+    //printf("\n\n");
 }

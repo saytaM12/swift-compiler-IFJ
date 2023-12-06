@@ -128,7 +128,7 @@ int parse_prog()
 {
     code = generator_code_init();
     ins = generator_ins_init();
-    FILE *file = fopen("input.swift", "r");
+    FILE *file = stdin;
     Token *token = NULL;
     stack_t *stack = stack_ctor();
     push_new_scope(stack);
@@ -602,8 +602,6 @@ int parse_expression(FILE *file, Token *token, char *name, stack_t *stack)
         // symbol_t *found = get_symbol(stack, name);
         //  -> [id](<CALL_PARAM>);
         char namee[100];
-        Token*test = initToken();
-        test = token;
         strcpy(namee,token->lexeme);
         token = getToken(file);
         if(!strcmp(token->lexeme,"(")){
