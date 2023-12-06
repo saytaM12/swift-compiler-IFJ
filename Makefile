@@ -1,5 +1,5 @@
 TARGET:=main
-CFLAGS:=-g -Wall -std=c17 -fsanitize=address
+CFLAGS:=-g -Wall -std=c17 -fsanitize=address -lm
 RFLAGS:=-std=c17 -DNDEBUG -O3
 
 SRC:=$(wildcard src/*.c)

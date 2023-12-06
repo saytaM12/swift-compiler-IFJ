@@ -1,4 +1,9 @@
 #include "generator.h"
+#include "parser.h"
+#include <stdio.h>
+#include <math.h>
+#include <string.h>
+#include <stdlib.h>
 
 code_t generator_code_init() {
     code_t code;
@@ -8,25 +13,93 @@ code_t generator_code_init() {
 }
 
 instruction_t *generator_ins_init() {
-    return malloc(sizeof(instruction_t));
+    instruction_t *ins = malloc(sizeof(instruction_t));
+    ins->currScope = calloc(sizeof(scope_t), 1);
+
+    return ins;
 }
 
-void generator_destroy(code_t *code) {
+void generator_code_destroy(code_t *code) {
     if (!code->first) {
         return;
     }
 
-    line_t *next = code->first;
+    line_t *node = code->first;
+    line_t *oldNode;
 
-    while (next) {
-        line_t *node = next;
-        next = node->next;
-        free(node);
+    while (node) {
+        oldNode = node;
+        node = oldNode->next;
+        free(oldNode->line);
+        free(oldNode);
     }
 
     code->first = NULL;
     code->last = NULL;
 }
+
+void generator_ins_destroy(instruction_t *ins) {
+    scope_t *scope = ins->currScope;
+    scope_t *nextScope;
+    while (scope) {
+        nextScope = scope->next;
+        free(scope->name);
+        free(scope);
+        scope = nextScope;
+    }
+    switch (ins->instructionType) {
+        case funDef:
+            for (int i = 0; i < ins->funDef.paramNum; i++) {
+                free(ins->funDef.parameters[i]->name);
+                free(ins->funDef.parameters[i]->id);
+                free(ins->funDef.parameters[i]);
+            }
+            free(ins->funDef.parameters);
+            free(ins->funDef.name);
+            break;
+        case funCal:
+        break;
+        case varDef:
+        break;
+        case assign:
+        break;
+        case whileLoop:
+        break;
+        case ifExpr:
+        break;
+    }
+    free(ins);
+}
+
+void generator_ins_push_scope(instruction_t *ins, int offset, char *name) {
+    ins->totalOffset += offset;
+    scope_t *newScope = malloc(sizeof(scope_t));
+    newScope->offset = offset;
+    newScope->name = malloc(strlen(name) + 1);
+    strcpy(newScope->name, name);
+    newScope->next = ins->currScope;
+    ins->currScope = newScope;
+}
+
+void generator_ins_add_to_offset(instruction_t *ins, int offset) {
+    ins->totalOffset += offset;
+    ins->currScope->offset += offset;
+}
+
+char *generator_ins_get_current_scope_name(instruction_t ins) {
+    if (ins.currScope) {
+        return ins.currScope->name;
+    }
+    return "";
+}
+
+void generator_ins_pop_scope(instruction_t *ins) {
+    ins->totalOffset -= ins->currScope->offset;
+    scope_t * oldScope = ins->currScope;
+    ins->currScope = oldScope->next;
+    free(oldScope);
+}
+
 
 int generator_addLineEnd(code_t *code, char *line) {
     return generator_addLineFromEnd(code, line, 0);
@@ -46,13 +119,14 @@ int generator_addLineFromEnd(code_t *code, char *line, int offset) {
     }
 
 
-    line_t *new = malloc(sizeof(line_t));
+    line_t *new = calloc(sizeof(line_t), 1);
     if (!new) {
         fputs("malloc fail", stderr);
         return -2;
     }
     
-    new->line = line;
+    new->line = malloc(strlen(line) + 1);
+    strcpy(new->line, line);
 
     if (previous) {
         new->prev = previous;
@@ -81,9 +155,47 @@ void generator_write(FILE *file, code_t code) {
     }
 }
 
+void translateFunDef() {
+    char *line = malloc(1 + strlen("LABEL $") + strlen(ins->funDef.name));
+    char *var = malloc(1);
+
+    sprintf(line, "LABEL $%s", ins->funDef.name);
+    generator_addLineEnd(&code, line);
+    generator_addLineEnd(&code, "PUSHFRAME");
+
+    line = realloc(line, 1 + strlen("DEFVAL LF@$") + strlen(ins->funDef.name) + strlen("$retval"));
+    sprintf(line, "DEFVAR LF@$%s$retval", ins->funDef.name);
+    generator_addLineEnd(&code, line);
+
+    for (int i = 0; i < ins->funDef.paramNum; i++) {
+        line = realloc(line, 1 + strlen("DEFVAR LF@$") + strlen(ins->funDef.name) + strlen("$param1") + (int)log10((double)i?i:1));
+        var = realloc(var, 1 + strlen("LF@$%s$%d") + strlen(ins->funDef.name) + (int)log10((double)i?i:1));
+        sprintf(var, "LF@$%s$%d", ins->funDef.name, i);
+        sprintf(line, "DEFVAR %s", var);
+        generator_addLineEnd(&code, line);
+
+        line = realloc(line, 1 + strlen("MOVE LF@$") + strlen(ins->funDef.name) + strlen("$param1") + 2*(int)log10((double)i?i:1) + strlen("LF@%1"));
+        sprintf(line, "MOVE %s LF@%%%d", var, i);
+        generator_addLineEnd(&code, line);
+    }
+
+    line = realloc(line, 1 + strlen("LABEL $") + strlen(ins->funDef.name) + strlen("$end"));
+    sprintf(line, "LABEL $%s$end", ins->funDef.name);
+    generator_addLineEnd(&code, line);
+    line = realloc(line, 1 + strlen("RETURN"));
+    sprintf(line, "RETURN");
+    generator_addLineEnd(&code, line);
+    line = realloc(line, 1 + strlen("POPFRAME"));
+    sprintf(line, "POPFRAME");
+    generator_addLineEnd(&code, line);
+    generator_ins_push_scope(ins, 2, ins->funDef.name);
+    free(var);
+}
+
 void generator_translate() {
     switch (ins->instructionType) {
         case funDef:
+            translateFunDef();
             break;
         case funCal:
             break;

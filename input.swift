@@ -2,6 +2,7 @@
 /* Hlavni telo programu */
 func hello(from x: Int, to y: Int) {
     write("Zadejte cislo pro vypocet faktorialu\n")
+    return 0;
 }
 let b : Int = 6
 let a : Int? = readInt()

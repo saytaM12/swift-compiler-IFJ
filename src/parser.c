@@ -3,6 +3,7 @@
 #include "symtable.h"
 #include "expression.h"
 #include "lexical.h"
+#include <stdlib.h>
 #include <string.h>
 #include "generator.h"
 
@@ -70,7 +71,7 @@ int addSymbol(Token* token, char* name, stack_t *stack){
 int parse_prog(){
     code = generator_code_init();
     ins = generator_ins_init();
-    FILE* file = fopen("input.swift", "r");
+    FILE* file = fopen("input2.swift", "r");
     Token* token = NULL;
     stack_t *stack = stack_ctor();
     push_new_scope(stack);
@@ -98,9 +99,11 @@ int parse_main_body(FILE *file, Token* token, stack_t *stack){
         printf("\nfunc\n");
 
         ins->instructionType = funDef;
-        return parse_func_declare(file,token,stack) || parse_main_body(file,token,stack);
         ins->funDef.paramNum = 0;
-        ins->funDef.parameters = calloc(sizeof(struct funcDefParam *), 1);
+        ins->funDef.parameters = calloc(sizeof(struct funDefParam *), 1);
+
+        return parse_func_declare(file,token,stack) || parse_main_body(file,token,stack);
+
     }
     // -> if <IF_WHILE_EXPRESSION> <IF_WHILE_MAIN_BODY> <ELSE_MAIN_BODY> <MAIN_BODY>
     if(!strcmp(token->lexeme,"if")){
@@ -183,7 +186,7 @@ int parse_param_types(FILE* file, Token* token){
         return 2;
     }
     printf("NAME\n");
-    struct funcDefParam *newParam = calloc(sizeof(struct funcDefParam), 1);
+    struct funDefParam *newParam = calloc(sizeof(struct funDefParam), 1);
     newParam->name = calloc(sizeof(token->lexeme), 1);
     strcpy(newParam->name, token->lexeme);
     token = new_token(file,token);
@@ -214,6 +217,7 @@ int parse_param_types(FILE* file, Token* token){
     }
     printf("TYPE\n");
     newParam->type = ENUMTYPE(token);
+    ins->funDef.parameters = realloc(ins->funDef.parameters, sizeof(struct funDefParam *) * (ins->funDef.paramNum + 1));
     ins->funDef.parameters[ins->funDef.paramNum++] = newParam;
     size++;
     param_types = realloc(param_types, size * sizeof(Typee));
@@ -253,6 +257,7 @@ int parse_function_type(FILE *file, Token* token, char* name, stack_t* stack){
     if(!strcmp(token->lexeme,"{")){
         printf("{\n");
         destroyToken(token);
+        generator_translate();
         return 0;
     // ->
     }else if(!strcmp(token->lexeme,"->")){
