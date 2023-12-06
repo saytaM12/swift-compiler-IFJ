@@ -9,7 +9,7 @@
 
 #define ERROR() do{\
     destroyToken(token);\
-    fprintf(stderr, "%d:%d\n", pos.line, pos.col + 1);\
+    /*fprintf(stderr, "%d:%d\n", pos.line, pos.col + 1);*/\
     generator_code_destroy(&code);\
     generator_ins_destroy(ins);\
     }while(0)

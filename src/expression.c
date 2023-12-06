@@ -60,7 +60,6 @@ void expression_list_insert(expression_list *list, expression_value *value)
         expression_element *tmp = (expression_element *)malloc(sizeof(expression_element));
         if (tmp == NULL)
         {
-            printf("Error: malloc failed\n");
         }
         tmp->prev = NULL;
         tmp->value = value;
@@ -74,7 +73,6 @@ void expression_list_insert(expression_list *list, expression_value *value)
         expression_element *tmp = (expression_element *)malloc(sizeof(expression_element));
         if (tmp == NULL)
         {
-            printf("Error: malloc failed\n");
         }
         while (list->active->next != NULL)
         {
@@ -104,7 +102,6 @@ void printValue(expression_value *value, int level)
 {
     if (value == NULL)
     {
-        printf("\n");
         return;
     }
     printValue(value->right, level + 1);
@@ -284,7 +281,6 @@ int reduce(expression_list *stack)
     if (node->value->index == Identifier)
     {
         node->value->index = Dollar;
-        printf("E -> i\n");
         return 0;
     }
     else if (strcmp(node->value->value, "+") == 0)
@@ -310,7 +306,6 @@ int reduce(expression_list *stack)
         {
             return 7;
         }
-        printf("E -> E + E\n");
     }
     else if (node->value->index == MultiplyDivide || strcmp(node->value->value, "-"))
     {
@@ -331,7 +326,6 @@ int reduce(expression_list *stack)
         {
             return 7;
         }
-        printf("E -> E op E\n");
     }
     else if (strcmp(node->value->value, "==") == 0)
     {
@@ -424,7 +418,7 @@ int bottomUp(Token *token, FILE *fp, expression_value **returningValue, stack_t 
             symbol_t *symbol = get_symbol(symTable, value->value);
             if (symbol == NULL)
             {
-                printf("Error: Semantics error\n");
+
                 return 7;
             }
             else if (symbol->is_variable)
@@ -457,7 +451,7 @@ int bottomUp(Token *token, FILE *fp, expression_value **returningValue, stack_t 
         }
         expression_value *last = expression_last(stack);
         int action = precTable[last->index][value->index];
-        printf("%s\n", value->value);
+
         if (action == S)
         {
             last->action = S;
@@ -508,7 +502,7 @@ int bottomUp(Token *token, FILE *fp, expression_value **returningValue, stack_t 
         }
         else
         {
-            printf("Error: syntax error\n");
+
             free(value);
             return 2;
         }
@@ -526,7 +520,6 @@ int bottomUp(Token *token, FILE *fp, expression_value **returningValue, stack_t 
         {
             if ((x = reduce(stack)))
             {
-                printf("Error: Syntax error\n");
                 return x;
             }
         }

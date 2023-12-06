@@ -369,7 +369,7 @@ void postOrderTraversal(expression_value *curr, int type, int fromEnd) {
         postOrderTraversal(curr->right, type, fromEnd);
     }
 
-    printf("curr->value: %s\n", curr->value);
+
     
     if (isInteger(curr->value)) {
         char *line = malloc(1 + strlen("PUSHS int@") + strlen(curr->value));
@@ -384,9 +384,9 @@ void postOrderTraversal(expression_value *curr, int type, int fromEnd) {
         // convert curr->value to double
         char *endptr;
 
-        printf("curr->value: %s\n", curr->value);
+
         double result = strtod(curr->value, &endptr);
-        printf("result: %f\n", result);
+
 
         char *line = malloc(1 + strlen("PUSHS float@") + sizeof(double) * 10);
         sprintf(line, "PUSHS float@%a", result);

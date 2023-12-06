@@ -52,7 +52,7 @@ int addSymbol(Token *token, char *name, stack_t *stack)
                     symbol = symbol_variable_ctor(name, found->return_type);
                     add_symbol(stack, symbol);
                 }
-                printf("(identifier)   ");
+
                 break;
             case keyword:
                 return 9;
@@ -220,7 +220,7 @@ int parse_main_body(FILE *file, Token *token, stack_t *stack)
             ERROR();
             return 2;
         }
-        printValue(value, 0);
+
         disposeValue(value);
         ERROR();
         return 0;
@@ -277,7 +277,7 @@ int parse_param(FILE *file, Token *token, stack_t *stack)
         ERROR();
         return 2;
     }
-    printf("(\n");
+
     token = getToken(file);
     // <PARAM_TYPES> -> eps
     if (!strcmp(token->lexeme, ")"))
@@ -379,7 +379,7 @@ int parse_next_param(FILE *file, Token *token, stack_t *stack)
 int parse_function_type(FILE *file, Token *token, char *name, stack_t *stack)
 {
     // eps
-    printf("\n%s\n",token->lexeme);
+
     if(!strcmp(token->lexeme,"{")){
         symbol_t *found = get_symbol(stack, name);
                     if(found!=NULL){
@@ -478,7 +478,7 @@ int parse_function_body(FILE *file, Token *token, stack_t *stack)
             ERROR();
             return 2;
         }
-        printValue(value, 0);
+
         disposeValue(value);
         return 0;
     }
@@ -539,7 +539,7 @@ int parse_body(FILE *file, Token *token, stack_t *stack)
             symbol_t *found = get_symbol(stack, name);
             if (found == NULL)
             {
-                printf("not defined");
+
                 ERROR();
                 return 5;
             }
@@ -625,7 +625,7 @@ int parse_expression(FILE *file, Token *token, char *name, stack_t *stack)
                 return 2;
             }
             generator_translate();
-            printValue(value, 0);
+
             disposeValue(value);
             // destroyToken(token);
             return 0;
@@ -635,11 +635,11 @@ int parse_expression(FILE *file, Token *token, char *name, stack_t *stack)
             if (addSymbol(token, name, stack))
                 return addSymbol(token, name, stack);
             // -> [expression]
-            printf("-> getting symbol...\n");
+
             symbol_t *found = get_symbol(stack, name);
-            printf("Found variable with the name: %s typ: %d\n", found->name, found->type);
+
         }
-        printf("\nEXPRESSSIOOON\n");
+
         expression_value *value = NULL;
         int error = bottomUp(token,file,&value,stack);
         if(error){
@@ -651,13 +651,13 @@ int parse_expression(FILE *file, Token *token, char *name, stack_t *stack)
             return 2;
         }
         generator_translate();
-        printValue(value, 0);
+
         disposeValue(value);
         // destroyToken(token);
         return 0;
     }
 
-printf("\nEXPRESSSIOOON\n");
+
     expression_value *value = NULL;
     int error = bottomUp(token,file,&value,stack);
     if(error){
@@ -681,7 +681,7 @@ printf("\nEXPRESSSIOOON\n");
             return 2;
         }
         generator_translate();
-        printValue(value, 0);
+
         disposeValue(value);
     return 0;
 }
@@ -852,7 +852,7 @@ int parse_if_expression(FILE *file, Token *token, stack_t *stack)
             ERROR();
             return 2;
         }
-        printValue(value, 0);
+
         disposeValue(value);
     return 0;
 }
@@ -881,7 +881,7 @@ int parse_if_while_main_body(FILE *file, Token *token, stack_t *stack)
             ERROR();
             return 2;
         }
-        printValue(value, 0);
+
         disposeValue(value);
         token = getToken(file);
         return 0;

@@ -52,7 +52,6 @@ void push_new_scope(stack_t *stack)
 
         if (stack->array == NULL)
         {
-            printf("ERROR: Stack overflow. You tried to push to a full stack and realloc has failed.\n");
             exit(1);
         }
     }
@@ -65,7 +64,6 @@ void pop_scope(stack_t *stack)
 {
     if (stack->top == -1)
     {
-        printf("ERROR: Stack underflow. You tried to pop an empty stack.\n");
         exit(1);
     }
     symtable_dtor(&stack->array[stack->top]); // TODO: this causes a double free error
