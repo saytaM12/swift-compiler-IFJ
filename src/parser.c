@@ -520,13 +520,14 @@ int parse_expression(FILE* file, Token* token, char* name, stack_t *stack){
         //symbol_t *found = get_symbol(stack, name);
         // -> [id](<CALL_PARAM>);
         printf("IDee\n");
-        strcpy(name,token->lexeme);
+        char namee[100];
+        strcpy(namee,token->lexeme);
         token = new_token(file,token);
         if(!strcmp(token->lexeme,"(")){
             destroyToken(token);
             printf("(\n");
-            printf("%s",name);
-            return parse_call_param(file,token,name, stack);
+            printf("%s",namee);
+            return parse_call_param(file,token,namee, stack);
         returnToken(token, file);
     }
     // -> [expression]
@@ -542,14 +543,7 @@ int parse_expression(FILE* file, Token* token, char* name, stack_t *stack){
     destroyToken(token);
     return 0;
 }
-if(name != NULL){
-    if(addSymbol(token,name, stack))
-        return addSymbol(token,name, stack);
-    // -> [expression]
-    printf("-> getting symbol...\n");
-    symbol_t *found = get_symbol(stack, name);
-    printf("Found variable with the name: %s typ: %d\n", found->name,found->type);
-}
+
 printf("\nEXPRESSSIOOON\n");
     expression_value *value=bottomUp(token,file);
     if (value==NULL)
