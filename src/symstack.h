@@ -39,6 +39,8 @@ void stack_dtor(stack_t *stack);
  */
 symbol_t *get_symbol(stack_t *stack, char *name);
 
+symbol_t *get_symbol_top(stack_t *stack, char *name);
+
 /**
  * Adds a symbol to the top scope.
  */

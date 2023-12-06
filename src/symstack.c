@@ -35,6 +35,16 @@ void add_symbol(stack_t *stack, symbol_t *symbol)
     symtable_insert(&stack->array[stack->top], symbol);
 }
 
+symbol_t *get_symbol_top(stack_t *stack, char *name)
+{
+    symbol_t *symbol = symtable_lookup(&stack->array[stack->top], name);
+    if (symbol != NULL)
+    {
+        return symbol;
+    }
+    return NULL;
+}
+
 void push_new_scope(stack_t *stack)
 {
     if (stack->top == stack->capacity - 1)

@@ -3,6 +3,8 @@
         "ctype.h": "c",
         "lexical.h": "c",
         "symtable.h": "c",
-        "symstack.h": "c"
+        "symstack.h": "c",
+        "type_traits": "c",
+        "expression.h": "c"
     }
 }
