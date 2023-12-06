@@ -414,6 +414,10 @@ int bottomUp(Token *token, FILE *fp, expression_value **returningValue, stack_t 
         {
             break;
         }
+        if (token->type == singleChars && (token->lexeme[0] != '('&& token->lexeme[0] != ')'))
+        {
+            break;
+        }
         expression_value *value = expression_value_create(token);
         if (token->type == identifier)
         {
