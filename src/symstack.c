@@ -11,7 +11,6 @@ stack_t *stack_ctor()
 
 void stack_dtor(stack_t *stack)
 {
-    free(stack->array);
     free(stack);
 }
 
@@ -69,6 +68,6 @@ void pop_scope(stack_t *stack)
         printf("ERROR: Stack underflow. You tried to pop an empty stack.\n");
         exit(1);
     }
-    // symtable_dtor(&stack->array[stack->top]); // TODO: this causes a double free error
+    symtable_dtor(&stack->array[stack->top]); // TODO: this causes a double free error
     stack->top--;
 }

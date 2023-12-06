@@ -34,6 +34,7 @@ typedef enum
     assign = 4,
     whileLoop = 5,
     ifExpr = 6,
+    ret = 7,
 } instructionType_e;
 
 typedef enum
@@ -93,11 +94,13 @@ struct assign_t
 // while loop ////////////////////////////
 struct whileLoop_t
 {
+    expression_value *condition;
 };
 
 // if expression /////////////////////////
 struct ifExpr_t
 {
+    expression_value *condition;
 };
 
 
@@ -111,8 +114,8 @@ typedef struct {
         struct funCal_t funCal;
         struct varDef_t varDef;
         struct assign_t assign;
-        // struct whileLoop_t whileLoop;
-        // struct ifExpr_t ifExpr;
+        struct whileLoop_t whileLoop;
+        struct ifExpr_t ifExpr;
     };
 } instruction_t;
 
@@ -157,7 +160,9 @@ void postOrderTraversal(expression_value *curr, int type, int fromEnd);
 
 void postOrderString(expression_value *curr, int fromEnd);
 
-int isNumber(const char *str);
+int isInteger(const char *str);
+
+int isFloat(const char *str);
 
 void codeTypeCheck(int fromEnd);
 

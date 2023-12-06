@@ -1,2 +1,3 @@
 .IFJcode23
-JUMP $$main
+CREATEFRAME
+PUSHS int@5
