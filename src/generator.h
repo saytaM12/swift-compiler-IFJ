@@ -155,6 +155,8 @@ void generator_ins_pop_scope(instruction_t *ins);
 
 void postOrderTraversal(expression_value *curr, int type, int fromEnd);
 
+void postOrderString(expression_value *curr, int fromEnd);
+
 int isNumber(const char *str);
 
 void codeTypeCheck(int fromEnd);
