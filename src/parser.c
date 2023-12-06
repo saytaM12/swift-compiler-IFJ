@@ -121,7 +121,7 @@ int parse_prog()
 {
     code = generator_code_init();
     ins = generator_ins_init();
-    FILE *file = fopen("input2.swift", "r");
+    FILE *file = fopen("input.swift", "r");
     Token *token = NULL;
     stack_t *stack = stack_ctor();
     push_new_scope(stack);
@@ -892,6 +892,7 @@ int parse_if_while_main_body(FILE *file, Token *token, stack_t *stack)
     {
         printf("while\n");
         printf("expression\n");
+        token = new_token(file,token);
         expression_value *value = NULL;
         int error = bottomUp(token,file,&value,stack);
         if(error){
@@ -903,6 +904,7 @@ int parse_if_while_main_body(FILE *file, Token *token, stack_t *stack)
         }
         printValue(value, 0);
         disposeValue(value);
+        token = getToken(file);
         return 0;
     }
     // eps

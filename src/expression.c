@@ -451,8 +451,7 @@ int bottomUp(Token *token, FILE *fp, expression_value **returningValue, stack_t 
             }
             else
             {
-                printf("Error: Semantics error\n");
-                return 7;
+                break;
             }
         }
         expression_value *last = expression_last(stack);
