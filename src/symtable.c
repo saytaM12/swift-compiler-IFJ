@@ -2,7 +2,7 @@
 
 #include "symtable.h"
 
-symbol_t *symbol_ctor(char *name, Typee type, bool is_variable, Typee return_type, Typee *param_types)
+symbol_t *symbol_ctor(char *name, Typee type, bool is_variable, Typee return_type, Typee *param_types, int size)
 {
     symbol_t *symbol = (symbol_t *)malloc(sizeof(symbol_t));
 
@@ -15,18 +15,18 @@ symbol_t *symbol_ctor(char *name, Typee type, bool is_variable, Typee return_typ
     symbol->is_variable = is_variable;
     symbol->return_type = return_type;
     symbol->param_types = param_types;
-
+    symbol->size = size;
     return symbol;
 }
 
-symbol_t *symbol_function_ctor(char *name, Typee return_type, Typee *param_types)
+symbol_t *symbol_function_ctor(char *name, Typee return_type, Typee *param_types, int size)
 {
-    return symbol_ctor(name, function_t, false, return_type, param_types);
+    return symbol_ctor(name, function_t, false, return_type, param_types,size);
 }
 
 symbol_t *symbol_variable_ctor(char *name, Typee type)
 {
-    return symbol_ctor(name, type, true, undefined_t, NULL);
+    return symbol_ctor(name, type, true, undefined_t, NULL, 0);
 }
 
 symtable_t *symtable_ctor()

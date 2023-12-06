@@ -37,21 +37,21 @@ int parse_func_declare(FILE *file,Token*token,stack_t *stack);
 *FILE* file = file to read from,
 *Token* token = structure of read token
 */
-int parse_param(FILE *file,Token*token);
+int parse_param(FILE *file,Token*token,stack_t* stack);
 
 /*
 *Type of the parameter of the declared function
 *FILE* file = file to read from,
 *Token* token = structure of read token
 */
-int parse_param_types(FILE *file,Token*token);
+int parse_param_types(FILE *file,Token*token,stack_t* stack);
 
 /*
 *Next parameter of the declared function
 *FILE* file = file to read from,
 *Token* token = structure of read token
 */
-int parse_next_param(FILE *file, Token* token);
+int parse_next_param(FILE *file, Token* token,stack_t* stack);
 
 /*
 *Return type of the function
