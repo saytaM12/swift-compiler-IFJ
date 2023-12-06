@@ -589,6 +589,8 @@ int parse_assign(FILE *file, Token *token, char *name, stack_t *stack)
             token = new_token(file, token);
             return parse_expression(file, token, "", stack);
         }
+        returnToken(token,file);
+        return 0;
     }
     ERROR();
     return 2;
@@ -607,7 +609,6 @@ int parse_expression(FILE *file, Token *token, char *name, stack_t *stack)
         strcpy(namee,token->lexeme);
         token = new_token(file,token);
         if(!strcmp(token->lexeme,"(")){
-            destroyToken(token);
             printf("(\n");
             printf("%s",namee);
             return parse_call_param(file,token,namee, stack);
