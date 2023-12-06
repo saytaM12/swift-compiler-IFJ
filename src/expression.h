@@ -10,6 +10,7 @@ typedef enum {num, str, doub, boo, nil,undefined}type;
 
 typedef struct expression_value
 {
+    int isVariable;
     type type;
     prec_action action;
     prec_index index;

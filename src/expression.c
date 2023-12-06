@@ -429,6 +429,7 @@ int bottomUp(Token *token, FILE *fp, expression_value **returningValue, stack_t 
             }
             else if (symbol->is_variable)
             {
+                value->isVariable = 1;
                 if (symbol->type == int_t)
                 {
                     value->type = num;
