@@ -203,4 +203,6 @@ void postOrderTraversal(expression_value *curr, int type, int fromEnd);
 
 void codeTypeCheck(int fromEnd);
 
+void convertToEscapeSequences(const char *input, char *output);
+
 #endif // GENERATOR_H

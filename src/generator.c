@@ -463,12 +463,19 @@ void postOrderString(expression_value *curr, int fromEnd) {
         generator_addLineFromEnd(&code, "GTS", fromEnd);
         generator_addLineFromEnd(&code, "NOTS", fromEnd);
     } else {
-        generator_addLineFromEnd(&code, "PUSHFRAME", fromEnd);
-        generator_addLineFromEnd(&code, "CREATEFRAME", fromEnd);
-        char *line = malloc(1 + strlen("PUSHS string@") + strlen(curr->value));
-        sprintf(line, "PUSHS string@%s", curr->value);
-        generator_addLineFromEnd(&code, line, fromEnd);
-        generator_addLineFromEnd(&code, "POPFRAME", fromEnd);
+        if (curr->isVariable == 1) {
+            char *line_var = malloc(1 + strlen("PUSHS LF@") + strlen(curr->value));
+            sprintf(line_var, "PUSHS LF@%s", curr->value);
+            generator_addLineFromEnd(&code, line_var, fromEnd);
+        } else {
+            char outputString[256];
+            convertToEscapeSequences(curr->value, outputString);
+
+            char *line = malloc(1 + strlen("PUSHS string@") + strlen(outputString));
+            sprintf(line, "PUSHS string@%s", outputString);
+
+            generator_addLineFromEnd(&code, line, fromEnd);
+        }
     }
 }
 
@@ -486,6 +493,46 @@ int isFloat(const char *str) {
 
     // Check for errors during conversion or if the entire string was consumed
     return (*str != '\0' && *endptr == '\0');
+}
+
+void convertToEscapeSequences(const char *input, char *output) {
+    // Iterate through each character in the input string
+    while (*input != '\0') {
+        // Check for special characters and replace them with escape sequences
+        switch (*input) {
+            case ' ':
+                *output++ = '\\';
+                *output++ = '0';
+                *output++ = '3';
+                *output++ = '2';
+                break;
+            case '\\':
+                *output++ = '\\';
+                *output++ = '0';
+                *output++ = '9';
+                *output++ = '2';
+                break;
+            case '\a':
+                *output++ = '\\';
+                *output++ = '0';
+                *output++ = '7';
+                break;
+            case '\n':
+                *output++ = '\\';
+                *output++ = '0';
+                *output++ = '1';
+                *output++ = '0';
+                break;
+            default:
+                *output++ = *input;
+        }
+
+        // Move to the next character in the input string
+        input++;
+    }
+
+    // Null-terminate the output string
+    *output = '\0';
 }
 
 void codeTypeCheck(int fromEnd) {
