@@ -1,5 +1,5 @@
-let a = 5+5*8
-let b = 8+(5+5)*"ahoj"
+let a = 5??5*8
+let b = 8+(5+5))*"ahoj"
 // a = 5+5*8
 // // Program 1: Vypocet faktorialu (iterativne)
 // /* Hlavni telo programu */

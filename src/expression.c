@@ -246,6 +246,16 @@ expression_value *expression_value_create(Token *token)
     return value;
 }
 
+int reduceOp(expression_list *stack, expression_element *node){
+        node->value->index = Dollar;
+        node->value->action = R;
+        node->value->right = expression_list_pop(stack);
+        node->value = expression_list_pop(stack);
+        node->value->left = expression_list_pop(stack);
+        expression_list_insert(stack, node->value);
+        return 0;
+}
+
 int reduce(expression_list *stack)
 {
     expression_element *lastShift = NULL;
@@ -260,8 +270,7 @@ int reduce(expression_list *stack)
     }
     if (lastShift == NULL)
     {
-        printf("Error: syntax error\n");
-        return -1;
+        return 1;
     }
     if (lastShift->next->value->index == Dollar)
     {
@@ -279,23 +288,18 @@ int reduce(expression_list *stack)
         printf("E -> i\n");
         return 0;
     }
-    else if (node->value->index == PlusMinus || node->value->index == QuestionMark)
+    else if (node->value->index == PlusMinus)
     {
-        node->value->index = Dollar;
-        node->value->action = R;
-        node->value->right = expression_list_pop(stack);
-        node->value = expression_list_pop(stack);
-        node->value->left = expression_list_pop(stack);
-        expression_list_insert(stack, node->value);
+        reduceOp(stack, node);
         printf("E -> E op E\n");
     }
     else if (node->value->index == MultiplyDivide||strcmp(node->value->value,"-"))
     {
-        node->value->index = Dollar;
-        node->value->action = R;
-        node->value->right = expression_list_pop(stack);
-        node->value = expression_list_pop(stack);
-        node->value->left = expression_list_pop(stack);
+        reduceOp(stack, node);
+        if (node->value->left==NULL||node->value->right==NULL)
+        {
+            return 2;
+        }
         if (node->value->left->type == num && node->value->right->type == num)
         {
             node->value->type = num;
@@ -306,18 +310,39 @@ int reduce(expression_list *stack)
         }
         else
         {
-            printf("Error: semantics\n");
-            return -1;
+            return 2;
         }
-        
-        
-        expression_list_insert(stack, node->value);
         printf("E -> E op E\n");
+    }
+    else if (node->value->index==Rel){
+        reduceOp(stack, node);
+                if (node->value->left==NULL||node->value->right==NULL)
+        {
+            return 2;
+        }
+        if ((node->value->left->type != node->value->right->type)&&(node->value->left->type!=nil)&&(node->value->right->type!=nil))
+        {
+            return 2;
+        }
+        node->value->type = boo;        
+    }
+    else if (node->value->index==QuestionMark){
+        reduceOp(stack,node);
+                if (node->value->left==NULL||node->value->right==NULL)
+        {
+            return 2;
+        }
+        if (node->value->left->type==nil)
+        {
+            node->value->type = node->value->right->type;
+        }
+        else{
+            node->value->type = node->value->left->type;
+        }
     }
     else
     {
-        printf("Spatna syntaxe: %d\n", node->value->index);
-        return -1;
+        return 1;
     }
     return 0;
 }
@@ -336,6 +361,7 @@ expression_value *bottomUp(Token *token, FILE *fp)
     dollarVal->right = NULL;
     dollarVal->index = Dollar;
     int openBrackets = 0;
+    int x;
     expression_list_insert(stack, dollarVal);
     // token = new_token(fp, token);
     if (!(token->type != identifier || token->type != number || token->type != string || token->type != numberFloat || token->type != singleChars))
@@ -371,13 +397,17 @@ expression_value *bottomUp(Token *token, FILE *fp)
             {
                 openBrackets--;
             }
-            printf("Pocet zavorek %d\n", openBrackets);
         }
         else if (action == R)
         {
-            if (reduce(stack) == -1)
+            if ((x = reduce(stack)) == 1)
             {
                 printf("Error: Syntax error\n");
+                return NULL;
+            }
+            else if (x == 2)
+            {
+                printf("Error: Semantics error\n");
                 return NULL;
             }
         }
@@ -426,9 +456,14 @@ expression_value *bottomUp(Token *token, FILE *fp)
     {
         while (stack->head->next->next != NULL)
         {
-            if (reduce(stack) == -1)
+            if ((x = reduce(stack)) == 1)
             {
                 printf("Error: Syntax error\n");
+                return NULL;
+            }
+            else if (x == 2)
+            {
+                printf("Error: Semantics error\n");
                 return NULL;
             }
         }
