@@ -159,7 +159,9 @@ void postOrderTraversal(expression_value *curr, int type, int fromEnd);
 
 void postOrderString(expression_value *curr, int fromEnd);
 
-int isNumber(const char *str);
+int isInteger(const char *str);
+
+int isFloat(const char *str);
 
 void codeTypeCheck(int fromEnd);
 
