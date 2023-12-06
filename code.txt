@@ -1,0 +1,10 @@
+LABEL $hello
+PUSHFRAME
+DEFVAR LF@$hello$retval
+DEFVAR LF@$hello$0
+MOVE LF@$hello$0 LF@%0
+DEFVAR LF@$hello$1
+MOVE LF@$hello$1 LF@%1
+LABEL $hello$end
+RETURN
+POPFRAME

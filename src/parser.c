@@ -1,6 +1,7 @@
 #include "parser.h"
 #include "generator.h"
 #include "lexical.h"
+#include <stdlib.h>
 #include <string.h>
 
 code_t code;
@@ -16,7 +17,7 @@ Token* new_token(FILE* file, Token* token){
 int parse_prog(){
     code = generator_code_init();
     ins = generator_ins_init();
-    FILE* file = fopen("input.swift", "r");
+    FILE* file = fopen("input2.swift", "r");
     Token* token = NULL;
     return parse_main_body(file,token);
 }
@@ -36,7 +37,7 @@ int parse_main_body(FILE *file, Token* token){
 
         ins->instructionType = funDef;
         ins->funDef.paramNum = 0;
-        ins->funDef.parameters = calloc(sizeof(struct funcDefParam *), 1);
+        ins->funDef.parameters = calloc(sizeof(struct funDefParam *), 1);
 
         return parse_func_declare(file,token) || parse_main_body(file,token);
     }
@@ -118,7 +119,7 @@ int parse_param_types(FILE* file, Token* token){
         return 2;
     }
     printf("NAME\n");
-    struct funcDefParam *newParam = calloc(sizeof(struct funcDefParam), 1);
+    struct funDefParam *newParam = calloc(sizeof(struct funDefParam), 1);
     newParam->name = calloc(sizeof(token->lexeme), 1);
     strcpy(newParam->name, token->lexeme);
     token = new_token(file,token);
@@ -149,6 +150,7 @@ int parse_param_types(FILE* file, Token* token){
     }
     printf("TYPE\n");
     newParam->type = ENUMTYPE(token);
+    ins->funDef.parameters = realloc(ins->funDef.parameters, sizeof(struct funDefParam *) * (ins->funDef.paramNum + 1));
     ins->funDef.parameters[ins->funDef.paramNum++] = newParam;
     destroyToken(token);
     return 0;
@@ -180,6 +182,7 @@ int parse_function_type(FILE *file, Token* token){
     if(!strcmp(token->lexeme,"{")){
         printf("{\n");
         destroyToken(token);
+        generator_translate();
         return 0;
         // ->
     }else if(!strcmp(token->lexeme,"-")){

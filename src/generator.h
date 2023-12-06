@@ -35,9 +35,15 @@ typedef enum {
     String = 3,
 } varialbeType_e;
 
+typedef struct Scope{
+    struct Scope *next;
+    char *name;
+    int offset;
+} scope_t;
+
 // function definition ///////////////////
                                         //
-struct funcDefParam {                   //
+struct funDefParam {                    //
     char *name;                         //
     char *id;                           //
     varialbeType_e type;                //
@@ -47,21 +53,21 @@ struct funDef_t {                       //
     varialbeType_e type;                //
     char *name;                         //
     int paramNum;                       //
-    struct funcDefParam **parameters;   //
+    struct funDefParam **parameters;    //
 };                                      //
                                         //
 //////////////////////////////////////////
 
 // function Call /////////////////////////
                                         //
-struct funcCallParam {                  //
+struct funCallParam {                   //
     varialbeType_e type;                //
     char *value;                        //
 };                                      //
                                         //
 struct funCal_t {                       //
     char *name;                         //
-    struct funcCallParam *parameters;   //
+    struct funCallParam **parameters;   //
 };                                      //
                                         //
 //////////////////////////////////////////
@@ -101,6 +107,8 @@ struct ifExpr_t {                       //
 
 
 typedef struct {
+    scope_t *currScope;
+    int totalOffset;
     instructionType_e instructionType;
     union {
         struct funDef_t funDef;
@@ -120,6 +128,8 @@ extern instruction_t *ins;
  */
 code_t generator_code_init();
 
+
+
 /*
  * Inicializes empty instruction_t structure
  * this will later be used to store a line of IFJ23 text
@@ -127,9 +137,36 @@ code_t generator_code_init();
 instruction_t *generator_ins_init();
 
 /*
- * Frees every elemet and bring the structure to state after init
+ * adds a scope to scope buffer and sets it's offset
  */
-void generator_destroy(code_t *code);
+void generator_ins_push_scope(instruction_t *ins, int offset, char *name);
+
+/*
+ * increses offset of current scope and totalOffset
+ */
+void generator_ins_add_to_offset(instruction_t *ins, int offset);
+
+/*
+ * returns a scope_t structure, which is at the top of the scope buffer
+ */
+char *generator_ins_get_current_scope_name(instruction_t ins);
+
+/*
+ * pops a scope from scope buffer
+ */
+void generator_ins_pop_scope(instruction_t *ins);
+
+
+
+/*
+ * Frees every element and brings the structure to state after init
+ */
+void generator_code_destroy(code_t *code);
+
+/*
+ * Frees every element and brings the structure to state after init
+ */
+void generator_ins_destroy(instruction_t *ins);
 
 /*
  * Adds a line to the end of the structure

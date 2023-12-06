@@ -7,25 +7,8 @@
 #define ERROR() do{\
     destroyToken(token);\
     fprintf(stderr, "%d:%d\n", pos.line, pos.col + 1);\
-    generator_destroy(&code);\
-    switch (ins->instructionType) {\
-        case funDef:\
-            for (int i = 0; i < ins->funDef.paramNum; i++) {\
-                free(ins->funDef.parameters[i]);\
-            }\
-            break;\
-        case funCal:\
-        break;\
-        case varDef:\
-        break;\
-        case assign:\
-        break;\
-        case whileLoop:\
-        break;\
-        case ifExpr:\
-        break;\
-    }\
-    free(ins);\
+    generator_code_destroy(&code);\
+    generator_ins_destroy(ins);\
     }while(0)
 
 #define ENUMTYPE(token)\
