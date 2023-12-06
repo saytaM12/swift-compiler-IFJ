@@ -375,11 +375,6 @@ expression_value *bottomUp(Token *token, FILE *fp)
         {
             break;
         }
-        if (openBrackets < 0)
-        {
-            printf("Zavorka navic\n");
-            break;
-        }
         expression_value *value = expression_value_create(token);
         expression_value *last = expression_last(stack);
         int action = precTable[last->index][value->index];
