@@ -137,6 +137,7 @@ int parse_main_body(FILE *file, Token* token, stack_t *stack){
                 // Parametry
             // FIX THIS --- spatna velikost pole ,sizeof(call_function[i].param_types)/sizeof(Typee)
             printf("pole %d hash %d\n",call_function[i].size,found->size);
+            printf("jmeno funkce: %s\n",found->name);
             // Kvuli funkci write, ktera muze mit parametru kolik chce
             if(found->size != -1){
             if(call_function[i].size != found->size){
@@ -148,7 +149,7 @@ int parse_main_body(FILE *file, Token* token, stack_t *stack){
                 // Kvuli funkci write, ktera muze mit parametru kolik chce
                 if(found->size != -1){
                 if(found->param_types[j] != call_function[i].param_types[j]){
-                    printf("spatny typ");
+                    printf("spatny typ\n");
                     printf("typ %d typ %d",found->param_types[j], call_function[i].param_types[j]);
                     return 4;
                 }
@@ -529,8 +530,8 @@ int parse_expression(FILE* file, Token* token, char* name, stack_t *stack){
             printf("(\n");
             printf("%s",namee);
             return parse_call_param(file,token,namee, stack);
-        returnToken(token, file);
-    }
+        }
+    returnToken(token, file);
     // -> [expression]
     printf("\nEXPRESSSIOOON\n");
     expression_value *value=bottomUp(token,file);

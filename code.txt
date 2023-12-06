@@ -10,3 +10,13 @@ MOVE LF@$hello$1 LF@%1
 LABEL $hello$end
 RETURN
 POPFRAME
+PUSHFRAME
+DEFVAL TF@%0
+MOVE TF@%0 Zadejte cislo pro vypocet faktorialu\n
+CALL $write
+PUSHFRAME
+DEFVAL TF@%0
+MOVE TF@%0 a
+DEFVAL TF@%1
+MOVE TF@%1 b
+CALL $hello
