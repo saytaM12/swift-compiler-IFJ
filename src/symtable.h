@@ -12,7 +12,7 @@ typedef enum
 {
     undefined_t,
     int_t,
-    double_t,
+    double_tt,
     string_t,
     bool_t,
     function_t,

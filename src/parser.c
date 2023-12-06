@@ -43,7 +43,7 @@ int addSymbol(Token* token, char* name, stack_t *stack){
                     add_symbol(stack, symbol);
                 }
                 if(!strcmp(token->lexeme,"Double")){
-                    symbol = symbol_variable_ctor(name, double_t);
+                    symbol = symbol_variable_ctor(name, double_tt);
                     add_symbol(stack, symbol);
                 }
                 break;
@@ -52,7 +52,7 @@ int addSymbol(Token* token, char* name, stack_t *stack){
                 add_symbol(stack, symbol);
                 break;
             case numberFloat:
-                symbol = symbol_variable_ctor(name, double_t);
+                symbol = symbol_variable_ctor(name, double_tt);
                 add_symbol(stack, symbol);
             case operation:
                 return 9;
@@ -78,22 +78,22 @@ void addFunctions(stack_t *stack){
     add_symbol(stack, symbol);
     symbol = symbol_function_ctor("write", undefined_t , NULL , -1);
     add_symbol(stack, symbol);
-    Type *param_types[1] ={int_t};
-    symbol = symbol_function_ctor("Int2Double", double_t , param_types , 1);
+    Typee param_types[1] ={int_t};
+    symbol = symbol_function_ctor("Int2Double", double_tt , param_types , 1);
     add_symbol(stack, symbol);
-    Type *param_types2[1] ={double_t};
+    Typee param_types2[1] ={double_tt};
     symbol = symbol_function_ctor("Double2Int", int_t , param_types2 , 1);
     add_symbol(stack, symbol);
-    Type *param_types3[1] ={string_t};
+    Typee param_types3[1] ={string_t};
     symbol = symbol_function_ctor("length", int_t , param_types3 , 1);
     add_symbol(stack, symbol);
-    Type *param_types4[1] ={string_t,int_t,int_t};
+    Typee param_types4[3] ={string_t,int_t,int_t};
     symbol = symbol_function_ctor("substring", string_t , param_types4 , 3);
     add_symbol(stack, symbol);
-    Type *param_types5[1] ={string_t};
+    Typee param_types5[1] ={string_t};
     symbol = symbol_function_ctor("ord", int_t , param_types5 , 1);
     add_symbol(stack, symbol);
-    Type *param_types6[1] ={int_t};
+    Typee param_types6[1] ={int_t};
     symbol = symbol_function_ctor("chr", string_t , param_types6 , 1);
     add_symbol(stack, symbol);
     return;
@@ -120,7 +120,7 @@ int parse_main_body(FILE *file, Token* token, stack_t *stack){
             // Jestli je funkce definovana
             symbol_t *found = get_symbol(stack, call_function[i].name);
                 if(found == NULL){
-                    printf("Nedefinovana funkce\n");
+                    printf("Nedefinovana funkce %s\n",call_function[i].name);
                     return 3;
                 }
 
@@ -136,7 +136,7 @@ int parse_main_body(FILE *file, Token* token, stack_t *stack){
             }
             for(int j = 0;j < call_function[i].size;j++){
                 // Kvuli funkci write, ktera muze mit parametru kolik chce
-                if(found != -1){
+                if(found->size != -1){
                 if(found->param_types[j] != call_function[i].param_types[j]){
                     printf("spatny typ");
                     printf("typ %d typ %d",found->param_types[j], call_function[i].param_types[j]);
@@ -264,7 +264,7 @@ int parse_param_types(FILE* file, Token* token, stack_t* stack){
         param_types[size-1] = string_t;
     }
     if(!strcmp(token->lexeme,"Double")){
-        param_types[size-1] = double_t;
+        param_types[size-1] = double_tt;
     }
     destroyToken(token);
     return 0;
@@ -313,7 +313,7 @@ int parse_function_type(FILE *file, Token* token, char* name, stack_t* stack){
                     typ = string_t;
                 }
                 if(!strcmp(token->lexeme,"Double"))
-                    typ = double_t;
+                    typ = double_tt;
                 // Redefinice funkce
                 symbol_t *found = get_symbol(stack, name);
                 if(found!=NULL){
@@ -412,7 +412,7 @@ int parse_body(FILE* file, Token* token, stack_t *stack){
             printf("=\n");
             token = new_token(file,token);
             char name[100];
-            return parse_expression(file,token, NULL, stack);
+            return parse_expression(file,token, name, stack);
         }
     }
     destroyToken(token);
@@ -448,7 +448,7 @@ int parse_assign(FILE* file, Token* token, char*name,stack_t *stack){
             // = [id](<CALL_PARAM>)
             printf("=\n");
             token = new_token(file,token);
-            return parse_expression(file,token,name,stack);
+            return parse_expression(file,token,"",stack);
         }
         returnToken(token, file);
         return 0;
@@ -464,11 +464,13 @@ int parse_expression(FILE* file, Token* token, char* name, stack_t *stack){
     if(token->type == identifier){
         //symbol_t *found = get_symbol(stack, name);
         // -> [id](<CALL_PARAM>);
-        printf("ID\n");
+        printf("IDee\n");
+        strcpy(name,token->lexeme);
         token = new_token(file,token);
         if(!strcmp(token->lexeme,"(")){
             destroyToken(token);
             printf("(\n");
+            printf("%s",name);
             return parse_call_param(file,token,name, stack);
         returnToken(token, file);
     }
@@ -514,6 +516,7 @@ int parse_call_param(FILE * file, Token * token, char *name, stack_t* stack){
 // Types of parameters of the calling function
 // <CALL_PARAM_TYPES>
 int parse_call_param_types(FILE* file, Token* token, char *name, stack_t* stack){
+    strcpy(name,token->lexeme);
     // -> [expression] <NEXT_CALL_PARAM>
     if(token->type == number || token->type == string || token->type == identifier){
          if(size == 1)
@@ -534,10 +537,10 @@ int parse_call_param_types(FILE* file, Token* token, char *name, stack_t* stack)
                     call_function[size_call_function-1].param_types[size-1] = string_t;
                 }
                 if(token->type == numberFloat){
-                    call_function[size_call_function-1].param_types[size-1] = double_t;
+                    call_function[size_call_function-1].param_types[size-1] = double_tt;
                 }
                 if(token->type == identifier){
-                    symbol_t *found = get_symbol_top(stack, token->lexeme);
+                    symbol_t *found = get_symbol(stack, token->lexeme);
                     if(found == NULL){
                         return 3;
                     }
@@ -557,12 +560,12 @@ int parse_call_param_types(FILE* file, Token* token, char *name, stack_t* stack)
         if(typ == string)
             call_function[size_call_function-1].param_types[size-1] = string_t;
         if(typ == numberFloat)
-            call_function[size_call_function-1].param_types[size-1] = double_t;
-        if(token->type == identifier){
-            symbol_t *found = get_symbol_top(stack, name);
-            if(found == NULL)
+            call_function[size_call_function-1].param_types[size-1] = double_tt;
+        if(typ == identifier){
+            symbol_t *found = get_symbol(stack, name);
+            if(found == NULL){
                 return 3;
-            printf("\n\n%s\n",found->name);
+            }
             call_function[size_call_function-1].param_types[size-1] = found->type;
         }
         // <NEXT_CALL_PARAM>

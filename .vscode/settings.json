@@ -10,5 +10,6 @@
         "initializer_list": "c",
         "utility": "c",
         "typeinfo": "c"
-    }
+    },
+    "C_Cpp.errorSquiggles": "disabled"
 }
