@@ -378,7 +378,7 @@ int parse_function_type(FILE *file, Token* token, char* name, stack_t* stack){
                 }
             }
     }
-    destroyToken(token);
+    ERROR();
     return 2;
 }
 
@@ -535,6 +535,7 @@ int parse_expression(FILE* file, Token* token, char* name, stack_t *stack){
     expression_value *value=bottomUp(token,file);
     if (value==NULL)
     {
+        ERROR();
         return 2;
     }
 
@@ -548,6 +549,7 @@ printf("\nEXPRESSSIOOON\n");
     expression_value *value=bottomUp(token,file);
     if (value==NULL)
     {
+        ERROR();
         return 2;
     }
     printValue(value,0);
