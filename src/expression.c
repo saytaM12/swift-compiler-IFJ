@@ -246,14 +246,15 @@ expression_value *expression_value_create(Token *token)
     return value;
 }
 
-int reduceOp(expression_list *stack, expression_element *node){
-        node->value->index = Dollar;
-        node->value->action = R;
-        node->value->right = expression_list_pop(stack);
-        node->value = expression_list_pop(stack);
-        node->value->left = expression_list_pop(stack);
-        expression_list_insert(stack, node->value);
-        return 0;
+int reduceOp(expression_list *stack, expression_element *node)
+{
+    node->value->index = Dollar;
+    node->value->action = R;
+    node->value->right = expression_list_pop(stack);
+    node->value = expression_list_pop(stack);
+    node->value->left = expression_list_pop(stack);
+    expression_list_insert(stack, node->value);
+    return 0;
 }
 
 int reduce(expression_list *stack)
@@ -270,7 +271,7 @@ int reduce(expression_list *stack)
     }
     if (lastShift == NULL)
     {
-        return 1;
+        return 2;
     }
     if (lastShift->next->value->index == Dollar)
     {
@@ -280,23 +281,41 @@ int reduce(expression_list *stack)
     {
         node = lastShift->next;
     }
-    // node = lastShift->next;
-
     if (node->value->index == Identifier)
     {
         node->value->index = Dollar;
         printf("E -> i\n");
         return 0;
     }
-    else if (node->value->index == PlusMinus)
+    else if (strcmp(node->value->value, "+") == 0)
     {
         reduceOp(stack, node);
-        printf("E -> E op E\n");
+        if (node->value->left == NULL || node->value->right == NULL)
+        {
+            return 2;
+        }
+        if (node->value->left->type == str && node->value->right->type == str)
+        {
+            node->value->type = str;
+        }
+        else if (node->value->left->type == num && node->value->right->type == num)
+        {
+            node->value->type = num;
+        }
+        else if ((node->value->left->type == doub || node->value->left->type == num) && (node->value->right->type == doub || node->value->right->type == num))
+        {
+            node->value->type = doub;
+        }
+        else
+        {
+            return 7;
+        }
+        printf("E -> E + E\n");
     }
-    else if (node->value->index == MultiplyDivide||strcmp(node->value->value,"-"))
+    else if (node->value->index == MultiplyDivide || strcmp(node->value->value, "-"))
     {
         reduceOp(stack, node);
-        if (node->value->left==NULL||node->value->right==NULL)
+        if (node->value->left == NULL || node->value->right == NULL)
         {
             return 2;
         }
@@ -304,53 +323,72 @@ int reduce(expression_list *stack)
         {
             node->value->type = num;
         }
-        else if ((node->value->left->type==doub || node->value->left->type==num)&&(node->value->right->type==doub || node->value->right->type==num))
+        else if ((node->value->left->type == doub || node->value->left->type == num) && (node->value->right->type == doub || node->value->right->type == num))
         {
             node->value->type = doub;
         }
         else
         {
-            return 2;
+            return 7;
         }
         printf("E -> E op E\n");
     }
-    else if (node->value->index==Rel){
+    else if (strcmp(node->value->value, "==") == 0)
+    {
         reduceOp(stack, node);
-                if (node->value->left==NULL||node->value->right==NULL)
+        if (node->value->left == NULL || node->value->right == NULL)
         {
             return 2;
         }
-        if ((node->value->left->type != node->value->right->type)&&(node->value->left->type!=nil)&&(node->value->right->type!=nil))
+        else if ((node->value->left->type == num || node->value->left->type == doub) && (node->value->right->type == num || node->value->right->type == doub))
         {
-            return 2;
+            node->value->type = boo;
         }
-        node->value->type = boo;        
+        else if (node->value->left->type != node->value->right->type)
+        {
+            return 7;
+        }
     }
-    else if (node->value->index==QuestionMark){
-        reduceOp(stack,node);
-                if (node->value->left==NULL||node->value->right==NULL)
+
+    else if (node->value->index == Rel)
+    {
+        reduceOp(stack, node);
+        if (node->value->left == NULL || node->value->right == NULL)
         {
             return 2;
         }
-        if (node->value->left->type==nil)
+        if ((node->value->left->type != node->value->right->type) && (node->value->left->type != nil) && (node->value->right->type != nil))
+        {
+            return 7;
+        }
+        node->value->type = boo;
+    }
+    else if (node->value->index == QuestionMark)
+    {
+        reduceOp(stack, node);
+        if (node->value->left == NULL || node->value->right == NULL)
+        {
+            return 2;
+        }
+        if (node->value->left->type == nil)
         {
             node->value->type = node->value->right->type;
         }
-        else{
+        else
+        {
             node->value->type = node->value->left->type;
         }
     }
     else
     {
-        return 1;
+        return 2;
     }
     return 0;
 }
 
-expression_value *bottomUp(Token *token, FILE *fp)
+int bottomUp(Token *token, FILE *fp, expression_value **returningValue, stack_t *symTable)
 {
     expression_value *retVal = NULL;
-    // FILE *fp = fopen("input.swift", "r");
     expression_list *stack = expression_list_create();
     char *dollar = malloc(sizeof(char) * 2);
     strcpy(dollar, "$");
@@ -366,16 +404,53 @@ expression_value *bottomUp(Token *token, FILE *fp)
     // token = new_token(fp, token);
     if (!(token->type != identifier || token->type != number || token->type != string || token->type != numberFloat || token->type != singleChars))
     {
-        return NULL;
+        return 2;
     }
 
     while (token->type == identifier || token->type == number || token->type == string || token->type == operation || token->type == singleChars || token->type == numberFloat)
     {
+
         if (token->type == unknown)
         {
             break;
         }
         expression_value *value = expression_value_create(token);
+        if (token->type == identifier)
+        {
+            symbol_t *symbol = get_symbol(symTable, value->value);
+            if (symbol == NULL)
+            {
+                printf("Error: Semantics error\n");
+                return 7;
+            }
+            else if (symbol->is_variable)
+            {
+                if (symbol->type == int_t)
+                {
+                    value->type = num;
+                }
+                else if (symbol->type == double_tt)
+                {
+                    value->type = doub;
+                }
+                else if (symbol->type == string_t)
+                {
+                    value->type = str;
+                }
+                else if (symbol->type == bool_t)
+                {
+                    value->type = boo;
+                }
+                else if (symbol->type == undefined_t){
+                    value->type = undefined;
+                }                
+            }
+            else
+            {
+                printf("Error: Semantics error\n");
+                return 7;
+            }
+        }
         expression_value *last = expression_last(stack);
         int action = precTable[last->index][value->index];
         printf("%s\n", value->value);
@@ -392,19 +467,12 @@ expression_value *bottomUp(Token *token, FILE *fp)
             {
                 openBrackets--;
             }
-            returnToken(token, fp);
         }
         else if (action == R)
         {
-            if ((x = reduce(stack)) == 1)
+            if ((x = reduce(stack)) != 0)
             {
-                printf("Error: Syntax error\n");
-                return NULL;
-            }
-            else if (x == 2)
-            {
-                printf("Error: Semantics error\n");
-                return NULL;
+                return x;
             }
         }
         else if (action == Err)
@@ -414,9 +482,8 @@ expression_value *bottomUp(Token *token, FILE *fp)
                 free(value);
                 break;
             }
-            printf("Error: syntax error\n");
             free(value);
-            break;
+            return 2;
         }
         else if (action == Eq)
         {
@@ -433,14 +500,13 @@ expression_value *bottomUp(Token *token, FILE *fp)
         }
         else if (action == Fin)
         {
-            printf("Konec\n");
             break;
         }
         else
         {
             printf("Error: syntax error\n");
             free(value);
-            break;
+            return 2;
         }
 
         if (token->lexeme[0] == EOF)
@@ -448,6 +514,8 @@ expression_value *bottomUp(Token *token, FILE *fp)
             break;
         }
     }
+    returnToken(token, fp);
+
     if (stack->head->next != NULL)
     {
         while (stack->head->next->next != NULL)
@@ -455,18 +523,21 @@ expression_value *bottomUp(Token *token, FILE *fp)
             if ((x = reduce(stack)) == 1)
             {
                 printf("Error: Syntax error\n");
-                return NULL;
+                return 2;
             }
             else if (x == 2)
             {
                 printf("Error: Semantics error\n");
-                return NULL;
+                return 7;
             }
         }
     }
+    
     retVal = expression_list_pop(stack);
+    translateExpression(retVal, 0);
+
     expression_list_dispose(stack);
-    // destroyToken(token);
-    // fclose(fp);
-    return retVal;
+    *returningValue = retVal;
+    returnToken(token, fp);
+    return 0;
 }

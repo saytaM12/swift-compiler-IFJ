@@ -7,13 +7,16 @@ const char *typeLookup[] = {
     "string",
 };
 
+int expression_cnt = 1;
+
 code_t generator_code_init() {
     code_t code;
     code.last = NULL;
     code.first = NULL;
 
     generator_addLineEnd(&code, ".IFJcode23");
-    generator_addLineEnd(&code, "JUMP $$main");
+    generator_addLineEnd(&code, "CREATEFRAME");
+    // generator_addLineEnd(&code, "JUMP $$main");
 
     return code;
 }
@@ -232,11 +235,8 @@ void translateFunCal() {
 }
 
 void translateVarDEF() {
-
     int max_len;
     char *line;
-
-    //if (ins->varDef.local) {
 
     if (ins->currScope) {
         generator_addLineFromEnd(&code,
@@ -247,9 +247,9 @@ void translateVarDEF() {
     }
 
     if (ins->varDef.value) {
-        max_len = strlen(ins->varDef.value) + strlen(ins->varDef.name) + 20;
+        max_len = 1 + strlen(ins->varDef.value) + strlen("POPS LF@");
         line = malloc(sizeof(char) * max_len);
-        snprintf(line, max_len, "MOVE LF@%s %s@%s", ins->varDef.name, typeLookup[ins->varDef.type], ins->varDef.value);
+        snprintf(line, max_len, "POPS LF@%s", ins->varDef.name);
         generator_addLineFromEnd(&code, line, ins->totalOffset);
     }
 
@@ -258,17 +258,45 @@ void translateVarDEF() {
 }
 
 void translateAssign() {
-    int max_len;
-    char *line;
-    max_len = strlen(ins->assign.from) + strlen(ins->assign.to) + 20;
-    line = malloc(sizeof(char) * max_len);
-    snprintf(line, max_len, "MOVE LF@%s LF@%s", ins->assign.to, ins->assign.from);
+    int max_len = 1 + strlen(ins->assign.to) + strlen("MOVE LF@ LF@");
+    char *line = malloc(sizeof(char) * max_len);
+    snprintf(line, max_len, "POPS LF@%s", ins->assign.to);
     generator_addLineFromEnd(&code, line, ins->totalOffset);
 
     generator_ins_destroy(ins);
     ins = generator_ins_init();
 }
 
+void translateWhileLoop() {
+    char *line = malloc(1 + strlen("LABEL $") + strlen(ins->currScope->name) + strlen("$while"));
+    sprintf(line, "LABEL $%s$while", ins->currScope->name);
+    generator_addLineFromEnd(&code, line, ins->totalOffset);
+
+    translateExpression(ins->whileLoop.condition, ins->totalOffset);
+
+    line = realloc(line, 1 + strlen("JUMPIFEQ $") + strlen(ins->currScope->name) + strlen("$while_end bool@true"));
+    sprintf(line, "JUMPIFEQ $%s$while_end bool@true", ins->currScope->name);
+    generator_addLineFromEnd(&code, line, ins->totalOffset);
+
+    generator_ins_destroy(ins);
+    ins = generator_ins_init();
+}
+
+void translateIfExpr() {
+    generator_addLineFromEnd(&code, "PUSHFRAME", ins->totalOffset);
+    generator_addLineFromEnd(&code, "CREATEFRAME", ins->totalOffset);
+
+    translateExpression(ins->ifExpr.condition, ins->totalOffset);
+
+    generator_addLineFromEnd(&code, "POPS TF@tmp_cond", ins->totalOffset);
+
+    char *line = malloc(1 + strlen("JUMPIFNEQ $else$$ bool@true TF@tmp_cond") + strlen(ins->currScope->name) + ins->currScope->offset);
+    sprintf(line, "JUMPIFNEQ $else$%s$%d bool@true TF@tmp_cond", ins->currScope->name, ins->currScope->offset);
+    generator_addLineFromEnd(&code, line, ins->totalOffset);
+
+    generator_ins_destroy(ins);
+    ins = generator_ins_init();
+}
 
 void generator_translate() {
     switch (ins->instructionType) {
@@ -285,8 +313,10 @@ void generator_translate() {
             translateAssign();
             break;
         case whileLoop:
+            translateWhileLoop();
             break;
         case ifExpr:
+            translateIfExpr();
             break;
         default:
             break;
@@ -311,13 +341,30 @@ void postOrderTraversal(expression_value *curr, int type, int fromEnd) {
         postOrderTraversal(curr->right, type, fromEnd);
     }
     
-    if (isNumber(curr->value)) {
+    if (isInteger(curr->value)) {
         char *line = malloc(1 + strlen("PUSHS int@") + strlen(curr->value));
         sprintf(line, "PUSHS int@%s", curr->value);
         generator_addLineFromEnd(&code, line, fromEnd);
 
         return;
     } 
+
+    if (isFloat(curr->value)) {
+        // convert curr->value to double and PUSHS it as %a
+        // convert curr->value to double
+        char *endptr;
+
+        printf("curr->value: %s\n", curr->value);
+        double result = strtod(curr->value, &endptr);
+        printf("result: %f\n", result);
+
+        char *line = malloc(1 + strlen("PUSHS float@") + sizeof(double) * 10);
+        sprintf(line, "PUSHS float@%a", result);
+
+        generator_addLineFromEnd(&code, line, fromEnd);
+
+        return;        
+    }
     // checks that both types are the same, otherwise converts int to float
     codeTypeCheck(fromEnd);
 
@@ -385,10 +432,19 @@ void postOrderString(expression_value *curr, int fromEnd) {
     }
 }
 
-int isNumber(const char *str) {
+int isInteger(const char *str) {
     char *endptr;
     strtol(str, &endptr, 10);
 
+    // Check for errors during conversion or if the entire string was consumed
+    return (*str != '\0' && *endptr == '\0');
+}
+
+int isFloat(const char *str) {
+    char *endptr;
+    strtod(str, &endptr);
+
+    // Check for errors during conversion or if the entire string was consumed
     return (*str != '\0' && *endptr == '\0');
 }
 
@@ -403,14 +459,35 @@ void codeTypeCheck(int fromEnd) {
     generator_addLineFromEnd(&code, "DEFVAR TF@type2", fromEnd);
     generator_addLineFromEnd(&code, "TYPE TF@type1 TF@val1", fromEnd);
     generator_addLineFromEnd(&code, "TYPE TF@type2 TF@val2", fromEnd);
-    generator_addLineFromEnd(&code, "JUMPIFEQ $types_eq TF@type1 TF@type2", fromEnd);
-    generator_addLineFromEnd(&code, "JUMPIFNEQ $val1_is_int TF@type1 string@int", fromEnd);
+    char *line1 = malloc(1 + strlen("JUMPIFEQ $") + expression_cnt * sizeof(char) + strlen("$types_eq TF@type1 TF@type2"));
+    sprintf(line1, "JUMPIFEQ $%d$types_eq TF@type1 TF@type2", expression_cnt);
+    generator_addLineFromEnd(&code, line1, fromEnd);
+    char *line2 = malloc(1 + strlen("JUMPIFNEQ $") + expression_cnt * sizeof(char) + strlen("$val1_is_int TF@type1 string@int"));
+    sprintf(line2, "JUMPIFNEQ $%d$val1_is_int TF@type1 string@int", expression_cnt);
+    generator_addLineFromEnd(&code, line2, fromEnd);
     generator_addLineFromEnd(&code, "INT2FLOAT TF@val1 TF@val1", fromEnd);
-    generator_addLineFromEnd(&code, "JUMP $types_eq", fromEnd);
-    generator_addLineFromEnd(&code, "LABEL $val1_is_int", fromEnd);
+
+    char *line3 = malloc(1 + strlen("JUMP $") + expression_cnt * sizeof(char) + strlen("$types_eq"));
+    sprintf(line3, "JUMP $%d$types_eq", expression_cnt);
+    generator_addLineFromEnd(&code, line3, fromEnd);
+
+    char *line4 = malloc(1 + strlen("LABEL $") + expression_cnt * sizeof(char) + strlen("$val1_is_int"));
+    sprintf(line4, "LABEL $%d$val1_is_int", expression_cnt);
+    generator_addLineFromEnd(&code, line4, fromEnd);
     generator_addLineFromEnd(&code, "INT2FLOAT TF@val2 TF@val2", fromEnd);
-    generator_addLineFromEnd(&code, "LABEL $types_eq", fromEnd);
+
+    char *line5 = malloc(1 + strlen("LABEL $") + expression_cnt * sizeof(char) + strlen("$types_eq"));
+    sprintf(line5, "LABEL $%d$types_eq", expression_cnt);
+    generator_addLineFromEnd(&code, line5, fromEnd);
     generator_addLineFromEnd(&code, "PUSHS TF@val2", fromEnd);
     generator_addLineFromEnd(&code, "PUSHS TF@val1", fromEnd);
     generator_addLineFromEnd(&code, "POPFRAME", fromEnd);
+
+    expression_cnt++;
+
+    free(line1);
+    free(line2);
+    free(line3);
+    free(line4);
+    free(line5);
 }
