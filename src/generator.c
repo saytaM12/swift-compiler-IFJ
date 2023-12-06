@@ -4,7 +4,6 @@
 #include <math.h>
 #include <string.h>
 #include <stdlib.h>
-/*
 
 code_t generator_code_init() {
     code_t code;
@@ -71,8 +70,6 @@ void generator_ins_destroy(instruction_t *ins) {
         case whileLoop:
         break;
         case ifExpr:
-        break;
-        case expression:
         break;
     }
     free(ins);
@@ -247,17 +244,81 @@ void generator_translate() {
             break;
         case ifExpr:
             break;
-        case expression:
-            translateExpression();
-            break;
         default:
             break;
     }
 }
-*/
 
-void translateExpression() {
-    ins->expression.expr_val;
+void translateExpression(expression_value *expr_val, int lineFromEnd) {
+    if (expr_val->type == num || expr_val->type == doub) {
+        postOrderTraversal(expr_val, expr_val->type, lineFromEnd);
+    }
+}
+
+void postOrderTraversal(expression_value *curr, int type, int fromEnd) {
+    if (curr->left) {
+        postOrderTraversal(curr->left, type, fromEnd);
+    }
+    if (curr->right) {
+        postOrderTraversal(curr->right, type, fromEnd);
+    }
+    
+    if (isNumber(curr->value)) {
+        char *line = malloc(1 + strlen("PUSHS int@") + strlen(curr->value));
+        sprintf(line, "PUSHS int@%s", curr->value);
+        generator_addLineFromEnd(&code, line, fromEnd);
+    } else if (strcmp(curr->value, "+") == 0) {
+        char *line = malloc(1 + strlen("ADDS"));
+        sprintf(line, "ADDS");
+        generator_addLineFromEnd(&code, line, fromEnd);
+    } else if (strcmp(curr->value, "-") == 0) {
+        char *line = malloc(1 + strlen("SUBS"));
+        sprintf(line, "SUBS");
+        generator_addLineFromEnd(&code, line, fromEnd);
+    } else if (strcmp(curr->value, "*") == 0) {
+        char *line = malloc(1 + strlen("MULS"));
+        sprintf(line, "MULS");
+        generator_addLineFromEnd(&code, line, fromEnd);
+    } else if (strcmp(curr->value, "/") == 0) {
+        if (type == doub) {
+            char *line = malloc(1 + strlen("DIVS"));
+            sprintf(line, "DIVS");
+            generator_addLineFromEnd(&code, line, fromEnd);
+        }
+        else if (type == num) {
+            char *line = malloc(1 + strlen("IDIVS"));
+            sprintf(line, "IDIVS");
+            generator_addLineFromEnd(&code, line, fromEnd);
+        }
+    } else if (strcmp(curr->value, ">") == 0) {
+        char *line = malloc(1 + strlen("GTS"));
+        sprintf(line, "GTS");
+        generator_addLineFromEnd(&code, line, fromEnd);
+    } else if (strcmp(curr->value, "<") == 0) {
+        char *line = malloc(1 + strlen("LTS"));
+        sprintf(line, "LTS");
+        generator_addLineFromEnd(&code, line, fromEnd);
+    } else if (strcmp(curr->value, ">=") == 0) {
+        // TBD:
+        // PUSHFRAME
+        // DEFVAR TF@%tmp1
+        // DEFVAR TF@%tmp2
+        // DEFVAR TF@%res_gt
+        // DEFVAR TF@%res_eq
+        // DEFVAR TF@%res
+        // GT TF@%res_gt LF@%tmp1 LF@%tmp2
+        // EQ TF@%res_eq LF@%tmp1 LF@%tmp2
+        // OR TF@%res TF@%res_gt TF@%res_eq
+        // PUSHS TF@%res
+    } else if (strcmp(curr->value, "==") == 0) {
+        char *line = malloc(1 + strlen("EQS"));
+        sprintf(line, "EQS");
+        generator_addLineFromEnd(&code, line, fromEnd);
+    } else if (strcmp(curr->value, "!") == 0) {
+        char *line = malloc(1 + strlen("NOTS"));
+        sprintf(line, "NOTS");
+        generator_addLineFromEnd(&code, line, fromEnd);
+    }
 }
 
 int isNumber(const char *str) {
@@ -265,63 +326,4 @@ int isNumber(const char *str) {
     strtol(str, &endptr, 10);
 
     return (*str != '\0' && *endptr == '\0');
-}
-
-
-void postOrderTraversal(expression_value *curr) {
-    if (curr->left) {
-        postOrderTraversal(curr->left);
-    }
-    if (curr->right) {
-        postOrderTraversal(curr->right);
-    }
-    
-    if (isNumber(curr->value)) {
-        printf("PUSHS int@%s\n", curr->value);
-    } else if (strcmp(curr->value, "+") == 0) {
-        printf("ADDS\n");
-    } else if (strcmp(curr->value, "-") == 0) {
-        printf("SUBS\n");
-    } else if (strcmp(curr->value, "*") == 0) {
-        printf("MULS\n");
-    } else if (strcmp(curr->value, "/") == 0) {
-        printf("IDIVS\n");
-    } else if (strcmp(curr->value, ">") == 0) {
-        printf("GTS\n");
-    } else if (strcmp(curr->value, "<") == 0) {
-        printf("LTS\n");
-    } else if (strcmp(curr->value, "==") == 0) {
-        printf("EQS\n");
-    } else if (strcmp(curr->value, "!") == 0) {
-        printf("NOTS\n");
-    }
-}
-void main() {
-    instruction_t *ins = malloc(sizeof(instruction_t));
-    ins->instructionType = expression;
-
-    // 8/4 + 6 > 4*8
-    // populate tree
-    expression_value *root = malloc(sizeof(expression_value));
-    root->value = ">";
-    root->left = malloc(sizeof(expression_value));
-    root->left->value = "+";
-    root->left->left = malloc(sizeof(expression_value));
-    root->left->left->value = "/";
-    root->left->left->left = malloc(sizeof(expression_value));
-    root->left->left->left->value = "8";
-    root->left->left->right = malloc(sizeof(expression_value));
-    root->left->left->right->value = "4";
-    root->left->right = malloc(sizeof(expression_value));
-    root->left->right->value = "6";
-    root->right = malloc(sizeof(expression_value));
-    root->right->value =    "*";
-    root->right->left = malloc(sizeof(expression_value));
-    root->right->left->value = "4";
-    root->right->right = malloc(sizeof(expression_value));
-    root->right->right->value = "8";
-
-    ins->expression.expr_val = *root;
-
-    postOrderTraversal(&ins->expression.expr_val);
 }

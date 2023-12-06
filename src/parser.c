@@ -51,6 +51,8 @@ int addSymbol(Token* token, char* name, stack_t *stack){
                 symbol = symbol_variable_ctor(name, int_t);
                 add_symbol(stack, symbol);
                 break;
+            case numberFloat:
+                break;
             case operation:
                 return 9;
             case singleChars:

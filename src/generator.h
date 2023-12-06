@@ -32,7 +32,6 @@ typedef enum
     assign = 4,
     whileLoop = 5,
     ifExpr = 6,
-    expression = 7,
 } instructionType_e;
 
 typedef enum
@@ -102,12 +101,6 @@ struct ifExpr_t
 {
 };
 
-// expression /////////////////////////
-struct expression_t
-{
-    expression_value expr_val;
-};
-
 
 typedef struct {
     scope_t *currScope;
@@ -121,7 +114,6 @@ typedef struct {
         struct assign_t assign;
         // struct whileLoop_t whileLoop;
         // struct ifExpr_t ifExpr;
-        struct expression_t expression;
     };
 } instruction_t;
 
