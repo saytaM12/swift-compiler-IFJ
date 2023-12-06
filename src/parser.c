@@ -667,8 +667,9 @@ int parse_expression(FILE *file, Token *token, char *name, stack_t *stack)
 }
 
 printf("\nEXPRESSSIOOON\n");
-    expression_value *value=bottomUp(token,file);
-    if (value==NULL)
+    expression_value *value = NULL;
+    bottomUp(token, file, &value,stack);
+    if (value == NULL)
     {
         ERROR();
         return 2;
