@@ -377,9 +377,15 @@ int parse_next_param(FILE *file, Token *token, stack_t *stack)
 int parse_function_type(FILE *file, Token *token, char *name, stack_t *stack)
 {
     // eps
-    printf("\n%s\n", token->lexeme);
-    if (!strcmp(token->lexeme, "{"))
-    {
+    printf("\n%s\n",token->lexeme);
+    if(!strcmp(token->lexeme,"{")){
+        symbol_t *found = get_symbol(stack, name);
+                    if(found!=NULL){
+                        return 3;
+                    }
+                    symbol_t *symbol = symbol_function_ctor(name, void_t, param_types,size);
+                    add_symbol(stack, symbol);
+                    size=0;
         printf("{\n");
         destroyToken(token);
         generator_translate();
