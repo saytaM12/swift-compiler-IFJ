@@ -1,10 +1,12 @@
 #ifndef EXPRESSIN_H
 #define EXPRESSIN_H
 #include "lexical.h"
+#include "symtable.h"
+#include "symstack.h"
 typedef enum {R, S, Eq, Err, Fin}prec_action; // R = reduce, S = shift, Eq = equal, Err = error, Fin = final
 typedef enum {PlusMinus, MultiplyDivide, Rel, ExMark, QuestionMark, OpenBracket, CloseBracket, Identifier, Dollar, Expression}prec_index;
 // +-   */   !=<>   !   ??   (   )   i   $
-typedef enum {num, str, doub, boo, nil}type;
+typedef enum {num, str, doub, boo, nil,undefined}type;
 
 typedef struct expression_value
 {
@@ -40,5 +42,5 @@ void printExprList(expression_list* stack);
 void printValue(expression_value* value, int level);
 expression_value *expression_last(expression_list *list);
 expression_value* expression_value_create(Token* token);
-int bottomUp(Token *token,FILE *fp, expression_value **returningValue);
+int bottomUp(Token *token,FILE *fp, expression_value **returningValue, stack_t *stack);
 #endif

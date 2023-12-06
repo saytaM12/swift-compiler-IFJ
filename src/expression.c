@@ -298,7 +298,7 @@ int reduce(expression_list *stack)
         {
             node->value->type = str;
         }
-        else if (node->value->left->type==num && node->value->right->type==num)
+        else if (node->value->left->type == num && node->value->right->type == num)
         {
             node->value->type = num;
         }
@@ -340,11 +340,12 @@ int reduce(expression_list *stack)
         {
             return 2;
         }
-        else if ((node->value->left->type == num || node->value->left->type == doub)&& (node->value->right->type == num || node->value->right->type == doub))
+        else if ((node->value->left->type == num || node->value->left->type == doub) && (node->value->right->type == num || node->value->right->type == doub))
         {
             node->value->type = boo;
         }
-        else if (node->value->left->type != node->value->right->type){
+        else if (node->value->left->type != node->value->right->type)
+        {
             return 7;
         }
     }
@@ -385,7 +386,7 @@ int reduce(expression_list *stack)
     return 0;
 }
 
-int bottomUp(Token *token, FILE *fp, expression_value **returningValue)
+int bottomUp(Token *token, FILE *fp, expression_value **returningValue, stack_t *symTable)
 {
     expression_value *retVal = NULL;
     expression_list *stack = expression_list_create();
@@ -408,11 +409,48 @@ int bottomUp(Token *token, FILE *fp, expression_value **returningValue)
 
     while (token->type == identifier || token->type == number || token->type == string || token->type == operation || token->type == singleChars || token->type == numberFloat)
     {
+
         if (token->type == unknown)
         {
             break;
         }
         expression_value *value = expression_value_create(token);
+        if (token->type == identifier)
+        {
+            symbol_t *symbol = get_symbol(symTable, value->value);
+            if (symbol == NULL)
+            {
+                printf("Error: Semantics error\n");
+                return 7;
+            }
+            else if (symbol->is_variable)
+            {
+                if (symbol->type == int_t)
+                {
+                    value->type = num;
+                }
+                else if (symbol->type == double_tt)
+                {
+                    value->type = doub;
+                }
+                else if (symbol->type == string_t)
+                {
+                    value->type = str;
+                }
+                else if (symbol->type == bool_t)
+                {
+                    value->type = boo;
+                }
+                else if (symbol->type == undefined_t){
+                    value->type = undefined;
+                }                
+            }
+            else
+            {
+                printf("Error: Semantics error\n");
+                return 7;
+            }
+        }
         expression_value *last = expression_last(stack);
         int action = precTable[last->index][value->index];
         printf("%s\n", value->value);
@@ -494,7 +532,7 @@ int bottomUp(Token *token, FILE *fp, expression_value **returningValue)
     }
     retVal = expression_list_pop(stack);
     expression_list_dispose(stack);
-    *returningValue=retVal;
-    returnToken(token,fp);
+    *returningValue = retVal;
+    returnToken(token, fp);
     return 0;
 }
