@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <math.h>
+#include <string.h>
 
 /*
  * Single node of double linked list of lines of code IFJcode23

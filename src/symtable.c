@@ -1,5 +1,3 @@
-#include <stdio.h>
-
 #include "symtable.h"
 
 symbol_t *symbol_ctor(char *name, Typee type, bool is_variable, Typee return_type, Typee *param_types)

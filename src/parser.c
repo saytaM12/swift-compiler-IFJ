@@ -1,5 +1,3 @@
-#include <stdlib.h>
-#include <string.h>
 #include "parser.h"
 #include "symstack.h"
 #include "symtable.h"

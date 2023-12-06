@@ -13,6 +13,8 @@
 #define SYMSTACK_H
 
 #include "symtable.h"
+#include <stdio.h>
+
 
 #define DEFAULT_STACK_SIZE 50
 

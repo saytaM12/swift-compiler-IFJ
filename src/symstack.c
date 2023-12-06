@@ -1,5 +1,3 @@
-#include <stdio.h>
-
 #include "symstack.h"
 
 stack_t *stack_ctor()
