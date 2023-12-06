@@ -1,15 +1,5 @@
 {
     "files.associations": {
-        "*.embeddedhtml": "html",
-        "ctype.h": "c",
-        "lexical.h": "c",
-        "symtable.h": "c",
-        "symstack.h": "c",
-        "array": "c",
-        "string_view": "c",
-        "initializer_list": "c",
-        "utility": "c",
-        "typeinfo": "c"
-    },
-    "C_Cpp.errorSquiggles": "disabled"
+        "ctype.h": "c"
+    }
 }

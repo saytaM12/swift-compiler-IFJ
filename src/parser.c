@@ -605,8 +605,8 @@ int parse_expression(FILE *file, Token *token, char *name, stack_t *stack)
             printf("(\n");
             printf("%s", name);
             return parse_call_param(file, token, name, stack);
-            returnToken(token, file);
         }
+        returnToken(token, file);
         // -> [expression]
         printf("\nEXPRESSSIOOON\n");
         expression_value *value = NULL;
