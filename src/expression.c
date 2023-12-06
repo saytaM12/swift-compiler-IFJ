@@ -392,7 +392,6 @@ expression_value *bottomUp(Token *token, FILE *fp)
             {
                 openBrackets--;
             }
-            returnToken(token, fp);
         }
         else if (action == R)
         {
@@ -448,6 +447,8 @@ expression_value *bottomUp(Token *token, FILE *fp)
             break;
         }
     }
+    returnToken(token, fp);
+
     if (stack->head->next != NULL)
     {
         while (stack->head->next->next != NULL)
@@ -464,7 +465,10 @@ expression_value *bottomUp(Token *token, FILE *fp)
             }
         }
     }
+    
     retVal = expression_list_pop(stack);
+    translateExpression(retVal, 0);
+
     expression_list_dispose(stack);
     // destroyToken(token);
     // fclose(fp);
