@@ -526,7 +526,7 @@ int parse_body(FILE *file, Token *token, stack_t *stack)
             ins->instructionType = funCal;
             ins->funCal.name = potentialFun;
             ins->funCal.paramNum = 0;
-            ins->funCal.parameters = calloc(sizeof(struct funDefParam *), 1);
+            ins->funCal.parameters = calloc(sizeof(char*), 1);
 
             destroyToken(token);
             printf("(\n");
