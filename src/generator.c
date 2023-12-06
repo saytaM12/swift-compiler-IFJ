@@ -73,8 +73,8 @@ void generator_ins_clear(instruction_t *ins) {
             free(ins->funCal.name);
         break;
         case varDef:
-            free(ins->varDef.name);
-            free(ins->varDef.value);
+            //free(ins->varDef.name);
+            //free(ins->varDef.value);
         break;
         case assign:
             free(ins->assign.from);

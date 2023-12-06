@@ -1,0 +1,70 @@
+.IFJcode23
+CREATEFRAME
+PUSHFRAME
+CREATEFRAME
+LABEL $hello
+PUSHFRAME
+DEFVAR LF@$hello$retval
+DEFVAR LF@$hello$0
+MOVE LF@$hello$0 LF@%0
+GTS
+POPFRAME
+PUSHS TF@val1
+PUSHS TF@val2
+LABEL $2$types_eq
+INT2FLOAT TF@val2 TF@val2
+LABEL $2$val1_is_int
+JUMP $2$types_eq
+INT2FLOAT TF@val1 TF@val1
+JUMPIFNEQ $2$val1_is_int TF@type1 string@int
+JUMPIFEQ $2$types_eq TF@type1 TF@type2
+TYPE TF@type2 TF@val2
+TYPE TF@type1 TF@val1
+DEFVAR TF@type2
+DEFVAR TF@type1
+POPS TF@val2
+POPS TF@val1
+DEFVAR TF@val2
+DEFVAR TF@val1
+CREATEFRAME
+PUSHFRAME
+PUSHS int@0
+POPFRAME
+PUSHS TF@val1
+PUSHS TF@val2
+LABEL $1$types_eq
+INT2FLOAT TF@val2 TF@val2
+LABEL $1$val1_is_int
+JUMP $1$types_eq
+INT2FLOAT TF@val1 TF@val1
+JUMPIFNEQ $1$val1_is_int TF@type1 string@int
+JUMPIFEQ $1$types_eq TF@type1 TF@type2
+TYPE TF@type2 TF@val2
+TYPE TF@type1 TF@val1
+DEFVAR TF@type2
+DEFVAR TF@type1
+POPS TF@val2
+POPS TF@val1
+DEFVAR TF@val2
+DEFVAR TF@val1
+CREATEFRAME
+PUSHFRAME
+PUSHS LF@a
+DEFVAR LF@$hello$1
+PUSHS int@1
+CALL $write
+MOVE TF@%0 Faktorial nelze spocitat\n
+DEFVAL TF@%0
+PUSHFRAME
+MOVE LF@$hello$1 LF@%1
+PUSHS int@6
+LABEL $hello$end
+POPS LF@UNKNOWN
+DEFVAR LF@UNKNOWN
+PUSHS int@0
+CALL $write
+MOVE TF@%0 Zadejte cislo pro vypocet faktorialu\n
+DEFVAL TF@%0
+PUSHFRAME
+RETURN
+POPFRAME

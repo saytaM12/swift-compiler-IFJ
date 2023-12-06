@@ -41,7 +41,7 @@ int addSymbol(Token *token, char *name, stack_t *stack)
         }
     switch (token->type) {
             case identifier:
-                 symbol_t *found = get_symbol(stack, token->lexeme);
+                found = get_symbol(stack, token->lexeme);
                 if(found == NULL){
                     return 3;
                 }
@@ -667,7 +667,13 @@ printf("\nEXPRESSSIOOON\n");
     }
     
     ins->instructionType = varDef;
-    ins->varDef.name = name;
+    if (name) {
+        ins->varDef.name = malloc(strlen(name) + 1);
+        strcpy(ins->varDef.name, name);
+    } else {
+        ins->varDef.name = malloc(strlen("UNKNOWN") + 1);
+        ins->varDef.name = "UNKNOWN";
+    }
     generator_translate();
     ins->totalOffset++;
 
