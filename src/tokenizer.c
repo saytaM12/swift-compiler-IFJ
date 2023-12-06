@@ -1,4 +1,5 @@
-#include "lexical.h"
+#include "tokenizer.h"
+#include <stdio.h>
 
 Token* initToken() {
     Token* token = malloc(sizeof(Token));
@@ -22,6 +23,12 @@ void finishToken(Token* token, Type type) {
     token->size = token->lexlen + 1;
     token->lexeme[token->lexlen] = '\0';
     token->type = type;
+}
+
+void returnToken(Token *token, FILE *file) {
+    for (int i = 0; i < token->lexlen; i++) {
+        ungetc(token->lexeme[token->lexlen - (i + 1)], file);
+    }
 }
 
 void destroyToken(Token* token) {

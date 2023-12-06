@@ -1,5 +1,6 @@
 #ifndef TOKENIZERDEFINED
 #define TOKENIZERDEFINED
+#include <stdio.h>
 #include <stdlib.h>
 
 #define DEFAULT_LEXEME_LEN 20
@@ -56,6 +57,14 @@ void addToLexeme(Token* token, char ch);
  * Type type = type what tke token should be
  */
 void finishToken(Token* token, Type type);
+
+/*
+ * return lexeme to file,
+ * ,
+ * Token *token = token from which to take lexeme,
+ * FILE *file = file into which to write,
+ */
+void returnToken(Token *token, FILE *file);
 
 /*
  * destroys token so it cannot be used later and frees memory,

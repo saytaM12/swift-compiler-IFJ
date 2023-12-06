@@ -1,10 +1,13 @@
 #include "lexical.h"
 #include "parser.h"
 #include "symstack.h"
+#include "tokenizer.h"
 void lexCheck() {
     Token* token;
 
+    int i = 0;
     FILE* file = fopen("input.swift", "r");
+    if (!file) return;
     token = getToken(file);
 
     while (token->lexeme[0] != EOF) {
@@ -36,6 +39,10 @@ void lexCheck() {
         }
         printf("%d:%d\t", pos.line, pos.col);
         printf("%s\n", token->lexeme);
+        if (i < 20) {
+            returnToken(token, file);
+            i++;
+        }
         destroyToken(token);
         token = getToken(file);
     }
@@ -57,7 +64,9 @@ int main(void) {
     printf("===Printing Lexical analyzer output===");
     printf("\n\n");
     lexCheck();
+    /*
     printf("\n\n====Printing top-down parser output===\n\n");
     synCheck();
     printf("\n\n");
+    */
 }
