@@ -523,7 +523,7 @@ int parse_body(FILE *file, Token *token, stack_t *stack)
         {
             symbol_t *found = get_symbol(stack, name);
             if(found == NULL){
-                return 3;
+                return 5;
             }
             free(potentialFun);
             token = new_token(file,token);
@@ -687,7 +687,7 @@ int parse_call_param_types(FILE *file, Token *token, char *name, stack_t *stack)
                     symbol_t *found = get_symbol(stack, token->lexeme);
                     if (found == NULL)
                     {
-                        return 3;
+                        return 5;
                     }
                     call_function[size_call_function-1].param_types[size-1] = found->type;
                 }
@@ -714,7 +714,7 @@ int parse_call_param_types(FILE *file, Token *token, char *name, stack_t *stack)
             symbol_t *found = get_symbol(stack, name);
             if (found == NULL)
             {
-                return 3;
+                return 5;
             }
             call_function[size_call_function - 1].param_types[size - 1] = found->type;
         }
