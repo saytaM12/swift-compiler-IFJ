@@ -4,6 +4,7 @@
 #include <math.h>
 #include <string.h>
 #include <stdlib.h>
+/*
 
 code_t generator_code_init() {
     code_t code;
@@ -70,6 +71,8 @@ void generator_ins_destroy(instruction_t *ins) {
         case whileLoop:
         break;
         case ifExpr:
+        break;
+        case expression:
         break;
     }
     free(ins);
@@ -194,6 +197,12 @@ void translateFunDef() {
 }
 
 void translateVarDEF() {
+    const char *typeLookup[] = {
+        "int",
+        "float",
+        "string",
+    };
+
     int max_len;
     char *line;
     if (ins->varDef.local) {
@@ -220,6 +229,7 @@ void translateAssign() {
     generator_addLineEnd(&code, line);
 }
 
+
 void generator_translate() {
     switch (ins->instructionType) {
         case funDef:
@@ -237,7 +247,81 @@ void generator_translate() {
             break;
         case ifExpr:
             break;
+        case expression:
+            translateExpression();
+            break;
         default:
             break;
     }
+}
+*/
+
+void translateExpression() {
+    ins->expression.expr_val;
+}
+
+int isNumber(const char *str) {
+    char *endptr;
+    strtol(str, &endptr, 10);
+
+    return (*str != '\0' && *endptr == '\0');
+}
+
+
+void postOrderTraversal(expression_value *curr) {
+    if (curr->left) {
+        postOrderTraversal(curr->left);
+    }
+    if (curr->right) {
+        postOrderTraversal(curr->right);
+    }
+    
+    if (isNumber(curr->value)) {
+        printf("PUSHS int@%s\n", curr->value);
+    } else if (strcmp(curr->value, "+") == 0) {
+        printf("ADDS\n");
+    } else if (strcmp(curr->value, "-") == 0) {
+        printf("SUBS\n");
+    } else if (strcmp(curr->value, "*") == 0) {
+        printf("MULS\n");
+    } else if (strcmp(curr->value, "/") == 0) {
+        printf("IDIVS\n");
+    } else if (strcmp(curr->value, ">") == 0) {
+        printf("GTS\n");
+    } else if (strcmp(curr->value, "<") == 0) {
+        printf("LTS\n");
+    } else if (strcmp(curr->value, "==") == 0) {
+        printf("EQS\n");
+    } else if (strcmp(curr->value, "!") == 0) {
+        printf("NOTS\n");
+    }
+}
+void main() {
+    instruction_t *ins = malloc(sizeof(instruction_t));
+    ins->instructionType = expression;
+
+    // 8/4 + 6 > 4*8
+    // populate tree
+    expression_value *root = malloc(sizeof(expression_value));
+    root->value = ">";
+    root->left = malloc(sizeof(expression_value));
+    root->left->value = "+";
+    root->left->left = malloc(sizeof(expression_value));
+    root->left->left->value = "/";
+    root->left->left->left = malloc(sizeof(expression_value));
+    root->left->left->left->value = "8";
+    root->left->left->right = malloc(sizeof(expression_value));
+    root->left->left->right->value = "4";
+    root->left->right = malloc(sizeof(expression_value));
+    root->left->right->value = "6";
+    root->right = malloc(sizeof(expression_value));
+    root->right->value =    "*";
+    root->right->left = malloc(sizeof(expression_value));
+    root->right->left->value = "4";
+    root->right->right = malloc(sizeof(expression_value));
+    root->right->right->value = "8";
+
+    ins->expression.expr_val = *root;
+
+    postOrderTraversal(&ins->expression.expr_val);
 }

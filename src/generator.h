@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include "expression.h"
 
 /*
  * Single node of double linked list of lines of code IFJcode23
@@ -31,6 +32,7 @@ typedef enum
     assign = 4,
     whileLoop = 5,
     ifExpr = 6,
+    expression = 7,
 } instructionType_e;
 
 typedef enum
@@ -40,11 +42,6 @@ typedef enum
     String = 3,
 } varialbeType_e;
 
-const char *typeLookup[] = {
-    "int",
-    "float",
-    "string",
-};
 
 typedef struct Scope{
     struct Scope *next;
@@ -105,6 +102,13 @@ struct ifExpr_t
 {
 };
 
+// expression /////////////////////////
+struct expression_t
+{
+    expression_value expr_val;
+};
+
+
 typedef struct {
     scope_t *currScope;
     int totalOffset;
@@ -117,6 +121,7 @@ typedef struct {
         struct assign_t assign;
         // struct whileLoop_t whileLoop;
         // struct ifExpr_t ifExpr;
+        struct expression_t expression;
     };
 } instruction_t;
 
