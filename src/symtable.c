@@ -45,6 +45,9 @@ symtable_t *symtable_ctor()
 
 void symtable_dtor(symtable_t *symtable)
 {
+    if (!symtable) {
+        return;
+    }
     free(symtable->array);
     free(symtable);
 }
@@ -105,8 +108,10 @@ void print_symtable(symtable_t *symtable)
 
 void symbol_dtor(symbol_t *symbol)
 {
-    free(symbol);
+    if (!symbol)
+        return;
     free(symbol->name);
+    free(symbol);
 }
 
 /*int main()
