@@ -250,12 +250,12 @@ void generator_translate() {
 }
 
 void translateExpression(expression_value *expr_val, int lineFromEnd) {
-    if (expr_val->type == num || expr_val->type == doub) {
-        postOrderTraversal(expr_val, expr_val->type, lineFromEnd);
+    if (expr_val->type == str) {
+        postOrderString(expr_val, lineFromEnd);
     }
-    else if (expr_val->type == str)
+    else
     {
-
+        postOrderTraversal(expr_val, expr_val->type, lineFromEnd);
     }
 }
 
@@ -295,41 +295,48 @@ void postOrderTraversal(expression_value *curr, int type, int fromEnd) {
     } else if (strcmp(curr->value, "<") == 0) {
         generator_addLineFromEnd(&code, "LTS", fromEnd);
     } else if (strcmp(curr->value, ">=") == 0) {
-        generator_addLineFromEnd(&code, "PUSHFRAME", fromEnd);
-        generator_addLineFromEnd(&code, "CREATEFRAME", fromEnd);
-        generator_addLineFromEnd(&code, "DEFVAR TF@%tmp1", fromEnd);
-        generator_addLineFromEnd(&code, "DEFVAR TF@%tmp2", fromEnd);
-        generator_addLineFromEnd(&code, "POPS TF@%tmp2", fromEnd);
-        generator_addLineFromEnd(&code, "POPS TF@%tmp1", fromEnd);
-        generator_addLineFromEnd(&code, "DEFVAR TF@%res_gt", fromEnd);
-        generator_addLineFromEnd(&code, "DEFVAR TF@%res_eq", fromEnd);
-        generator_addLineFromEnd(&code, "DEFVAR TF@%res", fromEnd);
-        generator_addLineFromEnd(&code, "GT TF@%res_gt LF@%tmp1 LF@%tmp2", fromEnd);
-        generator_addLineFromEnd(&code, "EQ TF@%res_eq LF@%tmp1 LF@%tmp2", fromEnd);
-        generator_addLineFromEnd(&code, "OR TF@%res TF@%res_gt TF@%res_eq", fromEnd);
-        generator_addLineFromEnd(&code, "PUSHS TF@%res", fromEnd);
-        generator_addLineFromEnd(&code, "POPFRAME", fromEnd);
+        generator_addLineFromEnd(&code, "LTS", fromEnd);
+        generator_addLineFromEnd(&code, "NOTS", fromEnd);
     } else if (strcmp(curr->value, "<=") == 0) {
-        generator_addLineFromEnd(&code, "PUSHFRAME", fromEnd);
-        generator_addLineFromEnd(&code, "CREATEFRAME", fromEnd);
-        generator_addLineFromEnd(&code, "DEFVAR TF@%tmp1", fromEnd);
-        generator_addLineFromEnd(&code, "DEFVAR TF@%tmp2", fromEnd);
-        generator_addLineFromEnd(&code, "POPS TF@%tmp2", fromEnd);
-        generator_addLineFromEnd(&code, "POPS TF@%tmp1", fromEnd);
-        generator_addLineFromEnd(&code, "DEFVAR TF@%res_lt", fromEnd);
-        generator_addLineFromEnd(&code, "DEFVAR TF@%res_eq", fromEnd);
-        generator_addLineFromEnd(&code, "DEFVAR TF@%res", fromEnd);
-        generator_addLineFromEnd(&code, "LT TF@%res_lt LF@%tmp1 LF@%tmp2", fromEnd);
-        generator_addLineFromEnd(&code, "EQ TF@%res_eq LF@%tmp1 LF@%tmp2", fromEnd);
-        generator_addLineFromEnd(&code, "OR TF@%res TF@%res_lt TF@%res_eq", fromEnd);
-        generator_addLineFromEnd(&code, "PUSHS TF@%res", fromEnd);
-        generator_addLineFromEnd(&code, "POPFRAME", fromEnd);
+        generator_addLineFromEnd(&code, "GTS", fromEnd);
+        generator_addLineFromEnd(&code, "NOTS", fromEnd);
     } else if (strcmp(curr->value, "!=") == 0) {
         generator_addLineFromEnd(&code, "EQS", fromEnd);
         generator_addLineFromEnd(&code, "NOTS", fromEnd);
     } else if (strcmp(curr->value, "==") == 0) {
         generator_addLineFromEnd(&code, "EQS", fromEnd);
     } else if (strcmp(curr->value, "!") == 0) {
+        generator_addLineFromEnd(&code, "NOTS", fromEnd);
+    }
+}
+
+void postOrderString(expression_value *curr, int fromEnd) {
+    if (curr->left) {
+        postOrderString(curr->left, fromEnd);
+    }
+    if (curr->right) {
+        postOrderString(curr->right, fromEnd);
+    }
+    
+    if (strcmp(curr->value, "+") == 0) {
+        generator_addLineFromEnd(&code, "POPS TF@%tmp2", fromEnd);
+        generator_addLineFromEnd(&code, "POPS TF@%tmp1", fromEnd);
+        generator_addLineFromEnd(&code, "CONCAT TF@%tmp1 TF@%tmp1 TF@%tmp2", fromEnd);
+        generator_addLineFromEnd(&code, "PUSHS TF@%tmp1", fromEnd);
+    } else if (strcmp(curr->value, "==") == 0) {
+        generator_addLineFromEnd(&code, "EQS", fromEnd);
+    } else if (strcmp(curr->value, "!=") == 0) {
+        generator_addLineFromEnd(&code, "EQS", fromEnd);
+        generator_addLineFromEnd(&code, "NOTS", fromEnd);
+    } else if (strcmp(curr->value, "<") == 0) {
+        generator_addLineFromEnd(&code, "LTS", fromEnd);
+    } else if (strcmp(curr->value, ">") == 0) {
+        generator_addLineFromEnd(&code, "GTS", fromEnd);
+    } else if (strcmp(curr->value, "<=") == 0) {
+        generator_addLineFromEnd(&code, "LTS", fromEnd);
+        generator_addLineFromEnd(&code, "NOTS", fromEnd);
+    } else if (strcmp(curr->value, ">=") == 0) {
+        generator_addLineFromEnd(&code, "GTS", fromEnd);
         generator_addLineFromEnd(&code, "NOTS", fromEnd);
     }
 }
