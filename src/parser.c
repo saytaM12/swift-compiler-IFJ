@@ -584,7 +584,7 @@ int parse_assign(FILE* file, Token* token, char*name,stack_t *stack){
         if (!strcmp(token->lexeme, "="))
         {
             token = new_token(file, token);
-            return parse_expression(file, token, "", stack);
+            return parse_expression(file, token, name, stack);
         }
         returnToken(token,file);
         return 0;
@@ -660,12 +660,18 @@ int parse_expression(FILE *file, Token *token, char *name, stack_t *stack)
     }
 
 printf("\nEXPRESSSIOOON\n");
-        expression_value *value = NULL;
-        int error = bottomUp(token,file,&value,stack);
-        if(error){
-            return error;
-        }
-        if (value == NULL)
+    expression_value *value = NULL;
+    int error = bottomUp(token,file,&value,stack);
+    if(error){
+        return error;
+    }
+    
+    ins->instructionType = varDef;
+    ins->varDef.name = name;
+    generator_translate();
+    ins->totalOffset++;
+
+    if (value == NULL)
         {
             ERROR();
             return 2;

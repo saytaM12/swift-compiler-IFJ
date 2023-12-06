@@ -16,6 +16,8 @@ code_t generator_code_init() {
 
     generator_addLineEnd(&code, ".IFJcode23");
     generator_addLineEnd(&code, "CREATEFRAME");
+    generator_addLineEnd(&code, "PUSHFRAME");
+    generator_addLineEnd(&code, "CREATEFRAME");
     // generator_addLineEnd(&code, "JUMP $$main");
 
     return code;
@@ -246,16 +248,13 @@ void translateVarDEF() {
     int max_len;
     char *line;
 
-    if (ins->currScope) {
-        generator_addLineFromEnd(&code,
-                strcat(strcat("DEFVAR LF@$", ins->currScope->name), strcat("$", ins->varDef.name)),
-                ins->totalOffset);
-    } else {
-        generator_addLineFromEnd(&code, strcat("DEFVAR GF@$", ins->varDef.name), ins->totalOffset);
-    }
+    char *def = malloc(1 + strlen("DEFVAR LF@") + strlen(ins->varDef.name));
+    sprintf(def, "DEFVAR LF@%s", ins->varDef.name);
+    generator_addLineFromEnd(&code, def, ins->totalOffset);
+
 
     if (ins->varDef.value) {
-        max_len = 1 + strlen(ins->varDef.value) + strlen("POPS LF@");
+        max_len = 1 + strlen("POPS LF@") + strlen(ins->varDef.name);
         line = malloc(sizeof(char) * max_len);
         snprintf(line, max_len, "POPS LF@%s", ins->varDef.name);
         generator_addLineFromEnd(&code, line, ins->totalOffset);
@@ -369,6 +368,8 @@ void postOrderTraversal(expression_value *curr, int type, int fromEnd) {
     if (curr->right) {
         postOrderTraversal(curr->right, type, fromEnd);
     }
+
+    printf("curr->value: %s\n", curr->value);
     
     if (isInteger(curr->value)) {
         char *line = malloc(1 + strlen("PUSHS int@") + strlen(curr->value));
@@ -394,6 +395,12 @@ void postOrderTraversal(expression_value *curr, int type, int fromEnd) {
 
         return;        
     }
+    if (strcmp(curr->value, "+") != 0 && strcmp(curr->value, "-") != 0 && strcmp(curr->value, "*") != 0 && strcmp(curr->value, "/") != 0 && strcmp(curr->value, ">") != 0 && strcmp(curr->value, "<") != 0 && strcmp(curr->value, ">=") != 0 && strcmp(curr->value, "<=") != 0 && strcmp(curr->value, "!=") != 0 && strcmp(curr->value, "==") != 0 && strcmp(curr->value, "!") != 0) {
+        char *line = malloc(1 + strlen("PUSHS LF@") + strlen(curr->value));
+        sprintf(line, "PUSHS LF@%s", curr->value);
+        generator_addLineFromEnd(&code, line, fromEnd);
+    }
+
     // checks that both types are the same, otherwise converts int to float
     codeTypeCheck(fromEnd);
 
@@ -439,10 +446,15 @@ void postOrderString(expression_value *curr, int fromEnd) {
     }
     
     if (strcmp(curr->value, "+") == 0) {
+        generator_addLineFromEnd(&code, "PUSHFRAME", fromEnd);
+        generator_addLineFromEnd(&code, "CREATEFRAME", fromEnd);
+        generator_addLineFromEnd(&code, "DEFVAR TF@%tmp1", fromEnd);
+        generator_addLineFromEnd(&code, "DEFVAR TF@%tmp2", fromEnd);
         generator_addLineFromEnd(&code, "POPS TF@%tmp2", fromEnd);
         generator_addLineFromEnd(&code, "POPS TF@%tmp1", fromEnd);
         generator_addLineFromEnd(&code, "CONCAT TF@%tmp1 TF@%tmp1 TF@%tmp2", fromEnd);
         generator_addLineFromEnd(&code, "PUSHS TF@%tmp1", fromEnd);
+        generator_addLineFromEnd(&code, "POPFRAME", fromEnd);
     } else if (strcmp(curr->value, "==") == 0) {
         generator_addLineFromEnd(&code, "EQS", fromEnd);
     } else if (strcmp(curr->value, "!=") == 0) {
@@ -458,6 +470,20 @@ void postOrderString(expression_value *curr, int fromEnd) {
     } else if (strcmp(curr->value, ">=") == 0) {
         generator_addLineFromEnd(&code, "GTS", fromEnd);
         generator_addLineFromEnd(&code, "NOTS", fromEnd);
+    } else {
+        if (curr->isVariable == 1) {
+            char *line_var = malloc(1 + strlen("PUSHS LF@") + strlen(curr->value));
+            sprintf(line_var, "PUSHS LF@%s", curr->value);
+            generator_addLineFromEnd(&code, line_var, fromEnd);
+        } else {
+            char outputString[256];
+            convertToEscapeSequences(curr->value, outputString);
+
+            char *line = malloc(1 + strlen("PUSHS string@") + strlen(outputString));
+            sprintf(line, "PUSHS string@%s", outputString);
+
+            generator_addLineFromEnd(&code, line, fromEnd);
+        }
     }
 }
 
@@ -475,6 +501,46 @@ int isFloat(const char *str) {
 
     // Check for errors during conversion or if the entire string was consumed
     return (*str != '\0' && *endptr == '\0');
+}
+
+void convertToEscapeSequences(const char *input, char *output) {
+    // Iterate through each character in the input string
+    while (*input != '\0') {
+        // Check for special characters and replace them with escape sequences
+        switch (*input) {
+            case ' ':
+                *output++ = '\\';
+                *output++ = '0';
+                *output++ = '3';
+                *output++ = '2';
+                break;
+            case '\\':
+                *output++ = '\\';
+                *output++ = '0';
+                *output++ = '9';
+                *output++ = '2';
+                break;
+            case '\a':
+                *output++ = '\\';
+                *output++ = '0';
+                *output++ = '7';
+                break;
+            case '\n':
+                *output++ = '\\';
+                *output++ = '0';
+                *output++ = '1';
+                *output++ = '0';
+                break;
+            default:
+                *output++ = *input;
+        }
+
+        // Move to the next character in the input string
+        input++;
+    }
+
+    // Null-terminate the output string
+    *output = '\0';
 }
 
 void codeTypeCheck(int fromEnd) {
