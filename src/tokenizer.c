@@ -32,6 +32,9 @@ void returnToken(Token *token, FILE *file) {
 }
 
 void destroyToken(Token* token) {
+    if (!token) {
+        return;
+    }
     free(token->lexeme);
     token->lexeme = NULL;
     free(token);

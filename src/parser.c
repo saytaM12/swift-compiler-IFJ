@@ -115,7 +115,7 @@ int parse_prog(){
     Token* token = NULL;
     stack_t *stack = stack_ctor();
     push_new_scope(stack);
-    void addFunctions(stack);
+    addFunctions(stack);
     return parse_main_body(file,token, stack);
 }
 
