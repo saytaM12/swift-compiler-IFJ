@@ -40,11 +40,14 @@ typedef enum
     String = 3,
 } varialbeType_e;
 
-const char *typeLookup[] = {
+extern const char *typeLookup[];
+/*
+= {
     "int",
     "float",
     "string",
 };
+*/
 
 typedef struct Scope{
     struct Scope *next;
