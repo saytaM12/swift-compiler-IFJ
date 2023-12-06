@@ -596,8 +596,8 @@ int parse_call_param_types(FILE* file, Token* token, char *name, stack_t* stack)
          else
             call_function[size_call_function-1].param_types = realloc(call_function[size_call_function-1].param_types,size * sizeof(Typee));
         // -> name: expression <NEXT_CALL_PARAM>
-        printf("%s\n",token->lexeme);
-
+        char namee[100];
+        strcpy(namee,token->lexeme);
         ins->funCal.parameters = realloc(ins->funCal.parameters, sizeof(char*) * (ins->funCal.paramNum + 1));
         ins->funCal.parameters[ins->funCal.paramNum] = malloc(strlen(token->lexeme) + 1);
         strcpy(ins->funCal.parameters[ins->funCal.paramNum++], token->lexeme);
@@ -622,9 +622,9 @@ int parse_call_param_types(FILE* file, Token* token, char *name, stack_t* stack)
                     if(found == NULL){
                         return 3;
                     }
+                    printf("TYYYYYYYYP %d \n \n",found->type);
                     call_function[size_call_function-1].param_types[size-1] = found->type;
                 }
-                printf("%s\n",token->lexeme);
 
                 ins->funCal.parameters[ins->funCal.paramNum - 1] =
                     realloc(ins->funCal.parameters[ins->funCal.paramNum - 1], strlen(token->lexeme) + 1);
@@ -637,7 +637,6 @@ int parse_call_param_types(FILE* file, Token* token, char *name, stack_t* stack)
             ERROR();
             return 2;
         }
-        printf("size_fnc:%d size:%d\n",size_call_function,size);
         if(typ == number)
             call_function[size_call_function-1].param_types[size-1] = int_t;
         if(typ == string)
@@ -645,7 +644,7 @@ int parse_call_param_types(FILE* file, Token* token, char *name, stack_t* stack)
         if(typ == numberFloat)
             call_function[size_call_function-1].param_types[size-1] = double_tt;
         if(typ == identifier){
-            symbol_t *found = get_symbol(stack, name);
+            symbol_t *found = get_symbol(stack, namee);
             if(found == NULL){
                 return 3;
             }

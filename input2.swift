@@ -6,7 +6,7 @@ func hello(from x: Int, to y: Int) {
 }
 let b : Int = 6
 let a : Int = 4
-
+let c = 2
 hello(a, b)
 /*
 if let a {
