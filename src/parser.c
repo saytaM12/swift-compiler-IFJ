@@ -482,11 +482,16 @@ int parse_body(FILE* file, Token* token, stack_t *stack){
 // Asign value
 // <ASIGN>
 int parse_assign(FILE* file, Token* token, char*name,stack_t *stack){
-    token = new_token(file,token);
+    char namee[100];
+    strcpy(namee,token->lexeme);
+    token = getToken(file);
     if(!strcmp(token->lexeme,"=")){
         // -> = [id](<CALL_PARAM>)
         printf("= \n");
+        //printf("%s\n",test->lexeme);
+        //addSymbol(test,name)
         token = new_token(file,token);
+        addSymbol(token,namee,stack);
         return parse_expression(file,token,name, stack);
     }
     // -> : [type] <VALUE>
