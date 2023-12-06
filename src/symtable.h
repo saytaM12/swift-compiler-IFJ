@@ -34,14 +34,15 @@ typedef struct
     bool is_variable; // false means it's a function
     Typee return_type;
     Typee *param_types;
+    int size;
 } symbol_t;
 
-symbol_t *symbol_ctor(char *name, Typee type, bool is_variable, Typee return_type, Typee *param_types);
+symbol_t *symbol_ctor(char *name, Typee type, bool is_variable, Typee return_type, Typee *param_types, int size);
 
 /**
  * A symbol constructor for functions.
  */
-symbol_t *symbol_function_ctor(char *name, Typee return_type, Typee *param_types);
+symbol_t *symbol_function_ctor(char *name, Typee return_type, Typee *param_types, int size);
 
 /**
  * A symbol constructor for variables.
