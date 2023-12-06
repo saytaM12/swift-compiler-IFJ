@@ -38,7 +38,19 @@ int addSymbol(Token* token, char* name, stack_t *stack){
         }
     switch (token->type) {
             case identifier:
+                 symbol_t *found = get_symbol(stack, token->lexeme);
+                if(found == NULL){
+                    return 3;
+                }
+                if(found->is_variable){
+                    symbol = symbol_variable_ctor(name, found->type);
+                    add_symbol(stack, symbol);
+                }else{  
+                    symbol = symbol_variable_ctor(name, found->return_type);
+                    add_symbol(stack, symbol);
+                }
                 printf("(identifier)   ");
+                break;
             case keyword:
                 return 9;
             case variableType:
@@ -465,14 +477,13 @@ int parse_body(FILE* file, Token* token, stack_t *stack){
         if(!strcmp(token->lexeme,"=")){
             symbol_t *found = get_symbol(stack, name);
             if(found == NULL){
-                printf("not defined");
+                printf("not defined %s",name);
                 return 3;
             }
             printf("=\n");
             free(potentialFun);
             token = new_token(file,token);
-            char name[100];
-            return parse_expression(file,token, name, stack);
+            return parse_expression(file,token, NULL, stack);
         }
     }
     ERROR();
@@ -491,7 +502,6 @@ int parse_assign(FILE* file, Token* token, char*name,stack_t *stack){
         //printf("%s\n",test->lexeme);
         //addSymbol(test,name)
         token = new_token(file,token);
-        addSymbol(token,namee,stack);
         return parse_expression(file,token,name, stack);
     }
     // -> : [type] <VALUE>
@@ -529,13 +539,24 @@ int parse_expression(FILE* file, Token* token, char* name, stack_t *stack){
         // -> [id](<CALL_PARAM>);
         printf("IDee\n");
         char namee[100];
+        Token*test = initToken();
+        test = token;
         strcpy(namee,token->lexeme);
-        token = new_token(file,token);
+        token = getToken(file);
         if(!strcmp(token->lexeme,"(")){
             printf("(\n");
-            printf("%s",namee);
+            symbol_t *found = get_symbol(stack, namee);
+            if(found != NULL){
+                printf("%s name %d typ",name,found->return_type);
+                symbol_t * symbol = symbol_variable_ctor(name, found->return_type);
+                add_symbol(stack, symbol);
+            }
             return parse_call_param(file,token,namee, stack);
         }
+    if(name!= NULL){
+    addSymbol(test,name,stack);
+    }
+    printf("pohoda");
     returnToken(token, file);
     // -> [expression]
     printf("\nEXPRESSSIOOON\n");
