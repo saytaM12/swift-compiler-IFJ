@@ -108,6 +108,7 @@ typedef struct {
     scope_t *currScope;
     int totalOffset;
     instructionType_e instructionType;
+    bool cleared;
     union
     {
         struct funDef_t funDef;

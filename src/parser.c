@@ -121,7 +121,7 @@ int parse_prog()
 {
     code = generator_code_init();
     ins = generator_ins_init();
-    FILE *file = fopen("input2.swift", "r");
+    FILE *file = fopen("input.swift", "r");
     Token *token = NULL;
     stack_t *stack = stack_ctor();
     push_new_scope(stack);
@@ -145,6 +145,7 @@ int parse_main_body(FILE *file, Token *token, stack_t *stack)
             if (found == NULL)
             {
                 printf("Nedefinovana funkce %s\n", call_function[i].name);
+                ERROR();
                 return 3;
             }
 
@@ -156,6 +157,7 @@ int parse_main_body(FILE *file, Token *token, stack_t *stack)
             if(found->size != -1){
                 if(call_function[i].size != found->size){
                     printf("spatny pocet argumentu");
+                    ERROR();
                     return 4;
                 }
             }
@@ -165,6 +167,7 @@ int parse_main_body(FILE *file, Token *token, stack_t *stack)
                     if(found->param_types[j] != call_function[i].param_types[j]){
                         printf("spatny typ\n");
                         printf("typ %d typ %d",found->param_types[j], call_function[i].param_types[j]);
+                        ERROR();
                         return 4;
                     }
                 }
@@ -178,6 +181,7 @@ int parse_main_body(FILE *file, Token *token, stack_t *stack)
                     {
                         printf("spatny typ");
                         printf("typ %d typ %d", found->param_types[j], call_function[i].param_types[j]);
+                        ERROR();
                         return 4;
                     }
                 }
@@ -194,6 +198,7 @@ int parse_main_body(FILE *file, Token *token, stack_t *stack)
         printf("\nfunc\n");
 
         ins->instructionType = funDef;
+        ins->cleared = false;
         ins->funDef.paramNum = 0;
         ins->funDef.parameters = calloc(sizeof(struct funDefParam *), ins->funDef.paramNum + 1);
 
@@ -218,10 +223,12 @@ int parse_main_body(FILE *file, Token *token, stack_t *stack)
         }
         if (value == NULL)
         {
+            ERROR();
             return 2;
         }
         printValue(value, 0);
         disposeValue(value);
+        ERROR();
         return 0;
     }
     return parse_body(file, token, stack) || parse_main_body(file, token, stack);
@@ -393,6 +400,7 @@ int parse_function_type(FILE *file, Token *token, char *name, stack_t *stack)
     if(!strcmp(token->lexeme,"{")){
         symbol_t *found = get_symbol(stack, name);
                     if(found!=NULL){
+                        ERROR();
                         return 3;
                     }
                     symbol_t *symbol = symbol_function_ctor(name, void_t, param_types,size);
@@ -429,6 +437,7 @@ int parse_function_type(FILE *file, Token *token, char *name, stack_t *stack)
             symbol_t *found = get_symbol(stack, name);
             if (found != NULL)
             {
+                ERROR();
                 return 3;
             }
             symbol_t *symbol = symbol_function_ctor(name, typ, param_types, size);
@@ -469,9 +478,8 @@ int parse_function_body(FILE *file, Token *token, stack_t *stack)
         token = new_token(file,token);
 
         generator_translate();
-        generator_ins_destroy(ins);
-        ins = generator_ins_init();
         ins->instructionType = ret;
+        ins->cleared = false;
 
         return parse_expression(file,token, NULL,stack) || parse_function_body(file,token,stack);
     }
@@ -494,6 +502,7 @@ int parse_function_body(FILE *file, Token *token, stack_t *stack)
         }
         if (value == NULL)
         {
+            ERROR();
             return 2;
         }
         printValue(value, 0);
@@ -547,6 +556,7 @@ int parse_body(FILE *file, Token *token, stack_t *stack)
             ins->instructionType = funCal;
             ins->funCal.name = potentialFun;
             ins->funCal.paramNum = 0;
+            ins->cleared = false;
             ins->funCal.parameters = calloc(sizeof(char*), ins->funCal.paramNum + 1);
 
             destroyToken(token);
@@ -561,6 +571,7 @@ int parse_body(FILE *file, Token *token, stack_t *stack)
             if (found == NULL)
             {
                 printf("not defined");
+                ERROR();
                 return 3;
             }
             printf("=\n");
@@ -579,6 +590,9 @@ int parse_body(FILE *file, Token *token, stack_t *stack)
 int parse_assign(FILE* file, Token* token, char*name,stack_t *stack){
     char namee[100];
     strcpy(namee,token->lexeme);
+
+    generator_translate();
+
     token = getToken(file);
     if(!strcmp(token->lexeme,"=")){
         // -> = [id](<CALL_PARAM>)
@@ -636,8 +650,35 @@ int parse_expression(FILE *file, Token *token, char *name, stack_t *stack)
             printf("(\n");
             printf("%s",namee);
             return parse_call_param(file,token,namee, stack);
-        returnToken(token, file);
-        // -> [expression]
+            returnToken(token, file);
+            // -> [expression]
+            printf("\nEXPRESSSIOOON\n");
+            expression_value *value = NULL;
+            int error = bottomUp(token,file,&value,stack);
+            if(error){
+                ERROR();
+                return error;
+            }
+            if (value == NULL)
+            {
+                ERROR();
+                return 2;
+            }
+            generator_translate();
+            printValue(value, 0);
+            disposeValue(value);
+            // destroyToken(token);
+            return 0;
+        }
+        if (name != NULL)
+        {
+            if (addSymbol(token, name, stack))
+                return addSymbol(token, name, stack);
+            // -> [expression]
+            printf("-> getting symbol...\n");
+            symbol_t *found = get_symbol(stack, name);
+            printf("Found variable with the name: %s typ: %d\n", found->name, found->type);
+        }
         printf("\nEXPRESSSIOOON\n");
         expression_value *value = NULL;
         int error = bottomUp(token,file,&value,stack);
@@ -646,37 +687,15 @@ int parse_expression(FILE *file, Token *token, char *name, stack_t *stack)
         }
         if (value == NULL)
         {
+            ERROR();
             return 2;
         }
+        generator_translate();
         printValue(value, 0);
         disposeValue(value);
         // destroyToken(token);
         return 0;
     }
-    if (name != NULL)
-    {
-        if (addSymbol(token, name, stack))
-            return addSymbol(token, name, stack);
-        // -> [expression]
-        printf("-> getting symbol...\n");
-        symbol_t *found = get_symbol(stack, name);
-        printf("Found variable with the name: %s typ: %d\n", found->name, found->type);
-    }
-    printf("\nEXPRESSSIOOON\n");
-        expression_value *value = NULL;
-        int error = bottomUp(token,file,&value,stack);
-        if(error){
-            return error;
-        }
-        if (value == NULL)
-        {
-            return 2;
-        }
-        printValue(value, 0);
-        disposeValue(value);
-    // destroyToken(token);
-    return 0;
-}
 
 printf("\nEXPRESSSIOOON\n");
         expression_value *value = NULL;
@@ -686,8 +705,10 @@ printf("\nEXPRESSSIOOON\n");
         }
         if (value == NULL)
         {
+            ERROR();
             return 2;
         }
+        generator_translate();
         printValue(value, 0);
         disposeValue(value);
     // for (int i = 0; i < token->lexlen-1; i++)
@@ -739,9 +760,11 @@ int parse_call_param_types(FILE *file, Token *token, char *name, stack_t *stack)
         strcpy(namee,token->lexeme);
         printf("%s\n", token->lexeme);
 
+        if (!ins->cleared) {
         ins->funCal.parameters = realloc(ins->funCal.parameters, sizeof(char*) * (ins->funCal.paramNum + 1));
         ins->funCal.parameters[ins->funCal.paramNum] = malloc(strlen(token->lexeme) + 1);
         strcpy(ins->funCal.parameters[ins->funCal.paramNum++], token->lexeme);
+        }
 
         int typ = token->type;
         token = new_token(file, token);
@@ -768,6 +791,7 @@ int parse_call_param_types(FILE *file, Token *token, char *name, stack_t *stack)
                     symbol_t *found = get_symbol(stack, token->lexeme);
                     if (found == NULL)
                     {
+                        ERROR();
                         return 3;
                     }
                     printf("TYYYYYYYYP %d \n \n",found->type);
@@ -798,6 +822,7 @@ int parse_call_param_types(FILE *file, Token *token, char *name, stack_t *stack)
             symbol_t *found = get_symbol(stack, name);
             if (found == NULL)
             {
+                ERROR();
                 return 3;
             }
             call_function[size_call_function - 1].param_types[size - 1] = found->type;
@@ -869,6 +894,7 @@ int parse_if_expression(FILE *file, Token *token, stack_t *stack)
         }
         if (value == NULL)
         {
+            ERROR();
             return 2;
         }
         printValue(value, 0);
@@ -899,6 +925,7 @@ int parse_if_while_main_body(FILE *file, Token *token, stack_t *stack)
         }
         if (value == NULL)
         {
+            ERROR();
             return 2;
         }
         printValue(value, 0);

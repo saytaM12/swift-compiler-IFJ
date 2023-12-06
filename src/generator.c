@@ -23,7 +23,9 @@ code_t generator_code_init() {
 
 instruction_t *generator_ins_init() {
     instruction_t *ins = malloc(sizeof(instruction_t));
-    ins->currScope = calloc(sizeof(scope_t), 1);
+    ins->currScope = NULL;
+    ins->totalOffset = 0;
+    ins->cleared = true;
 
     return ins;
 }
@@ -47,15 +49,9 @@ void generator_code_destroy(code_t *code) {
     code->last = NULL;
 }
 
-void generator_ins_destroy(instruction_t *ins) {
-    scope_t *scope = ins->currScope;
-    scope_t *nextScope;
-    while (scope) {
-        nextScope = scope->next;
-        free(scope->name);
-        free(scope);
-        scope = nextScope;
-    }
+void generator_ins_clear(instruction_t *ins) {
+    if (ins->cleared) return;
+    ins->cleared = true;
     switch (ins->instructionType) {
         case funDef:
             for (int i = 0; i < ins->funDef.paramNum; i++) {
@@ -89,6 +85,18 @@ void generator_ins_destroy(instruction_t *ins) {
         case ret:
         break;
     }
+}
+
+void generator_ins_destroy(instruction_t *ins) {
+    scope_t *scope = ins->currScope;
+    scope_t *nextScope;
+    while (scope) {
+        nextScope = scope->next;
+        free(scope->name);
+        free(scope);
+        scope = nextScope;
+    }
+    generator_ins_clear(ins);
     free(ins);
 }
 
@@ -207,8 +215,7 @@ void translateFunDef() {
     free(line);
     free(var);
 
-    generator_ins_destroy(ins);
-    ins = generator_ins_init();
+    generator_ins_clear(ins);
 }
 
 void translateFunCal() {
@@ -232,8 +239,7 @@ void translateFunCal() {
 
     free(line);
 
-    generator_ins_destroy(ins);
-    ins = generator_ins_init();
+    generator_ins_clear(ins);
 }
 
 void translateVarDEF() {
@@ -255,8 +261,7 @@ void translateVarDEF() {
         generator_addLineFromEnd(&code, line, ins->totalOffset);
     }
 
-    generator_ins_destroy(ins);
-    ins = generator_ins_init();
+    generator_ins_clear(ins);
 }
 
 void translateAssign() {
@@ -265,8 +270,7 @@ void translateAssign() {
     snprintf(line, max_len, "POPS LF@%s", ins->assign.to);
     generator_addLineFromEnd(&code, line, ins->totalOffset);
 
-    generator_ins_destroy(ins);
-    ins = generator_ins_init();
+    generator_ins_clear(ins);
 }
 
 void translateWhileLoop() {
@@ -280,8 +284,7 @@ void translateWhileLoop() {
     sprintf(line, "JUMPIFEQ $%s$while_end bool@true", ins->currScope->name);
     generator_addLineFromEnd(&code, line, ins->totalOffset);
 
-    generator_ins_destroy(ins);
-    ins = generator_ins_init();
+    generator_ins_clear(ins);
 }
 
 void translateIfExpr() {
@@ -296,16 +299,17 @@ void translateIfExpr() {
     sprintf(line, "JUMPIFNEQ $else$%s$%d bool@true TF@tmp_cond", ins->currScope->name, ins->currScope->offset);
     generator_addLineFromEnd(&code, line, ins->totalOffset);
 
-    generator_ins_destroy(ins);
-    ins = generator_ins_init();
+    generator_ins_clear(ins);
 }
 
 void translateRet() {
-    generator_addLineEnd(&code, "return expresion");
+    generator_addLineFromEnd(&code, "return expresion", ins->currScope->offset);
 
-    char *line = malloc(2 + strlen("JUMP $$") + strlen(ins->currScope->name));
+    char *line = malloc(2 + strlen("JUMP $$end") + strlen(ins->currScope->name));
     sprintf(line, "JUMP $%s$end", ins->currScope->name);
-    generator_addLineEnd(&code, line);
+    generator_addLineFromEnd(&code, line, ins->currScope->offset);
+
+    generator_ins_clear(ins);
 
     /*
     generator_addLineEnd(&code, "PUSHFRAME");
@@ -318,6 +322,9 @@ void translateRet() {
 }
 
 void generator_translate() {
+    if (ins->cleared) {
+        return;
+    }
     switch (ins->instructionType) {
         case funDef:
             translateFunDef();
