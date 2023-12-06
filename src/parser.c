@@ -121,7 +121,7 @@ int parse_prog()
 {
     code = generator_code_init();
     ins = generator_ins_init();
-    FILE *file = fopen("input.swift", "r");
+    FILE *file = fopen("input2.swift", "r");
     Token *token = NULL;
     stack_t *stack = stack_ctor();
     push_new_scope(stack);
