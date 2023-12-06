@@ -6,6 +6,8 @@ func hello(from x: Int, to y: Int) {
 }
 let b : Int = 6
 let a : Int = b
+
+hello(a, b)
 /*
 if let a {
     hello(from: a, to: b)

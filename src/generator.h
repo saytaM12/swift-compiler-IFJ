@@ -64,15 +64,11 @@ struct funDef_t
 };
 
 // function Call /////////////////////////
-struct funcCallParam
-{
-    varialbeType_e type;
-    char *value;
-};
-struct funCal_t
-{
+
+struct funCal_t {
     char *name;
-    struct funcCallParam *parameters;
+    int paramNum;
+    char **parameters;
 };
 
 // variable definition ///////////////////

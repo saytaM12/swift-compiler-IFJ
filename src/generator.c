@@ -69,6 +69,12 @@ void generator_ins_destroy(instruction_t *ins) {
             free(ins->funDef.name);
             break;
         case funCal:
+            for (int i = 0; i < ins->funCal.paramNum; i++) {
+                free(ins->funCal.parameters[i]);
+            }
+
+            free(ins->funCal.parameters);
+            free(ins->funCal.name);
         break;
         case varDef:
         break;
@@ -164,24 +170,24 @@ void generator_write(FILE *file, code_t code) {
 
 void translateFunDef() {
     char *line = malloc(1 + strlen("LABEL $") + strlen(ins->funDef.name));
-    char *var = malloc(1);
-
     sprintf(line, "LABEL $%s", ins->funDef.name);
+
     generator_addLineEnd(&code, line);
     generator_addLineEnd(&code, "PUSHFRAME");
 
+    char *var = malloc(1);
     line = realloc(line, 1 + strlen("DEFVAL LF@$") + strlen(ins->funDef.name) + strlen("$retval"));
     sprintf(line, "DEFVAR LF@$%s$retval", ins->funDef.name);
     generator_addLineEnd(&code, line);
 
     for (int i = 0; i < ins->funDef.paramNum; i++) {
-        line = realloc(line, 1 + strlen("DEFVAR LF@$") + strlen(ins->funDef.name) + strlen("$param1") + (int)log10((double)i?i:1));
-        var = realloc(var, 1 + strlen("LF@$%s$%d") + strlen(ins->funDef.name) + (int)log10((double)i?i:1));
+        line = realloc(line, 2 + strlen("DEFVAR LF@$") + strlen(ins->funDef.name) + strlen("$param1") + (int)log10((double)i?i:1));
+        var = realloc(var, 3 + strlen("LF@$%s$%d") + strlen(ins->funDef.name) + (int)log10((double)i?i:1));
         sprintf(var, "LF@$%s$%d", ins->funDef.name, i);
         sprintf(line, "DEFVAR %s", var);
         generator_addLineEnd(&code, line);
 
-        line = realloc(line, 1 + strlen("MOVE LF@$") + strlen(ins->funDef.name) + strlen("$param1") + 2*(int)log10((double)i?i:1) + strlen("LF@%1"));
+        line = realloc(line, 3 + strlen("MOVE LF@$") + strlen(ins->funDef.name) + strlen("$param1") + 2*(int)log10((double)i?i:1) + strlen("LF@%1"));
         sprintf(line, "MOVE %s LF@%%%d", var, i);
         generator_addLineEnd(&code, line);
     }
@@ -189,15 +195,78 @@ void translateFunDef() {
     line = realloc(line, 1 + strlen("LABEL $") + strlen(ins->funDef.name) + strlen("$end"));
     sprintf(line, "LABEL $%s$end", ins->funDef.name);
     generator_addLineEnd(&code, line);
-    line = realloc(line, 1 + strlen("RETURN"));
-    sprintf(line, "RETURN");
-    generator_addLineEnd(&code, line);
-    line = realloc(line, 1 + strlen("POPFRAME"));
-    sprintf(line, "POPFRAME");
-    generator_addLineEnd(&code, line);
+    generator_addLineEnd(&code, "RETURN");
+    generator_addLineEnd(&code, "POPFRAME");
     generator_ins_push_scope(ins, 2, ins->funDef.name);
+
     free(line);
     free(var);
+
+    generator_ins_destroy(ins);
+    ins = generator_ins_init();
+}
+
+void translateFunCal() {
+    generator_addLineFromEnd(&code, "PUSHFRAME", ins->totalOffset);
+
+    char *line = malloc(1);
+
+    for (int i = 0; i < ins->funCal.paramNum; i++) {
+        line = realloc(line, 2 + strlen("DEFVAL TF@%") + (int)log10((double)i?i:1));
+        sprintf(line, "DEFVAL TF@%%%d", i);
+        generator_addLineFromEnd(&code, line, ins->totalOffset);
+
+        line = realloc(line, 2 + strlen("MOVE TF@% ") + (int)log10((double)i?i:1) + strlen(ins->funCal.parameters[i]));
+        sprintf(line, "MOVE TF@%%%d %s", i, ins->funCal.parameters[i]);
+        generator_addLineFromEnd(&code, line, ins->totalOffset);
+    }
+
+    line = realloc(line, 1 + strlen("CALL $") + strlen(ins->funCal.name));
+    sprintf(line, "CALL $%s", ins->funCal.name);
+    generator_addLineFromEnd(&code, line, ins->totalOffset);
+
+    free(line);
+
+    generator_ins_destroy(ins);
+    ins = generator_ins_init();
+}
+
+void translateVarDEF() {
+    int max_len;
+    char *line;
+
+    //if (ins->varDef.local) {
+
+    if (ins->currScope) {
+        generator_addLineFromEnd(&code,
+                strcat(strcat("DEFVAR LF@$", ins->currScope->name), strcat("$", ins->varDef.name)),
+                ins->totalOffset);
+    } else {
+        generator_addLineFromEnd(&code, strcat("DEFVAR GF@$", ins->varDef.name), ins->totalOffset);
+    }
+
+        /*
+    }
+    else {
+        generator_addLineFromEnd(&code, strcat("DEFVAR GF@", ins->varDef.name), ins->totalOffset);
+    }
+    */
+
+    if (ins->varDef.value) {
+        max_len = strlen(ins->varDef.value) + strlen(ins->varDef.name) + 20;
+        line = malloc(sizeof(char) * max_len);
+        snprintf(line, max_len, "MOVE LF@%s %s@%s", ins->varDef.name, typeLookup[ins->varDef.type], ins->varDef.value);
+        generator_addLineFromEnd(&code, line, ins->totalOffset);
+    }
+}
+
+void translateAssign() {
+    int max_len;
+    char *line;
+    max_len = strlen(ins->assign.from) + strlen(ins->assign.to) + 20;
+    line = malloc(sizeof(char) * max_len);
+    snprintf(line, max_len, "MOVE LF@%s LF@%s", ins->assign.to, ins->assign.from);
+    generator_addLineFromEnd(&code, line, ins->totalOffset);
 }
 
 void generator_translate() {
@@ -206,6 +275,7 @@ void generator_translate() {
             translateFunDef();
             break;
         case funCal:
+            translateFunCal();
             break;
         case varDef:
             break;

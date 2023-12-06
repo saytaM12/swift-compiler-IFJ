@@ -179,16 +179,18 @@ int parse_param(FILE*file, Token* token){
 // Type of the parameter of the declared function
 //<PARAM_TYPES> -> [name] [id] : [type]
 int parse_param_types(FILE* file, Token* token){
-    // [name]
-    if(token->type != identifier){
-        printf("NOT \"ID\" in <PARAM_TYPES> -> [name] [id] : [type]");  
-        ERROR();
-        return 2;
-    }
-    printf("NAME\n");
-    struct funDefParam *newParam = calloc(sizeof(struct funDefParam), 1);
-    newParam->name = calloc(sizeof(token->lexeme), 1);
-    strcpy(newParam->name, token->lexeme);
+        // [name]
+        if(token->type != identifier){
+            printf("NOT \"ID\" in <PARAM_TYPES> -> [name] [id] : [type]");  
+            ERROR();
+            return 2;
+        }
+        printf("NAME\n");
+
+        struct funDefParam *newParam = calloc(sizeof(struct funDefParam), 1);
+        newParam->name = calloc(sizeof(token->lexeme), 1);
+        strcpy(newParam->name, token->lexeme);
+
     token = new_token(file,token);
     // [id]
     if(token->type != identifier){
@@ -198,8 +200,10 @@ int parse_param_types(FILE* file, Token* token){
         return 2;
     }
     printf("ID\n");
+
     newParam->id = calloc(sizeof(token->lexeme), 1);
     strcpy(newParam->id, token->lexeme);
+
     token = new_token(file,token);
     // :
     if(strcmp(token->lexeme,":")){
@@ -358,8 +362,16 @@ int parse_body(FILE* file, Token* token, stack_t *stack){
         printf("ID\n");
         char name[100];
         strcpy(name,token->lexeme);
+        char *potentialFun = malloc(strlen(token->lexeme) + 1);
+        strcpy(potentialFun, token->lexeme);
         token = new_token(file,token);
         if(!strcmp(token->lexeme,"(")){
+
+            ins->instructionType = funCal;
+            ins->funCal.name = potentialFun;
+            ins->funCal.paramNum = 0;
+            ins->funCal.parameters = calloc(sizeof(struct funDefParam *), 1);
+
             destroyToken(token);
             printf("(\n");
             return parse_call_param(file,token,name);
@@ -368,6 +380,7 @@ int parse_body(FILE* file, Token* token, stack_t *stack){
         // -> [id] = <EXPRESSION>
         if(!strcmp(token->lexeme,"=")){
             printf("=\n");
+            free(potentialFun);
             token = new_token(file,token);
             char name[100];
             return parse_expression(file,token, name, stack);
@@ -484,6 +497,7 @@ int parse_call_param(FILE * file, Token * token, char *name){
         size = 0;
         destroyToken(token);
         printf(")\n");
+        generator_translate();
         return 0;
     }
     // -> <CALL_PARAM_TYPES>
@@ -497,6 +511,10 @@ int parse_call_param_types(FILE* file, Token* token, char *name){
     if(token->type == number || token->type == string || token->type == identifier){
         // -> name: expression <NEXT_CALL_PARAM>
         printf("%s\n",token->lexeme);
+
+        ins->funCal.parameters[ins->funCal.paramNum] = malloc(strlen(token->lexeme) + 1);
+        strcpy(ins->funCal.parameters[ins->funCal.paramNum++], token->lexeme);
+
         token = new_token(file,token);
         if(!strcmp(token->lexeme,":")){
             printf(":\n");
@@ -514,6 +532,11 @@ int parse_call_param_types(FILE* file, Token* token, char *name){
                     call_function[size_call_function-1].param_types[size-1] = string;
                     printf("size:%d size:%d\n",size_call_function,size);
                 printf("%s\n",token->lexeme);
+
+                ins->funCal.parameters[ins->funCal.paramNum - 1] =
+                    realloc(ins->funCal.parameters[ins->funCal.paramNum - 1], strlen(token->lexeme) + 1);
+                strcpy(ins->funCal.parameters[ins->funCal.paramNum - 1], token->lexeme);
+
                 token = new_token(file,token);
                 // <NEXT_CALL_PARAM>
                 return parse_next_call_param(file,token,name);
@@ -535,6 +558,7 @@ int parse_next_call_param(FILE* file, Token* token, char *name){
     if(!strcmp(token->lexeme,")")){
         printf(")\n");
         destroyToken(token);
+        generator_translate();
         return 0;
     }
     // -> , <CALL_PARAM_TYPES>
