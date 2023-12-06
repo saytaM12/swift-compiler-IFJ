@@ -295,7 +295,6 @@ expression_value *bottomUp(Token *token,FILE *fp)
     dollarVal->left = NULL;
     dollarVal->right = NULL;
     dollarVal->index = Dollar;
-    int openBrackets = 0;
     expression_list_insert(stack, dollarVal);
     // token = new_token(fp, token);
     if (!(token->type!=identifier||token->type != number||token->type!=string||token->type!=numberFloat||token->type!=singleChars))
@@ -310,19 +309,6 @@ expression_value *bottomUp(Token *token,FILE *fp)
             break;
         }
         expression_value *value = expression_value_create(token);
-        if (token->lexeme[0] == '(')
-        {
-            openBrackets++;
-        }
-        else if (token->lexeme[0] == ')')
-        {
-            openBrackets--;
-        }
-        if (openBrackets < 0)
-        {
-            break;
-        }
-        
         expression_value *last = expression_last(stack);
         int action = precTable[last->index][value->index];
         printf("%s\n",value->value);
@@ -381,7 +367,6 @@ expression_value *bottomUp(Token *token,FILE *fp)
     expression_list_dispose(stack);
     // destroyToken(token);
     // fclose(fp);
-    // printf("Hodnota lexemu: %s \n",token->lexeme);
     return retVal;
 }
 

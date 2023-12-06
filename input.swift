@@ -1,8 +1,5 @@
 let a = 5+5*8
 let b = 5+5*8
-if (5 < 0){
-        b = 15/5
-    }
 // a = 5+5*8
 // // Program 1: Vypocet faktorialu (iterativne)
 // /* Hlavni telo programu */
