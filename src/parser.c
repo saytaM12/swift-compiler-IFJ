@@ -267,35 +267,35 @@ int parse_function_type(FILE *file, Token* token, char* name, stack_t* stack){
         return 0;
     // ->
     }else if(!strcmp(token->lexeme,"->")){
-            printf("->\n");
+        printf("->\n");
+        token = new_token(file,token);
+        printf("%s\n",token->lexeme);
+        // [type]
+        if(token->type == variableType){
+            printf("TYPE\n");
+            ins->funDef.type = ENUMTYPE(token);
+            int typ;
+            if (!strcmp(token->lexeme,"Int")){
+                typ = int_t;
+            }
+            if(!strcmp(token->lexeme,"String")){
+                typ = string_t;
+            }
+            // Redefinice funkce
+            symbol_t *found = get_symbol(stack, name);
+            if(found!=NULL){
+                return 3;
+            }
+            symbol_t *symbol = symbol_function_ctor(name, typ, param_types);
+            add_symbol(stack, symbol);
+            size=0;
             token = new_token(file,token);
-            printf("%s\n",token->lexeme);
-            // [type]
-            if(token->type == variableType){
-                printf("TYPE\n");
-                ins->funDef.type = ENUMTYPE(token);
-                int typ;
-                if (!strcmp(token->lexeme,"Int")){
-                    typ = int_t;
-                }if(!strcmp(token->lexeme,"String")){
-                    typ = string_t;
-                }
-                // Redefinice funkce
-                symbol_t *found = get_symbol(stack, name);
-                if(found!=NULL){
-                    return 3;
-                }
-                symbol_t *symbol = symbol_function_ctor(name, typ, param_types);
-                add_symbol(stack, symbol);
-                size=0;
-                token = new_token(file,token);
-                // {
-                if(!strcmp(token->lexeme,"{")){
-                    printf("{\n");
-                    destroyToken(token);
-                    generator_translate();
-                    return 0;
-                }
+            // {
+            if(!strcmp(token->lexeme,"{")){
+                printf("{\n");
+                destroyToken(token);
+                generator_translate();
+                return 0;
             }
         }
     }
