@@ -140,6 +140,7 @@ int generator_addLineFromEnd(code_t *code, char *line, int offset) {
         fputs("malloc fail", stderr);
         return -2;
     }
+
     new->line = malloc(strlen(line) + 1);
     strcpy(new->line, line);
 
@@ -278,8 +279,10 @@ void generator_translate() {
             translateFunCal();
             break;
         case varDef:
+            translateVarDEF();
             break;
         case assign:
+            translateAssign();
             break;
         case whileLoop:
             break;

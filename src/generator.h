@@ -49,18 +49,18 @@ typedef struct Scope{
 } scope_t;
 
 // function definition ///////////////////
-struct funcDefParam
-{
+
+struct funDefParam {
     char *name;
     char *id;
     varialbeType_e type;
 };
 
-struct funDef_t
-{
+struct funDef_t {
     varialbeType_e type;
     char *name;
-    struct funcDefParam *parameters;
+    int paramNum;
+    struct funDefParam **parameters;
 };
 
 // function Call /////////////////////////

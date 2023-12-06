@@ -1,10 +1,10 @@
+#include <stdlib.h>
+#include <string.h>
 #include "parser.h"
 #include "symstack.h"
 #include "symtable.h"
 #include "expression.h"
 #include "lexical.h"
-#include <stdlib.h>
-#include <string.h>
 #include "generator.h"
 
 Typee *param_types = NULL;
@@ -103,7 +103,6 @@ int parse_main_body(FILE *file, Token* token, stack_t *stack){
         ins->funDef.parameters = calloc(sizeof(struct funDefParam *), 1);
 
         return parse_func_declare(file,token,stack) || parse_main_body(file,token,stack);
-
     }
     // -> if <IF_WHILE_EXPRESSION> <IF_WHILE_MAIN_BODY> <ELSE_MAIN_BODY> <MAIN_BODY>
     if(!strcmp(token->lexeme,"if")){
@@ -332,7 +331,6 @@ int parse_function_body(FILE * file, Token * token, stack_t *stack){
     }
     // <BODY>
     if(parse_body(file,token,stack)){
-        destroyToken(token);
         ERROR();
         return 2;
     }
@@ -420,7 +418,6 @@ int parse_assign(FILE* file, Token* token, char*name,stack_t *stack){
             token = new_token(file,token);
             return parse_expression(file,token,NULL,stack);
         }
-        return 0;
     }
     ERROR();
     return 2;
@@ -670,4 +667,4 @@ int parse_else_function_body(FILE* file, Token* token, stack_t *stack){
     }
     ERROR();
     return 2;
-}
+    }
