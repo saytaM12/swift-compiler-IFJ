@@ -603,15 +603,14 @@ int parse_expression(FILE *file, Token *token, char *name, stack_t *stack)
         // symbol_t *found = get_symbol(stack, name);
         //  -> [id](<CALL_PARAM>);
         printf("IDee\n");
-        strcpy(name, token->lexeme);
-        token = new_token(file, token);
-        if (!strcmp(token->lexeme, "("))
-        {
+        char namee[100];
+        strcpy(namee,token->lexeme);
+        token = new_token(file,token);
+        if(!strcmp(token->lexeme,"(")){
             destroyToken(token);
             printf("(\n");
-            printf("%s", name);
-            return parse_call_param(file, token, name, stack);
-        }
+            printf("%s",namee);
+            return parse_call_param(file,token,namee, stack);
         returnToken(token, file);
         // -> [expression]
         printf("\nEXPRESSSIOOON\n");
@@ -642,7 +641,20 @@ int parse_expression(FILE *file, Token *token, char *name, stack_t *stack)
     {
         return 2;
     }
-    printValue(value, 0);
+
+    printValue(value,0);
+    disposeValue(value);
+    destroyToken(token);
+    return 0;
+}
+
+printf("\nEXPRESSSIOOON\n");
+    expression_value *value=bottomUp(token,file);
+    if (value==NULL)
+    {
+        return 2;
+    }
+    printValue(value,0);
     disposeValue(value);
     // for (int i = 0; i < token->lexlen-1; i++)
     // {

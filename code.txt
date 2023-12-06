@@ -1,2 +1,0 @@
-.IFJcode23
-JUMP $$main
