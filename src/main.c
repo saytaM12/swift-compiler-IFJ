@@ -53,8 +53,7 @@ void lexCheck() {
         token = getToken(file);
     }
 
-    free(token->lexeme);
-    free(token);
+    destroyToken(token);
     fclose(file);
 }
 
@@ -68,7 +67,7 @@ void synCheck(){
 
 int main(void) {
     printf("\n===Printing Lexical analyzer output===\n\n");
-    lexCheck();
+    //lexCheck();
     pos.line = 1;
     pos.col = 0;
     printf("\n\n====Printing top-down parser output===\n\n");

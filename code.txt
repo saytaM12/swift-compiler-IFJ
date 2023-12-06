@@ -1,0 +1,3 @@
+.IFJcode23
+CREATEFRAME
+PUSHS int@6

@@ -35,7 +35,9 @@ void destroyToken(Token* token) {
     if (!token) {
         return;
     }
-    free(token->lexeme);
+    if (token->lexeme) {
+        free(token->lexeme);
+    }
     token->lexeme = NULL;
     free(token);
     token = NULL;

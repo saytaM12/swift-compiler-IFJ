@@ -212,10 +212,12 @@ int parse_main_body(FILE *file, Token *token, stack_t *stack)
         printf("while\n");
         printf("expression\n");
         expression_value *value = NULL;
-        bottomUp(token, file, &value,stack);
+        int error = bottomUp(token,file,&value,stack);
+        if(error){
+            return error;
+        }
         if (value == NULL)
         {
-            ERROR();
             return 2;
         }
         printValue(value, 0);
@@ -486,7 +488,10 @@ int parse_function_body(FILE *file, Token *token, stack_t *stack)
         printf("while\n");
         printf("expression\n");
         expression_value *value = NULL;
-        bottomUp(token, file, &value,stack);
+        int error = bottomUp(token,file,&value,stack);
+        if(error){
+            return error;
+        }
         if (value == NULL)
         {
             return 2;
@@ -571,15 +576,18 @@ int parse_body(FILE *file, Token *token, stack_t *stack)
 
 // Asign value
 // <ASIGN>
-int parse_assign(FILE *file, Token *token, char *name, stack_t *stack)
-{
-    token = new_token(file, token);
-    if (!strcmp(token->lexeme, "="))
-    {
+int parse_assign(FILE* file, Token* token, char*name,stack_t *stack){
+    char namee[100];
+    strcpy(namee,token->lexeme);
+    token = getToken(file);
+    if(!strcmp(token->lexeme,"=")){
         // -> = [id](<CALL_PARAM>)
         printf("= \n");
-        token = new_token(file, token);
-        return parse_expression(file, token, name, stack);
+        //printf("%s\n",test->lexeme);
+        //addSymbol(test,name)
+        token = new_token(file,token);
+        addSymbol(token,namee,stack);
+        return parse_expression(file,token,name, stack);
     }
     // -> : [type] <VALUE>
     if (!strcmp(token->lexeme, ":"))
@@ -632,7 +640,10 @@ int parse_expression(FILE *file, Token *token, char *name, stack_t *stack)
         // -> [expression]
         printf("\nEXPRESSSIOOON\n");
         expression_value *value = NULL;
-        bottomUp(token, file, &value,stack);
+        int error = bottomUp(token,file,&value,stack);
+        if(error){
+            return error;
+        }
         if (value == NULL)
         {
             return 2;
@@ -652,36 +663,39 @@ int parse_expression(FILE *file, Token *token, char *name, stack_t *stack)
         printf("Found variable with the name: %s typ: %d\n", found->name, found->type);
     }
     printf("\nEXPRESSSIOOON\n");
-    expression_value *value = NULL;
-    bottomUp(token, file, &value,stack);
-    if (value == NULL)
-    {
-        ERROR();
-        return 2;
-    }
-
-    printValue(value,0);
-    disposeValue(value);
-    destroyToken(token);
+        expression_value *value = NULL;
+        int error = bottomUp(token,file,&value,stack);
+        if(error){
+            return error;
+        }
+        if (value == NULL)
+        {
+            return 2;
+        }
+        printValue(value, 0);
+        disposeValue(value);
+    // destroyToken(token);
     return 0;
 }
 
 printf("\nEXPRESSSIOOON\n");
     expression_value *value = NULL;
-    bottomUp(token, file, &value,stack);
-
+    int error = bottomUp(token,file,&value,stack);
+    if(error){
+        return error;
+    }
+    
     ins->instructionType = varDef;
     ins->varDef.name = name;
     generator_translate();
     ins->totalOffset++;
 
     if (value == NULL)
-    {
-        ERROR();
-        return 2;
-    }
-    printValue(value,0);
-    disposeValue(value);
+        {
+            return 2;
+        }
+        printValue(value, 0);
+        disposeValue(value);
     // for (int i = 0; i < token->lexlen-1; i++)
     // {
     //     printf("%c\n",token->lexeme[i]);
@@ -727,6 +741,8 @@ int parse_call_param_types(FILE *file, Token *token, char *name, stack_t *stack)
         else
             call_function[size_call_function - 1].param_types = realloc(call_function[size_call_function - 1].param_types, size * sizeof(Typee));
         // -> name: expression <NEXT_CALL_PARAM>
+        char namee[100];
+        strcpy(namee,token->lexeme);
         printf("%s\n", token->lexeme);
 
         ins->funCal.parameters = realloc(ins->funCal.parameters, sizeof(char*) * (ins->funCal.paramNum + 1));
@@ -760,7 +776,8 @@ int parse_call_param_types(FILE *file, Token *token, char *name, stack_t *stack)
                     {
                         return 3;
                     }
-                    call_function[size_call_function - 1].param_types[size - 1] = found->type;
+                    printf("TYYYYYYYYP %d \n \n",found->type);
+                    call_function[size_call_function-1].param_types[size-1] = found->type;
                 }
                 printf("%s\n", token->lexeme);
 
@@ -851,14 +868,17 @@ int parse_if_expression(FILE *file, Token *token, stack_t *stack)
     }
     // -> [expression]
     printf("EXPRESIOOON\n");
-    expression_value *value = NULL;
-    bottomUp(token, file, &value,stack);
-    if (value == NULL)
-    {
-        return 2;
-    }
-    printValue(value, 0);
-    disposeValue(value);
+        expression_value *value = NULL;
+        int error = bottomUp(token,file,&value,stack);
+        if(error){
+            return error;
+        }
+        if (value == NULL)
+        {
+            return 2;
+        }
+        printValue(value, 0);
+        disposeValue(value);
     return 0;
 }
 
@@ -879,7 +899,10 @@ int parse_if_while_main_body(FILE *file, Token *token, stack_t *stack)
         printf("while\n");
         printf("expression\n");
         expression_value *value = NULL;
-        bottomUp(token, file, &value,stack);
+        int error = bottomUp(token,file,&value,stack);
+        if(error){
+            return error;
+        }
         if (value == NULL)
         {
             return 2;
