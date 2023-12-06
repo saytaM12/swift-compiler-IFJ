@@ -30,7 +30,7 @@ typedef struct expression_list
     expression_element *active;
 }expression_list;
 
-void reduce(expression_list* stack);
+int reduce(expression_list* stack);
 expression_list* expression_list_create();
 void expression_list_insert(expression_list* list, expression_value *value);
 void expression_list_dispose(expression_list* list);
