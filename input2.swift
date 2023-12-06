@@ -5,7 +5,7 @@ func hello(from x: Int, to y: Int) {
     write("Zadejte cislo pro vypocet faktorialu\n")
 }
 let b : Int = 6
-let a : Int = b
+let a : Int = 4
 
 hello(a, b)
 /*
