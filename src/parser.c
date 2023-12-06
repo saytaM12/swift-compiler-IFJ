@@ -6,12 +6,14 @@
 Typee *param_types = NULL;
 int size = 0;
 int size_call_function = 0;
+
 struct CALLFUNCTION{
-    char name[1000];
+    char name[100];
     Typee *param_types;
 };
 
 struct CALLFUNCTION *call_function;
+
 // Get new and delete old token
 Token* new_token(FILE* file, Token* token){
     destroyToken(token);
@@ -74,9 +76,34 @@ int parse_main_body(FILE *file, Token* token, stack_t *stack){
     token = getToken(file);
     // -> eps
     if(token->lexeme[0] == EOF){
+        // Kontrola volanych funkci
         for(int i = 0; i <size_call_function;i++){
-            printf("----ted-----");
+            printf("----ted-----\n");
             printf("%s\n",call_function[i].name);
+            // Jestli je funkce definovana
+            symbol_t *found = get_symbol(stack, call_function[i].name);
+                if(found == NULL){
+                    return 3;
+                }else{
+                    printf("jetam");
+                }            // Parametry
+            for(int j = 0;j < sizeof(call_function[i].param_types)/sizeof(Typee);j++){
+                if(call_function[i].param_types == NULL){
+                    if(found->param_types != NULL){
+                       printf("spatny pocet parametru\n");
+                    }
+                    break;
+                }else{
+                if(found->param_types == NULL){
+                        printf("spatny pocet parametru\n");
+                        return 4;
+                    }
+                }
+                printf("typ :%d tyyyp:%d",found->param_types[j],call_function[i].param_types[j]);
+                if(found->param_types[j] == call_function[i].param_types[j]){
+                    printf("veryguud\n");
+                }
+            }
             //printf("%d\n",call_function[0].param_types[0]);
             //printf("typp: %d\n",call_function[i].param_types[0]);
         }
@@ -364,15 +391,17 @@ int parse_assign(FILE* file, Token* token, char*name,stack_t *stack){
             return addSymbol(token,name, stack);
         printf("TYPE\n");
         token = new_token(file,token);
-         printf("-> getting symbol...\n");
-        symbol_t *found = get_symbol(stack, name);
-        printf("Found variable with the name: %s typ: %d\n", found->name,found->type);
-        if(!strcmp(token->lexeme,"=")){
+        Token* test= initToken();
+        test = getToken(file);
+        if(!strcmp(test->lexeme,"=")){
             // = [id](<CALL_PARAM>)
+            token = new_token(file,token);
+            destroyToken(test);
             printf("=\n");
             token = new_token(file,token);
-            return parse_expression(file,token,NULL,stack);
+            return parse_expression(file,token,name,stack);
         }
+        
         return 0;
 
     }
@@ -416,6 +445,7 @@ return 0;
 //<CALL_PARAM>
 int parse_call_param(FILE * file, Token * token, char *name){
     size_call_function++;
+    size++;
     call_function = realloc(call_function, size_call_function * sizeof(struct CALLFUNCTION));
     strcpy(call_function[size_call_function-1].name,name);
     //<CALL_PARAM> -> eps
@@ -436,6 +466,10 @@ int parse_call_param(FILE * file, Token * token, char *name){
 int parse_call_param_types(FILE* file, Token* token, char *name){
     // -> [expression] <NEXT_CALL_PARAM>
     if(token->type == number || token->type == string || token->type == identifier){
+         if(size == 1)
+            call_function[size_call_function-1].param_types = malloc(size * sizeof(Typee));
+        else
+            call_function[size_call_function-1].param_types = realloc(call_function[size_call_function-1].param_types,size * sizeof(Typee));
         // -> name: expression <NEXT_CALL_PARAM>
         printf("%s    %d\n",token->lexeme,size_call_function);
         int typ = token->type;
@@ -444,15 +478,12 @@ int parse_call_param_types(FILE* file, Token* token, char *name){
             printf(":\n");
             token = new_token(file,token);
             if(token->type == number || token->type == string || token->type == identifier){
-                size++;
-                call_function[size_call_function-1].param_types = realloc(call_function[size_call_function-1].param_types, size * sizeof(Typee));
                 if(token->type == number){
                     call_function[size_call_function-1].param_types[size-1] = int_t;
-                    printf("size:%d size:%d\n",size_call_function,size);
                 }
-                if(token->type == string)
+                if(token->type == string){
                     call_function[size_call_function-1].param_types[size-1] = string;
-                    printf("size:%d size:%d\n",size_call_function,size);
+                }
                 printf("%s\n",token->lexeme);
                 token = new_token(file,token);
                 // <NEXT_CALL_PARAM>
@@ -461,16 +492,11 @@ int parse_call_param_types(FILE* file, Token* token, char *name){
             destroyToken(token);
             return 2;
         }
-         size++;
-         printf("size:%d size:%d\n",size_call_function,size);
-                call_function[size_call_function-1].param_types = realloc(call_function[size_call_function-1].param_types, size * sizeof(Typee));
-                if(typ == number){
-                    call_function[size_call_function-1].param_types[size-1] = int_t;
-                    printf("size:%d size:%d\n",size_call_function,size);
-                }
-                if(typ == string)
-                    call_function[size_call_function-1].param_types[size-1] = string;
-                    printf("size:%d size:%d\n",size_call_function,size);
+        printf("size_fnc:%d size:%d\n",size_call_function,size);
+        if(typ == number)
+            call_function[size_call_function-1].param_types[size-1] = int_t;
+        if(typ == string)
+            call_function[size_call_function-1].param_types[size-1] = string;
         // <NEXT_CALL_PARAM>
         return parse_next_call_param(file,token,name);
     }
@@ -491,6 +517,7 @@ int parse_next_call_param(FILE* file, Token* token, char *name){
     // -> , <CALL_PARAM_TYPES>
     if(!strcmp(token->lexeme,",")){
             token = new_token(file,token);
+            size++;
             return parse_call_param_types(file,token,name);
     }
     destroyToken(token);
