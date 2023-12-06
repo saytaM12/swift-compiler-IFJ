@@ -341,13 +341,30 @@ void postOrderTraversal(expression_value *curr, int type, int fromEnd) {
         postOrderTraversal(curr->right, type, fromEnd);
     }
     
-    if (isNumber(curr->value)) {
+    if (isInteger(curr->value)) {
         char *line = malloc(1 + strlen("PUSHS int@") + strlen(curr->value));
         sprintf(line, "PUSHS int@%s", curr->value);
         generator_addLineFromEnd(&code, line, fromEnd);
 
         return;
     } 
+
+    if (isFloat(curr->value)) {
+        // convert curr->value to double and PUSHS it as %a
+        // convert curr->value to double
+        char *endptr;
+
+        printf("curr->value: %s\n", curr->value);
+        double result = strtod(curr->value, &endptr);
+        printf("result: %f\n", result);
+
+        char *line = malloc(1 + strlen("PUSHS float@") + sizeof(double) * 10);
+        sprintf(line, "PUSHS float@%a", result);
+
+        generator_addLineFromEnd(&code, line, fromEnd);
+
+        return;        
+    }
     // checks that both types are the same, otherwise converts int to float
     codeTypeCheck(fromEnd);
 
@@ -415,10 +432,19 @@ void postOrderString(expression_value *curr, int fromEnd) {
     }
 }
 
-int isNumber(const char *str) {
+int isInteger(const char *str) {
     char *endptr;
     strtol(str, &endptr, 10);
 
+    // Check for errors during conversion or if the entire string was consumed
+    return (*str != '\0' && *endptr == '\0');
+}
+
+int isFloat(const char *str) {
+    char *endptr;
+    strtod(str, &endptr);
+
+    // Check for errors during conversion or if the entire string was consumed
     return (*str != '\0' && *endptr == '\0');
 }
 
