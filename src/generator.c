@@ -360,6 +360,8 @@ void postOrderTraversal(expression_value *curr, int type, int fromEnd) {
     if (curr->right) {
         postOrderTraversal(curr->right, type, fromEnd);
     }
+
+    printf("curr->value: %s\n", curr->value);
     
     if (isInteger(curr->value)) {
         char *line = malloc(1 + strlen("PUSHS int@") + strlen(curr->value));
@@ -385,6 +387,12 @@ void postOrderTraversal(expression_value *curr, int type, int fromEnd) {
 
         return;        
     }
+    if (strcmp(curr->value, "+") != 0 && strcmp(curr->value, "-") != 0 && strcmp(curr->value, "*") != 0 && strcmp(curr->value, "/") != 0 && strcmp(curr->value, ">") != 0 && strcmp(curr->value, "<") != 0 && strcmp(curr->value, ">=") != 0 && strcmp(curr->value, "<=") != 0 && strcmp(curr->value, "!=") != 0 && strcmp(curr->value, "==") != 0 && strcmp(curr->value, "!") != 0) {
+        char *line = malloc(1 + strlen("PUSHS LF@") + strlen(curr->value));
+        sprintf(line, "PUSHS LF@%s", curr->value);
+        generator_addLineFromEnd(&code, line, fromEnd);
+    }
+
     // checks that both types are the same, otherwise converts int to float
     codeTypeCheck(fromEnd);
 
@@ -419,9 +427,7 @@ void postOrderTraversal(expression_value *curr, int type, int fromEnd) {
     } else if (strcmp(curr->value, "!") == 0) {
         generator_addLineFromEnd(&code, "NOTS", fromEnd);
     } else {
-        char *line = malloc(1 + strlen("PUSHS LF@") + strlen(curr->value));
-        sprintf(line, "PUSHS LF@%s", curr->value);
-        generator_addLineFromEnd(&code, line, fromEnd);
+        
     }
 }
 
