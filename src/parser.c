@@ -80,6 +80,7 @@ int parse_main_body(FILE *file, Token* token, stack_t *stack){
         for(int i = 0; i <size_call_function;i++){
             printf("----ted-----\n");
             printf("%s\n",call_function[i].name);
+            printf("jkjkk");
             // Jestli je funkce definovana
             symbol_t *found = get_symbol(stack, call_function[i].name);
                 if(found == NULL){
@@ -87,23 +88,16 @@ int parse_main_body(FILE *file, Token* token, stack_t *stack){
                 }else{
                     printf("jetam");
                 }            // Parametry
-            for(int j = 0;j < sizeof(call_function[i].param_types)/sizeof(Typee);j++){
-                if(call_function[i].param_types == NULL){
-                    if(found->param_types != NULL){
-                       printf("spatny pocet parametru\n");
-                    }
-                    break;
-                }else{
-                if(found->param_types == NULL){
-                        printf("spatny pocet parametru\n");
-                        return 4;
-                    }
-                }
-                printf("typ :%d tyyyp:%d",found->param_types[j],call_function[i].param_types[j]);
-                if(found->param_types[j] == call_function[i].param_types[j]){
-                    printf("veryguud\n");
-                }
+            // FIX THIS --- spatna velikost pole ,sizeof(call_function[i].param_types)/sizeof(Typee)
+            printf("pole %ld hash %ld\n",sizeof(call_function[i].param_types)/sizeof(Typee),sizeof(found->param_types)/sizeof(Typee));
+            for(int j = 0;j < 1;j++){
+                printf("typ :%d tyyyp:%d\n",found->param_types[j],call_function[i].param_types[j]);
             }
+            /*
+            for(int j = 0;j < sizeof(call_function[i].param_types)/sizeof(Typee);j++){
+                printf("typ :%d tyyyp:%d",found->param_types[j],call_function[i].param_types[j]);
+            }
+            */
             //printf("%d\n",call_function[0].param_types[0]);
             //printf("typp: %d\n",call_function[i].param_types[0]);
         }
@@ -391,17 +385,13 @@ int parse_assign(FILE* file, Token* token, char*name,stack_t *stack){
             return addSymbol(token,name, stack);
         printf("TYPE\n");
         token = new_token(file,token);
-        Token* test= initToken();
-        test = getToken(file);
-        if(!strcmp(test->lexeme,"=")){
+        if(!strcmp(token->lexeme,"=")){
             // = [id](<CALL_PARAM>)
-            token = new_token(file,token);
-            destroyToken(test);
             printf("=\n");
             token = new_token(file,token);
             return parse_expression(file,token,name,stack);
         }
-        
+        returnToken(token, file);
         return 0;
 
     }
@@ -422,6 +412,7 @@ int parse_expression(FILE* file, Token* token, char* name, stack_t *stack){
             destroyToken(token);
             printf("(\n");
             return parse_call_param(file,token,name);
+        returnToken(token, file);
     }
     // -> [expression]
     printf("\nEXPRESSSIOOON\n");

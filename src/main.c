@@ -64,6 +64,7 @@ int main(void) {
     printf("===Printing Lexical analyzer output===");
     printf("\n\n");
     lexCheck();
+    synCheck();
     /*
     printf("\n\n====Printing top-down parser output===\n\n");
     synCheck();
