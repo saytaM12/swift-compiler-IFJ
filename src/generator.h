@@ -34,6 +34,7 @@ typedef enum
     assign = 4,
     whileLoop = 5,
     ifExpr = 6,
+    ret = 7,
 } instructionType_e;
 
 typedef enum
