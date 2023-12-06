@@ -9,7 +9,7 @@ void lexCheck() {
     Token* token;
 
     int i = 0;
-    FILE* file = fopen("input2.swift", "r");
+    FILE* file = fopen("input.swift", "r");
     if (!file) return;
     token = getToken(file);
 

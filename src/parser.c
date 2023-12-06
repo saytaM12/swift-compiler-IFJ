@@ -121,7 +121,7 @@ int parse_prog()
 {
     code = generator_code_init();
     ins = generator_ins_init();
-    FILE *file = fopen("input2.swift", "r");
+    FILE *file = fopen("input.swift", "r");
     Token *token = NULL;
     stack_t *stack = stack_ctor();
     push_new_scope(stack);
@@ -603,7 +603,7 @@ int parse_assign(FILE *file, Token *token, char *name, stack_t *stack)
         {
             printf("=\n");
             token = new_token(file, token);
-            return parse_expression(file, token, "", stack);
+            return parse_expression(file, token, name, stack);
         }
         returnToken(token,file);
         return 0;
@@ -669,6 +669,12 @@ int parse_expression(FILE *file, Token *token, char *name, stack_t *stack)
 printf("\nEXPRESSSIOOON\n");
     expression_value *value = NULL;
     bottomUp(token, file, &value,stack);
+
+    ins->instructionType = varDef;
+    ins->varDef.name = name;
+    generator_translate();
+    ins->totalOffset++;
+
     if (value == NULL)
     {
         ERROR();

@@ -534,7 +534,7 @@ int bottomUp(Token *token, FILE *fp, expression_value **returningValue, stack_t 
     }
     
     retVal = expression_list_pop(stack);
-    translateExpression(retVal, 0);
+    translateExpression(retVal, ins->totalOffset);
 
     expression_list_dispose(stack);
     *returningValue = retVal;

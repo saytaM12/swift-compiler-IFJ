@@ -80,7 +80,7 @@ struct varDef_t
 {
     char *name;
     varialbeType_e type;
-    char *value;
+    bool *value;
     bool local;
 };
 

@@ -16,6 +16,8 @@ code_t generator_code_init() {
 
     generator_addLineEnd(&code, ".IFJcode23");
     generator_addLineEnd(&code, "CREATEFRAME");
+    generator_addLineEnd(&code, "PUSHFRAME");
+    generator_addLineEnd(&code, "CREATEFRAME");
     // generator_addLineEnd(&code, "JUMP $$main");
 
     return code;
@@ -238,22 +240,18 @@ void translateVarDEF() {
     int max_len;
     char *line;
 
-    if (ins->currScope) {
-        generator_addLineFromEnd(&code,
-                strcat(strcat("DEFVAR LF@$", ins->currScope->name), strcat("$", ins->varDef.name)),
-                ins->totalOffset);
-    } else {
-        generator_addLineFromEnd(&code, strcat("DEFVAR GF@$", ins->varDef.name), ins->totalOffset);
-    }
+    char *def = malloc(1 + strlen("DEFVAR LF@") + strlen(ins->varDef.name));
+    sprintf(def, "DEFVAR LF@%s", ins->varDef.name);
+    generator_addLineFromEnd(&code, def, ins->totalOffset);
+
 
     if (ins->varDef.value) {
-        max_len = 1 + strlen(ins->varDef.value) + strlen("POPS LF@");
+        max_len = 1 + strlen("POPS LF@") + strlen(ins->varDef.name);
         line = malloc(sizeof(char) * max_len);
         snprintf(line, max_len, "POPS LF@%s", ins->varDef.name);
         generator_addLineFromEnd(&code, line, ins->totalOffset);
     }
 
-    generator_ins_destroy(ins);
     ins = generator_ins_init();
 }
 
@@ -398,6 +396,10 @@ void postOrderTraversal(expression_value *curr, int type, int fromEnd) {
         generator_addLineFromEnd(&code, "EQS", fromEnd);
     } else if (strcmp(curr->value, "!") == 0) {
         generator_addLineFromEnd(&code, "NOTS", fromEnd);
+    } else {
+        char *line = malloc(1 + strlen("PUSHS LF@") + strlen(curr->value));
+        sprintf(line, "PUSHS LF@%s", curr->value);
+        generator_addLineFromEnd(&code, line, fromEnd);
     }
 }
 
