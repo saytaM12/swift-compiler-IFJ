@@ -586,7 +586,7 @@ int parse_call_param_types(FILE* file, Token* token, char *name, stack_t* stack)
     if(token->type == number || token->type == string || token->type == identifier){
          if(size == 1)
             call_function[size_call_function-1].param_types = malloc(size * sizeof(Typee));
-        else
+         else
             call_function[size_call_function-1].param_types = realloc(call_function[size_call_function-1].param_types,size * sizeof(Typee));
         // -> name: expression <NEXT_CALL_PARAM>
         printf("%s\n",token->lexeme);

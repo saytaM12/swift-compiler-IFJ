@@ -392,6 +392,7 @@ expression_value *bottomUp(Token *token, FILE *fp)
             {
                 openBrackets--;
             }
+            returnToken(token, fp);
         }
         else if (action == R)
         {
