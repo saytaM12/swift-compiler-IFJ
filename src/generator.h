@@ -41,13 +41,6 @@ typedef enum
 } varialbeType_e;
 
 extern const char *typeLookup[];
-/*
-= {
-    "int",
-    "float",
-    "string",
-};
-*/
 
 typedef struct Scope{
     struct Scope *next;
@@ -72,14 +65,10 @@ struct funDef_t {
 
 // function Call /////////////////////////
 
-struct funCallParam {
-    varialbeType_e type;
-    char *value;
-};
-
 struct funCal_t {
     char *name;
-    struct funCallParam **parameters;
+    int paramNum;
+    char **parameters;
 };
 
 // variable definition ///////////////////
