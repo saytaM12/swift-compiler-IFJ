@@ -1,3 +1,5 @@
+// let b : Int = 6
+// let a : Int = 5 + b + 4
 // Program 1: Vypocet faktorialu (iterativne)
 /* Hlavni telo programu */
 func hello(from x: Int, to y: Int) {
