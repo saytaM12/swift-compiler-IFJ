@@ -186,7 +186,7 @@ int parse_main_body(FILE *file, Token *token, stack_t *stack)
 
         ins->instructionType = funDef;
         ins->funDef.paramNum = 0;
-        ins->funDef.parameters = calloc(sizeof(struct funDefParam *), 1);
+        ins->funDef.parameters = calloc(sizeof(struct funDefParam *), ins->funDef.paramNum + 1);
 
         return parse_func_declare(file, token, stack) || parse_main_body(file, token, stack);
     }
@@ -526,7 +526,7 @@ int parse_body(FILE *file, Token *token, stack_t *stack)
             ins->instructionType = funCal;
             ins->funCal.name = potentialFun;
             ins->funCal.paramNum = 0;
-            ins->funCal.parameters = calloc(sizeof(char*), 1);
+            ins->funCal.parameters = calloc(sizeof(char*), ins->funCal.paramNum + 1);
 
             destroyToken(token);
             printf("(\n");
@@ -706,6 +706,7 @@ int parse_call_param_types(FILE *file, Token *token, char *name, stack_t *stack)
         // -> name: expression <NEXT_CALL_PARAM>
         printf("%s\n", token->lexeme);
 
+        ins->funCal.parameters = realloc(ins->funCal.parameters, sizeof(char*) * (ins->funCal.paramNum + 1));
         ins->funCal.parameters[ins->funCal.paramNum] = malloc(strlen(token->lexeme) + 1);
         strcpy(ins->funCal.parameters[ins->funCal.paramNum++], token->lexeme);
 
