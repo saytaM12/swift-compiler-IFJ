@@ -212,10 +212,12 @@ int parse_main_body(FILE *file, Token *token, stack_t *stack)
         printf("while\n");
         printf("expression\n");
         expression_value *value = NULL;
-        bottomUp(token, file, &value,stack);
+        int error = bottomUp(token,file,&value,stack);
+        if(error){
+            return error;
+        }
         if (value == NULL)
         {
-            ERROR();
             return 2;
         }
         printValue(value, 0);
@@ -486,7 +488,10 @@ int parse_function_body(FILE *file, Token *token, stack_t *stack)
         printf("while\n");
         printf("expression\n");
         expression_value *value = NULL;
-        bottomUp(token, file, &value,stack);
+        int error = bottomUp(token,file,&value,stack);
+        if(error){
+            return error;
+        }
         if (value == NULL)
         {
             return 2;
@@ -635,7 +640,10 @@ int parse_expression(FILE *file, Token *token, char *name, stack_t *stack)
         // -> [expression]
         printf("\nEXPRESSSIOOON\n");
         expression_value *value = NULL;
-        bottomUp(token, file, &value,stack);
+        int error = bottomUp(token,file,&value,stack);
+        if(error){
+            return error;
+        }
         if (value == NULL)
         {
             return 2;
@@ -655,30 +663,33 @@ int parse_expression(FILE *file, Token *token, char *name, stack_t *stack)
         printf("Found variable with the name: %s typ: %d\n", found->name, found->type);
     }
     printf("\nEXPRESSSIOOON\n");
-    expression_value *value = NULL;
-    bottomUp(token, file, &value,stack);
-    if (value == NULL)
-    {
-        ERROR();
-        return 2;
-    }
-
-    printValue(value,0);
-    disposeValue(value);
-    destroyToken(token);
+        expression_value *value = NULL;
+        int error = bottomUp(token,file,&value,stack);
+        if(error){
+            return error;
+        }
+        if (value == NULL)
+        {
+            return 2;
+        }
+        printValue(value, 0);
+        disposeValue(value);
+    // destroyToken(token);
     return 0;
 }
 
 printf("\nEXPRESSSIOOON\n");
-    expression_value *value = NULL;
-    bottomUp(token, file, &value,stack);
-    if (value == NULL)
-    {
-        ERROR();
-        return 2;
-    }
-    printValue(value,0);
-    disposeValue(value);
+        expression_value *value = NULL;
+        int error = bottomUp(token,file,&value,stack);
+        if(error){
+            return error;
+        }
+        if (value == NULL)
+        {
+            return 2;
+        }
+        printValue(value, 0);
+        disposeValue(value);
     // for (int i = 0; i < token->lexlen-1; i++)
     // {
     //     printf("%c\n",token->lexeme[i]);
@@ -851,14 +862,17 @@ int parse_if_expression(FILE *file, Token *token, stack_t *stack)
     }
     // -> [expression]
     printf("EXPRESIOOON\n");
-    expression_value *value = NULL;
-    bottomUp(token, file, &value,stack);
-    if (value == NULL)
-    {
-        return 2;
-    }
-    printValue(value, 0);
-    disposeValue(value);
+        expression_value *value = NULL;
+        int error = bottomUp(token,file,&value,stack);
+        if(error){
+            return error;
+        }
+        if (value == NULL)
+        {
+            return 2;
+        }
+        printValue(value, 0);
+        disposeValue(value);
     return 0;
 }
 
@@ -879,7 +893,10 @@ int parse_if_while_main_body(FILE *file, Token *token, stack_t *stack)
         printf("while\n");
         printf("expression\n");
         expression_value *value = NULL;
-        bottomUp(token, file, &value,stack);
+        int error = bottomUp(token,file,&value,stack);
+        if(error){
+            return error;
+        }
         if (value == NULL)
         {
             return 2;

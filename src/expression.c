@@ -290,7 +290,7 @@ int reduce(expression_list *stack)
     else if (strcmp(node->value->value, "+") == 0)
     {
         reduceOp(stack, node);
-        if (node->value->left == NULL || node->value->right == NULL)
+        if (node->value->left == NULL || node->value->right == NULL||node->value->left->index!=Dollar||node->value->right->index!=Dollar)
         {
             return 2;
         }
@@ -315,7 +315,7 @@ int reduce(expression_list *stack)
     else if (node->value->index == MultiplyDivide || strcmp(node->value->value, "-"))
     {
         reduceOp(stack, node);
-        if (node->value->left == NULL || node->value->right == NULL)
+        if (node->value->left == NULL || node->value->right == NULL||node->value->left->index!=Dollar||node->value->right->index!=Dollar)
         {
             return 2;
         }
@@ -336,7 +336,7 @@ int reduce(expression_list *stack)
     else if (strcmp(node->value->value, "==") == 0)
     {
         reduceOp(stack, node);
-        if (node->value->left == NULL || node->value->right == NULL)
+        if (node->value->left == NULL || node->value->right == NULL||node->value->left->index!=Dollar||node->value->right->index!=Dollar)
         {
             return 2;
         }
@@ -353,7 +353,7 @@ int reduce(expression_list *stack)
     else if (node->value->index == Rel)
     {
         reduceOp(stack, node);
-        if (node->value->left == NULL || node->value->right == NULL)
+        if (node->value->left == NULL || node->value->right == NULL||node->value->left->index!=Dollar||node->value->right->index!=Dollar)
         {
             return 2;
         }
@@ -366,7 +366,7 @@ int reduce(expression_list *stack)
     else if (node->value->index == QuestionMark)
     {
         reduceOp(stack, node);
-        if (node->value->left == NULL || node->value->right == NULL)
+        if (node->value->left == NULL || node->value->right == NULL||node->value->left->index!=Dollar||node->value->right->index!=Dollar)
         {
             return 2;
         }
@@ -520,24 +520,18 @@ int bottomUp(Token *token, FILE *fp, expression_value **returningValue, stack_t 
     {
         while (stack->head->next->next != NULL)
         {
-            if ((x = reduce(stack)) == 1)
+            if ((x = reduce(stack)))
             {
                 printf("Error: Syntax error\n");
-                return 2;
-            }
-            else if (x == 2)
-            {
-                printf("Error: Semantics error\n");
-                return 7;
+                return x;
             }
         }
     }
     
     retVal = expression_list_pop(stack);
     translateExpression(retVal, 0);
-
     expression_list_dispose(stack);
     *returningValue = retVal;
-    returnToken(token, fp);
+    // returnToken(token, fp);
     return 0;
 }
