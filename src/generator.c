@@ -86,6 +86,8 @@ void generator_ins_destroy(instruction_t *ins) {
         break;
         case ifExpr:
         break;
+        case ret:
+        break;
     }
     free(ins);
 }
@@ -298,6 +300,23 @@ void translateIfExpr() {
     ins = generator_ins_init();
 }
 
+void translateRet() {
+    generator_addLineEnd(&code, "return expresion");
+
+    char *line = malloc(2 + strlen("JUMP $$") + strlen(ins->currScope->name));
+    sprintf(line, "JUMP $%s$end", ins->currScope->name);
+    generator_addLineEnd(&code, line);
+
+    /*
+    generator_addLineEnd(&code, "PUSHFRAME");
+
+    char *var = malloc(1);
+    line = realloc(line, 1 + strlen("DEFVAL LF@$") + strlen(ins->funDef.name) + strlen("$retval"));
+    sprintf(line, "DEFVAR LF@$%s$retval", ins->funDef.name);
+    generator_addLineEnd(&code, line);
+    */
+}
+
 void generator_translate() {
     switch (ins->instructionType) {
         case funDef:
@@ -317,6 +336,9 @@ void generator_translate() {
             break;
         case ifExpr:
             translateIfExpr();
+            break;
+        case ret:
+            translateRet();
             break;
         default:
             break;

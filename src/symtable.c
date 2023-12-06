@@ -49,7 +49,7 @@ void symtable_dtor(symtable_t *symtable)
         return;
     }
     free(symtable->array);
-    free(symtable);
+    //free(symtable);
 }
 
 int hash_function(symtable_t *symtable, char *name)
