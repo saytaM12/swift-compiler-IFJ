@@ -154,18 +154,19 @@ int parse_main_body(FILE *file, Token *token, stack_t *stack)
             printf("jmeno funkce: %s\n",found->name);
             // Kvuli funkci write, ktera muze mit parametru kolik chce
             if(found->size != -1){
-            if(call_function[i].size != found->size){
-                printf("spatny pocet argumentu");
-                return 4;
-            }
+                if(call_function[i].size != found->size){
+                    printf("spatny pocet argumentu");
+                    return 4;
+                }
             }
             for(int j = 0;j < call_function[i].size;j++){
                 // Kvuli funkci write, ktera muze mit parametru kolik chce
                 if(found->size != -1){
-                if(found->param_types[j] != call_function[i].param_types[j]){
-                    printf("spatny typ\n");
-                    printf("typ %d typ %d",found->param_types[j], call_function[i].param_types[j]);
-                    return 4;
+                    if(found->param_types[j] != call_function[i].param_types[j]){
+                        printf("spatny typ\n");
+                        printf("typ %d typ %d",found->param_types[j], call_function[i].param_types[j]);
+                        return 4;
+                    }
                 }
             }
             for (int j = 0; j < call_function[i].size; j++)
@@ -214,6 +215,7 @@ int parse_main_body(FILE *file, Token *token, stack_t *stack)
         bottomUp(token, file, &value,stack);
         if (value == NULL)
         {
+            ERROR();
             return 2;
         }
         printValue(value, 0);
