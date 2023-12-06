@@ -300,7 +300,7 @@ int parse_function_body(FILE * file, Token * token, stack_t *stack){
 }
 
 // Body for function/main
-// <BODY>
+// <BODY>cle
 int parse_body(FILE* file, Token* token, stack_t *stack){
     // -> <DEF_VARIABLE> <ASSIGN>
     // <DEF_VARIABLE> -> let [id]
@@ -408,7 +408,7 @@ int parse_expression(FILE* file, Token* token, char* name, stack_t *stack){
 
     printValue(value,0);
     disposeValue(value);
-    destroyToken(token);
+    // destroyToken(token);
     return 0;
 }
 if(name != NULL){
@@ -419,8 +419,9 @@ if(name != NULL){
     symbol_t *found = get_symbol(stack, name);
     printf("Found variable with the name: %s typ: %d\n", found->name,found->type);
 }
-printf("\nEXPRESSSIOOON\n");
+printf("\nEXPRESSSIOOONabc\n");
     expression_value *value=bottomUp(token,file);
+    // printf("Hodnota lexemu: %s\n",token->lexeme);
     if (value==NULL)
     {
         return 2;
