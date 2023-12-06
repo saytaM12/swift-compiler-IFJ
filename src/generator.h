@@ -190,4 +190,10 @@ void generator_write(FILE *file, code_t code);
  */
 void generator_translate();
 
+void translateExpression(expression_value *expr_val, int lineFromEnd);
+
+void postOrderTraversal(expression_value *curr, int type, int fromEnd);
+
+void codeTypeCheck(int fromEnd);
+
 #endif // GENERATOR_H

@@ -72,8 +72,12 @@ void generator_ins_destroy(instruction_t *ins) {
             free(ins->funCal.name);
         break;
         case varDef:
+            free(ins->varDef.name);
+            free(ins->varDef.value);
         break;
         case assign:
+            free(ins->assign.from);
+            free(ins->assign.to);
         break;
         case whileLoop:
         break;
@@ -228,11 +232,6 @@ void translateFunCal() {
 }
 
 void translateVarDEF() {
-    const char *typeLookup[] = {
-        "int",
-        "float",
-        "string",
-    };
 
     int max_len;
     char *line;
@@ -247,19 +246,15 @@ void translateVarDEF() {
         generator_addLineFromEnd(&code, strcat("DEFVAR GF@$", ins->varDef.name), ins->totalOffset);
     }
 
-        /*
-    }
-    else {
-        generator_addLineFromEnd(&code, strcat("DEFVAR GF@", ins->varDef.name), ins->totalOffset);
-    }
-    */
-
     if (ins->varDef.value) {
         max_len = strlen(ins->varDef.value) + strlen(ins->varDef.name) + 20;
         line = malloc(sizeof(char) * max_len);
         snprintf(line, max_len, "MOVE LF@%s %s@%s", ins->varDef.name, typeLookup[ins->varDef.type], ins->varDef.value);
         generator_addLineFromEnd(&code, line, ins->totalOffset);
     }
+
+    generator_ins_destroy(ins);
+    ins = generator_ins_init();
 }
 
 void translateAssign() {
@@ -269,6 +264,9 @@ void translateAssign() {
     line = malloc(sizeof(char) * max_len);
     snprintf(line, max_len, "MOVE LF@%s LF@%s", ins->assign.to, ins->assign.from);
     generator_addLineFromEnd(&code, line, ins->totalOffset);
+
+    generator_ins_destroy(ins);
+    ins = generator_ins_init();
 }
 
 
