@@ -603,7 +603,8 @@ int parse_expression(FILE *file, Token *token, char *name, stack_t *stack)
         //  -> [id](<CALL_PARAM>);
         char namee[100];
         strcpy(namee,token->lexeme);
-        token = getToken(file);
+        
+        Token *token2 = getToken(file);
         if(!strcmp(token->lexeme,"(")){
             symbol_t *found = get_symbol(stack, namee);
             if(found != NULL){
@@ -637,9 +638,8 @@ int parse_expression(FILE *file, Token *token, char *name, stack_t *stack)
             // -> [expression]
 
             symbol_t *found = get_symbol(stack, name);
-
         }
-
+        returnToken(token2, file);
         expression_value *value = NULL;
         int error = bottomUp(token,file,&value,stack);
         if(error){
@@ -657,7 +657,14 @@ int parse_expression(FILE *file, Token *token, char *name, stack_t *stack)
         return 0;
     }
 
+    if (name != NULL)
+        {
+            if (addSymbol(token, name, stack))
+                return addSymbol(token, name, stack);
+            // -> [expression]
 
+            symbol_t *found = get_symbol(stack, name);
+        }
     expression_value *value = NULL;
     int error = bottomUp(token,file,&value,stack);
     if(error){
