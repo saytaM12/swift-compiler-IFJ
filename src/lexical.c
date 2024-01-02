@@ -160,6 +160,7 @@ Token* multilineString(FILE* file, FilePos* pos) {
 
     // string ended with EOF insted of """
     finishToken(token, unknown);
+    exit(1);
     return token;
 }
 
@@ -185,6 +186,7 @@ Token* singlelineString(FILE* file, FilePos* pos) {
     }
 
     finishToken(token, unknown);
+    exit(1);
     return token;
 }
 
@@ -281,6 +283,7 @@ Token* getToken(FILE* file) {
             Token* token = initToken();
             addToLexeme(token, ch);
             finishToken(token, unknown);
+            exit(1);
             return token;
         }
     }

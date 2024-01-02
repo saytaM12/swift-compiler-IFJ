@@ -6,7 +6,11 @@
 #include "tokenizer.h"
 
 int main(void) {
-    parse_prog();
+    int err=parse_prog();
+    if (err)
+    {
+        return err;
+    }
     FILE *file = stdout;
     generator_write(file, code);
     fclose(file);
