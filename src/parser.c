@@ -584,7 +584,7 @@ int parse_assign(FILE* file, Token* token, char*name,stack_t *stack){
         if (!strcmp(token->lexeme, "="))
         {
             token = new_token(file, token);
-            return parse_expression(file, token, name, stack);
+            return parse_expression(file, token, NULL, stack);
         }
         returnToken(token,file);
         return 0;
